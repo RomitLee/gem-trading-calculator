@@ -1,0 +1,24 @@
+{
+  "name": "宝石商人计算器",
+  "short_name": "宝石计算器",
+  "description": "宝石合成价格、收购售卖、点卡成本和藏宝阁收益快速测算",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#17213b",
+  "icons": [
+    {
+      "src": "./icons/gem-calculator-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/gem-calculator-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
