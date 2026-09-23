@@ -39,6 +39,14 @@
 .main{margin-top:0;padding-top:calc(14px + env(safe-area-inset-top))}
 .top-tabs{top:calc(8px + env(safe-area-inset-top))}
 .global-cbg-setting{margin-bottom:14px}
+.daily-profit-summary{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;padding:14px 15px;border:1px solid #bfe8dc;border-radius:15px;background:linear-gradient(135deg,#e9faf5,#f3fffb)}
+.daily-profit-copy span{display:block;color:#087c68;font-size:12px;font-weight:800}
+.daily-profit-copy small{display:block;margin-top:4px;color:#778b86;font-size:9px}
+.daily-profit-value{display:flex;align-items:baseline;gap:4px;color:#087c68;white-space:nowrap}
+.daily-profit-value strong{font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+.daily-profit-value em{font-size:11px;font-style:normal;font-weight:700}
+.daily-profit-summary.loss{border-color:#f0c4c4;background:linear-gradient(135deg,#fff0f0,#fff8f8)}
+.daily-profit-summary.loss .daily-profit-copy span,.daily-profit-summary.loss .daily-profit-value{color:#c63838}
 </style>
 </head>
 <body>
@@ -86,6 +94,10 @@
     <section class="tab-panel" data-panel="profit">
       <div class="card">
         <div class="card-title"><h2>今日经营参数</h2><span>修改后自动计算</span></div>
+        <div class="daily-profit-summary" id="dailyProfitSummary">
+          <div class="daily-profit-copy"><span>预计每天净利润</span><small id="dailyProfitNote">已扣除手续费和账号点卡</small></div>
+          <div class="daily-profit-value"><strong id="dailyNet">0.00</strong><em>元</em></div>
+        </div>
         <div class="preset"><button type="button" data-preset="3">2收1卖 · 3个号</button><button type="button" data-preset="4" class="active">3收1卖 · 4个号</button></div>
         <div class="field-grid">
           <div class="field"><label>收购账号</label><div class="input-wrap"><input id="buyAccounts" data-key="buyAccounts" type="number" inputmode="numeric" min="1" step="1"><span class="unit">个</span></div></div>
@@ -212,7 +224,7 @@ function calc(){const accounts=Math.max(0,state.buyAccounts+state.sellAccounts);
 function compositionUnits(type,level){if(type==='normal')return 2**(level-1);if(type==='star')return 3**(level-1);const units=[0,1,2];for(let current=3;current<=level;current++)units[current]=2*units[current-1]+units[current-2];return units[level]}
 function renderSynthesis(){const type=gemTypes[state.gemType];const basePrice=Math.max(0,num(state.synthesisPrices[state.gemType]));const averageSalePrice=Math.max(0,num(state.averageSalePrices[state.gemType],Math.round(basePrice*1.1)));const cbgRate=Math.max(0,num(state.cbgQuote));const averageMode=state.saleMode==='average';document.querySelectorAll('[data-gem-type]').forEach(btn=>btn.classList.toggle('active',btn.dataset.gemType===state.gemType));document.querySelectorAll('[data-sale-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.saleMode===state.saleMode));$('saleModeBar').classList.toggle('average',averageMode);$('averageSaleField').classList.toggle('show',averageMode);$('ratioBtn').hidden=averageMode;if(document.activeElement!==$('averageSalePrice'))$('averageSalePrice').value=averageSalePrice;$('priceTableTitle').textContent=`${type.name}价格表`;$('synthesisRule').textContent=averageMode?`${type.rule} 均价售卖：各级售价按1级售卖均价乘以所需1级数量计算。`:type.rule;const rows=[];type.levels.forEach(level=>{const units=compositionUnits(state.gemType,level);const purchasePrice=basePrice*units;const ratio=state.priceRatios[state.gemType][level];const stallCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.stall));const cbgCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.cbg));const stallPrice=Math.floor(stallCoins/10000);const coinTier=stallCoins>=10000000?'coin-tier-ten-million':stallCoins>=1000000?'coin-tier-million':stallCoins>=100000?'coin-tier-hundred-thousand':stallCoins>=10000?'coin-tier-wan':'';const cbgPrice=cbgCoins/30000000*cbgRate;const cbgAvailable=level>=type.cbgMinLevel;rows.push(`<div class="price-row"><span>${level}级</span><span>${fmtWan(purchasePrice/10000)}</span><span>${fmt(units,0)}</span><span class="${coinTier}">${fmt(stallPrice,0)}</span><span class="${cbgAvailable?'':'not-available'}">${cbgAvailable?fmt(cbgPrice,1):'—'}</span></div>`)});$('gemPriceRows').innerHTML=rows.join('')}
 function renderRatioRows(){const type=gemTypes[state.gemType];$('ratioModalTitle').textContent=`${type.name}售价比例调整`;const rows=[];type.levels.forEach(level=>{const ratio=state.priceRatios[state.gemType][level];const showCbg=level>=type.cbgMinLevel;rows.push(`<div class="ratio-row"><b>${level}级</b><input type="number" inputmode="decimal" min="0" step="0.01" value="${num(ratio.stall).toFixed(2)}" data-ratio-level="${level}" data-ratio-key="stall" aria-label="${level}级摆摊比例">${showCbg?`<input type="number" inputmode="decimal" min="0" step="0.01" value="${num(ratio.cbg).toFixed(2)}" data-ratio-level="${level}" data-ratio-key="cbg" aria-label="${level}级CBG比例">`:'<span class="ratio-na">不可上架</span>'}</div>`)});$('ratioRows').innerHTML=rows.join('');document.querySelectorAll('[data-ratio-level]').forEach(input=>input.addEventListener('input',()=>{const level=input.dataset.ratioLevel;state.priceRatios[state.gemType][level][input.dataset.ratioKey]=Math.max(0,num(input.value));save();renderSynthesis()}))}
-function renderHero(){}
+function renderHero(c){$('dailyNet').textContent=fmt(c.dailyNet);$('dailyProfitSummary').classList.toggle('loss',c.dailyNet<0);$('dailyProfitNote').textContent=c.dailyNet>=0?'已扣除手续费和账号点卡':'当前经营参数预计亏损'}
 function render(){const c=calc();renderSynthesis();renderHero(c);$('accountHint').textContent=`${c.accounts}个账号 · ${fmt(c.cardCost,1)}元点卡/天`;
   $('sales').innerHTML=`${fmtSmart(c.sales)}<small>万</small>`;$('grossProfit').innerHTML=`${fmtSmart(c.grossProfit)}<small>万</small>`;$('cbgRmb').innerHTML=`${fmt(c.cbgRmb)}<small>元</small>`;$('cardCost').innerHTML=`${fmt(c.cardCost,1)}<small>元</small>`;$('breakEven').innerHTML=`${fmtSmart(c.breakEven)}<small>万</small>`;const gap=c.purchase-c.breakEven;$('gap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;$('targetPurchase').textContent=`${fmtSmart(c.targetPurchase)}万`;
   document.querySelectorAll('[data-preset]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.preset)===c.accounts&&((c.accounts===3&&state.buyAccounts===2)||(c.accounts===4&&state.buyAccounts===3))));document.querySelectorAll('[data-purchase]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.purchase)===state.purchase));
