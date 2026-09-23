@@ -31,12 +31,11 @@
 .sale-mode-setting{position:relative;min-width:0;height:38px}
 .sale-mode-setting>.ratio-button,.sale-mode-setting>.average-sale-field{position:absolute;inset:0;width:100%;height:38px}
 .sale-mode-setting>.ratio-button{border-color:#7770e7;background:#fff;box-shadow:0 4px 12px rgba(102,88,235,.1)}
-.average-sale-field{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:7px;min-width:0;padding:0 9px;border-radius:10px;background:#fff;color:#6f788c;font-size:11px;font-weight:700;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .15s}
+.average-sale-field{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:7px;min-width:0;padding:0 9px;border-radius:10px;background:#fff;color:#6f788c;font-size:11px;font-weight:700;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .15s}
 .average-sale-field.show{visibility:visible;opacity:1;pointer-events:auto}
 .sale-mode-bar.average .average-sale-field{box-shadow:inset 0 0 0 1px rgba(102,88,235,.25),0 4px 12px rgba(102,88,235,.08)}
 .average-sale-field input{min-width:0;width:100%;height:38px;padding:0 8px;border:0;outline:0;background:transparent;color:var(--ink);font-size:14px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
-.average-sale-field em{color:#9aa1b0;font-size:10px;font-style:normal;font-weight:500}
-@media(max-width:380px){.average-sale-field{grid-template-columns:auto minmax(0,1fr);gap:4px;padding:0 7px}.average-sale-field em{display:none}.average-sale-field input{padding:0 4px;font-size:13px}}
+@media(max-width:380px){.average-sale-field{gap:4px;padding:0 7px}.average-sale-field input{padding:0 4px;font-size:13px}}
 .main{margin-top:0;padding-top:calc(14px + env(safe-area-inset-top))}
 .top-tabs{top:calc(8px + env(safe-area-inset-top))}
 .global-cbg-setting{margin-bottom:14px}
@@ -72,7 +71,7 @@
           </div>
           <div class="sale-mode-setting">
             <button type="button" class="ratio-button" id="ratioBtn">售价比例</button>
-            <label class="average-sale-field" id="averageSaleField" for="averageSalePrice"><span>1级均价</span><input id="averageSalePrice" type="number" inputmode="numeric" min="0" step="1" value="110000"><em>游戏币</em></label>
+            <label class="average-sale-field" id="averageSaleField" for="averageSalePrice"><span>1级均价</span><input id="averageSalePrice" type="number" inputmode="numeric" min="0" step="1" value="110000"></label>
           </div>
         </div>
         <div class="price-table-head"><strong id="priceTableTitle">普通宝石价格表</strong></div>
