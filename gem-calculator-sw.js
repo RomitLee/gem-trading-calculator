@@ -1,10 +1,14 @@
-const CACHE_NAME = 'gem-calculator-v18';
+const CACHE_NAME = 'gem-calculator-v21';
 const APP_SHELL = [
   './index.html',
   './GemTradingCalculator.webmanifest',
   './icons/gem-calculator-icon-180.png',
   './icons/gem-calculator-icon-192.png',
-  './icons/gem-calculator-icon-512.png'
+  './icons/gem-calculator-icon-512.png',
+  './icons/gem-normal.png',
+  './icons/gem-star.png',
+  './icons/gem-dust.png',
+  './icons/app-logo.png'
 ];
 const OFFLINE_PAGE = new URL('./index.html', self.location.href).href;
 
