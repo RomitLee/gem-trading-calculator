@@ -47,6 +47,26 @@
 .daily-profit-value em{font-size:11px;font-style:normal;font-weight:700}
 .daily-profit-summary.loss{border-color:#f0c4c4;background:linear-gradient(135deg,#fff0f0,#fff8f8)}
 .daily-profit-summary.loss .daily-profit-copy span,.daily-profit-summary.loss .daily-profit-value{color:#c63838}
+.sync-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:9px 12px;border:1px dashed var(--line);border-radius:12px;background:#fafbfd;font-size:11px;color:#7c8495}.sync-bar .sync-dot{width:7px;height:7px;border-radius:50%;background:#c9cfda;flex:0 0 auto}.sync-bar.on .sync-dot{background:#0f9f88}.sync-bar.busy .sync-dot{background:#b76e00}.sync-bar .sync-link{margin-left:auto;border:0;background:transparent;color:#5e56cb;font-size:11px;font-weight:750;cursor:pointer;padding:0}
+.zone-label{margin:0 0 8px 2px;color:#6f788c;font-size:11px;font-weight:650}
+.zone-chips{display:flex;gap:7px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;scrollbar-width:none}.zone-chips::-webkit-scrollbar{display:none}
+.zone-chip{flex:0 0 auto;display:flex;align-items:center;height:36px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:#f7f8fb;color:#5f687c;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}.zone-chip.active{border-color:#7268eb;background:var(--violet-soft);color:#4e45c9;box-shadow:0 3px 10px rgba(102,88,235,.12)}.zone-chip.zone-add{border-style:dashed;color:#9aa1b0}
+.zone-edit{display:none}.zone-edit.show{display:block}
+.zone-name-row{margin-bottom:10px}.zone-name-row input{text-transform:none;font-weight:650}
+.zone-del{background:#fff0f0!important;color:#c63838!important;width:auto;padding:0 12px;white-space:nowrap}
+.zone-preset{margin-top:12px;margin-bottom:0}
+.zone-breakdown{margin-top:11px;display:grid;gap:6px}.zone-breakdown:empty{display:none}
+.zone-breakdown-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:11px;background:#f7f8fb;font-size:12px}.zone-breakdown-row b{color:#444c60;font-weight:700}.zone-breakdown-row span{font-weight:750;font-variant-numeric:tabular-nums}.zone-breakdown-row span.loss{color:#c63838}.zone-breakdown-row span.win{color:#087c68}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:3px;margin-bottom:16px;border-radius:12px;background:#f1f3f7}.auth-tabs button{height:34px;border:0;border-radius:9px;background:transparent;color:#777f91;font-weight:700;cursor:pointer;font-size:13px}.auth-tabs button.active{background:#fff;color:var(--navy);box-shadow:0 3px 10px rgba(26,38,68,.08)}
+.auth-label{display:block;margin:0 0 6px 2px;color:#6f788c;font-size:11px;font-weight:650}
+.auth-pane input{width:100%;height:44px;padding:0 13px;margin-bottom:12px;border:1px solid var(--line);border-radius:12px;outline:0;background:#f8f9fc;color:var(--ink);font-size:14px}.auth-pane input:focus{border-color:#8278ef;background:#fff;box-shadow:0 0 0 3px rgba(102,88,235,.1)}
+.auth-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:12px}.auth-row input{margin-bottom:0}
+.auth-code-btn{height:44px;padding:0 14px;border:1px solid #7770e7;border-radius:12px;background:#fff;color:#5e56cb;font-size:12px;font-weight:750;cursor:pointer;white-space:nowrap}.auth-code-btn:disabled{opacity:.5;cursor:default}
+.auth-submit{width:100%;height:46px;margin-top:2px;border:0;border-radius:13px;background:var(--navy);color:#fff;font-size:14px;font-weight:750;cursor:pointer}.auth-submit.secondary{background:#f1f3f7;color:#444c60}
+.auth-error{min-height:16px;margin:-4px 0 8px;color:#c63838;font-size:11px}.auth-hint{margin-top:10px;color:#9aa1b0;font-size:11px;line-height:1.6}
+.auth-forgot{margin-top:10px;border:0;background:transparent;color:#6b64d8;font-size:12px;font-weight:700;cursor:pointer;padding:4px}
+.auth-user-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:8px;border-radius:12px;background:#f7f8fb;font-size:13px}.auth-user-label{color:#858da0;font-size:11px}
+.sync-chip{display:flex;align-items:center;gap:6px;margin-left:auto;height:32px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:#fff;color:#7c8495;font-size:11px;font-weight:700;cursor:pointer}.sync-chip .sync-dot{width:7px;height:7px;border-radius:50%;background:#c9cfda}.sync-chip.on{color:#087c68;border-color:#bfe8dc;background:var(--green-soft)}.sync-chip.on .sync-dot{background:#0f9f88}.sync-chip.busy .sync-dot{background:#b76e00}
 </style>
 </head>
 <body>
@@ -55,6 +75,7 @@
     <header class="app-header">
       <img class="app-logo" src="icons/app-logo.png" alt="子霖宝石助手">
       <h1 class="app-name">子霖宝石助手</h1>
+      <button type="button" class="sync-chip" id="syncChip"><span class="sync-dot" id="chipDot"></span><span id="chipText">未登录</span></button>
     </header>
     <nav class="top-tabs" aria-label="计算器页面">
       <button type="button" class="active" data-tab="synthesis">宝石合成</button>
@@ -99,20 +120,24 @@
       <div class="card">
         <div class="card-title"><h2>今日经营参数</h2><span>修改后自动计算</span></div>
         <div class="daily-profit-summary" id="dailyProfitSummary">
-          <div class="daily-profit-copy"><span>预计每天净利润</span><small id="dailyProfitNote">已扣除手续费和账号点卡</small></div>
+          <div class="daily-profit-copy"><span>预计每天净利润</span><small id="dailyProfitNote">各区服合计，已扣除手续费和账号点卡</small></div>
           <div class="daily-profit-value"><strong id="dailyNet">0.00</strong><em>元</em></div>
         </div>
-        <div class="preset"><button type="button" data-preset="3">2收1卖 · 3个号</button><button type="button" data-preset="4" class="active">3收1卖 · 4个号</button></div>
-        <div class="field-grid">
-          <div class="field"><label>收购账号</label><div class="input-wrap"><input id="buyAccounts" data-key="buyAccounts" type="number" inputmode="numeric" min="1" step="1"><span class="unit">个</span></div></div>
-          <div class="field"><label>售卖账号</label><div class="input-wrap"><input id="sellAccounts" data-key="sellAccounts" type="number" inputmode="numeric" min="1" step="1"><span class="unit">个</span></div></div>
-          <div class="field full"><label>每天收购金额</label><div class="input-wrap"><input id="purchase" data-key="purchase" type="number" inputmode="decimal" min="0" step="100"><span class="unit">万游戏币</span></div><div class="quick"><button data-purchase="4800">4800万</button><button data-purchase="7200">7200万</button><button data-purchase="9000">9000万</button><button data-purchase="9800">9800万</button></div></div>
-          <div class="field"><label>实际利润率</label><div class="input-wrap"><input id="margin" data-key="margin" type="number" inputmode="decimal" min="0" step="0.1"><span class="unit">%</span></div></div>
-          <div class="field"><label>3000万游戏币价格</label><div class="input-wrap"><input id="cbgQuote" data-key="cbgQuote" type="number" inputmode="decimal" min="0" step="1"><span class="unit">元</span></div></div>
+        <div class="sync-bar" id="syncBar"><span class="sync-dot" id="syncDot"></span><span id="syncText">数据仅存本机</span><button type="button" class="sync-link" id="syncBtn">登录同步</button></div>
+        <div class="zone-label">区服（每个区服独立设置汇率与收购量）</div>
+        <div class="zone-chips" id="zoneChips"></div>
+        <div class="zone-edit" id="zoneEdit">
+          <div class="calc-field zone-name-row"><label for="zoneName">区服名称</label><input id="zoneName" type="text" maxlength="12" placeholder="如：秦淮风光"><button type="button" class="clear-button zone-del" id="delZoneBtn">删除</button></div>
+          <div class="field-grid">
+            <div class="field"><label>3000万游戏币价格</label><div class="input-wrap"><input id="zoneQuote" type="number" inputmode="decimal" min="0" step="1"><span class="unit">元</span></div></div>
+            <div class="field"><label>实际利润率</label><div class="input-wrap"><input id="zoneMargin" type="number" inputmode="decimal" min="0" step="0.1"><span class="unit">%</span></div></div>
+            <div class="field full"><label>每天收购金额</label><div class="input-wrap"><input id="zonePurchase" type="number" inputmode="decimal" min="0" step="100"><span class="unit">万游戏币</span></div><div class="quick"><button data-purchase="4800">4800万</button><button data-purchase="7200">7200万</button><button data-purchase="9000">9000万</button><button data-purchase="9800">9800万</button></div></div>
+          </div>
+          <div class="preset zone-preset"><button type="button" data-preset="3">2收1卖 · 3个号</button><button type="button" data-preset="4">3收1卖 · 4个号</button></div>
         </div>
       </div>
       <div class="card">
-        <div class="card-title"><h2>利润明细</h2><span id="accountHint">4个账号</span></div>
+        <div class="card-title"><h2>利润明细</h2><span id="accountHint">0个账号</span></div>
         <div class="results">
           <div class="result"><div class="result-label">游戏内销售额</div><div class="result-value" id="sales">0<small>万</small></div></div>
           <div class="result"><div class="result-label">交易毛利润</div><div class="result-value" id="grossProfit">0<small>万</small></div></div>
@@ -121,7 +146,8 @@
           <div class="result highlight"><div class="result-label">不亏本收购线</div><div class="result-value" id="breakEven">0<small>万</small></div></div>
           <div class="result warning"><div class="result-label">距离保本线</div><div class="result-value" id="gap">0<small>万</small></div></div>
         </div>
-        <div class="formula">藏宝阁到账＝收购额 × 利润率 ÷ 3000万 × 3000万市场价格 × 95%；净利润＝藏宝阁到账－账号点卡。藏宝阁手续费固定为5%，点卡固定按每号每小时0.6元、每天24小时计算。</div>
+        <div class="zone-breakdown" id="zoneBreakdown"></div>
+        <div class="formula">藏宝阁到账＝各区服（收购额 × 利润率 × 95% ÷ 3000万 × 该区汇率）之和；净利润＝到账合计－所有账号点卡。点卡按每号每小时0.6元、每天24小时计。保本线与目标反推按当前各区收购占比加权计算。</div>
       </div>
       <div class="card">
         <div class="card-title"><h2>目标利润反推</h2><span>想赚多少，就算要收多少</span></div>
@@ -173,7 +199,47 @@
     <div class="modal-actions"><button type="button" class="secondary" id="resetRatios">恢复默认</button><button type="button" class="primary" id="ratioDone">完成</button></div>
   </div>
 </div>
-<div class="share-toast" id="toast">测算结果已复制</div>
+<div class="modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+  <div class="modal-card">
+    <div class="modal-title"><h2 id="authModalTitle">云端同步</h2><button type="button" class="modal-close" id="authClose" aria-label="关闭">×</button></div>
+    <div id="authOut">
+      <div class="auth-tabs"><button type="button" class="active" data-auth-tab="otp">验证码登录</button><button type="button" data-auth-tab="pwd">密码登录</button></div>
+      <div class="auth-pane" id="authOtpPane">
+        <label class="auth-label">邮箱</label>
+        <div class="auth-row"><input id="authEmail" type="email" inputmode="email" placeholder="you@example.com" autocomplete="email"><button type="button" class="auth-code-btn" id="sendCodeBtn">获取验证码</button></div>
+        <label class="auth-label">验证码</label>
+        <input id="authCode" type="text" inputmode="numeric" maxlength="8" placeholder="6位验证码">
+        <div id="authPwdWrap" hidden><label class="auth-label">设置密码</label><input id="authNewPwd" type="password" placeholder="新账号需设置密码（6位以上）" autocomplete="new-password"></div>
+        <div class="auth-error" id="authError"></div>
+        <button type="button" class="auth-submit" id="otpSubmitBtn">登录 / 注册</button>
+        <div class="auth-hint">新用户：验证码+密码即完成注册；老用户：验证码直接登录。</div>
+      </div>
+      <div class="auth-pane" id="authPwdPane" hidden>
+        <label class="auth-label">邮箱</label>
+        <input id="pwdEmail" type="email" inputmode="email" placeholder="you@example.com" autocomplete="email">
+        <label class="auth-label">密码</label>
+        <input id="pwdPassword" type="password" placeholder="密码" autocomplete="current-password">
+        <div class="auth-error" id="pwdError"></div>
+        <button type="button" class="auth-submit" id="pwdSubmitBtn">登录</button>
+        <button type="button" class="auth-forgot" id="forgotBtn">忘记密码？邮箱重置</button>
+        <div id="forgotWrap" hidden>
+          <label class="auth-label">验证码</label>
+          <input id="forgotCode" type="text" inputmode="numeric" maxlength="8" placeholder="邮件中的验证码">
+          <label class="auth-label">新密码</label>
+          <input id="forgotNewPwd" type="password" placeholder="新密码（6位以上）">
+          <button type="button" class="auth-submit secondary" id="forgotSubmitBtn">确认重置</button>
+        </div>
+      </div>
+    </div>
+    <div id="authIn" hidden>
+      <div class="auth-user-row"><span class="auth-user-label">当前账号</span><strong id="authUserEmail"></strong></div>
+      <div class="auth-user-row"><span class="auth-user-label">同步状态</span><strong id="authUserSync"></strong></div>
+      <button type="button" class="auth-submit secondary" id="signOutBtn">退出登录</button>
+    </div>
+  </div>
+</div>
+<div class="share-toast" id="toast">操作成功</div>
+<script src="https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js"></script>
 <script>
 const defaultRatios={
   normal:{2:{stall:1.15,cbg:1.15},3:{stall:1.16,cbg:1.16},4:{stall:1.17,cbg:1.17},5:{stall:1.18,cbg:1.18},6:{stall:1.19,cbg:1.19},7:{stall:1.19,cbg:1.19},8:{stall:1.20,cbg:1.20},9:{stall:1.22,cbg:1.24},10:{stall:1.22,cbg:1.24},11:{stall:1.23,cbg:1.25},12:{stall:1.24,cbg:1.26}},
@@ -185,7 +251,7 @@ const previousNormalRatios={2:{stall:1.10,cbg:1.10},3:{stall:1.10,cbg:1.10},4:{s
 const defaultSynthesisPrices={normal:100000,star:141111,dust:322222};
 const cloneRatioSet=source=>Object.fromEntries(Object.entries(source).map(([level,value])=>[level,{stall:Number(value.stall),cbg:Number(value.cbg)}]));
 const cloneRatios=source=>Object.fromEntries(Object.entries(source).map(([type,ratios])=>[type,cloneRatioSet(ratios)]));
-const defaults={buyAccounts:3,sellAccounts:1,purchase:9000,margin:17,targetProfit:40,cbgQuote:210,periodDays:30,gemType:'normal',saleMode:'ratio'};
+const defaults={targetProfit:40,cbgQuote:210,periodDays:30,gemType:'normal',saleMode:'ratio'};
 const memoryStore={};
 const safeStorage={
   get(key){try{const value=localStorage.getItem(key);return value===null?(memoryStore[key]??null):value}catch{return memoryStore[key]??null}},
@@ -219,6 +285,12 @@ const $=id=>document.getElementById(id);const num=(value,fallback=0)=>{const n=N
 const fmt=(value,digits=2)=>num(value).toLocaleString('zh-CN',{minimumFractionDigits:digits,maximumFractionDigits:digits});
 const fmtSmart=value=>{const n=num(value);return n>=10000?fmt(n,0):n>=1000?fmt(n,1):fmt(n,2)};
 const fmtWan=value=>num(value).toLocaleString('zh-CN',{minimumFractionDigits:0,maximumFractionDigits:1});
+const uid=()=>'z'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+if(!Array.isArray(state.zones)||!state.zones.length){const legacyPreset=(num(state.buyAccounts,3)+num(state.sellAccounts,1))===3?3:4;state.zones=[{id:uid(),name:'秦淮风光',cbgQuote:num(state.cbgQuote,210),purchase:num(state.purchase,9000),margin:num(state.margin,17),preset:legacyPreset}]}
+state.zones=state.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));
+if(!state.zones.some(z=>z.id===state.activeZoneId))state.activeZoneId=state.zones[0].id;
+delete state.purchase;delete state.margin;delete state.buyAccounts;delete state.sellAccounts;
 const gemTypes={
   normal:{name:'普通宝石',icon:'icons/gem-normal.png',levels:[2,3,4,5,6,7,8,9,10,11,12],cbgMinLevel:8,rule:'普通宝石：2个低一级宝石合成1个高一级宝石。藏宝阁最低上架8级；摆摊售价直接去掉万位后的小数，藏宝阁售价保留1位小数。'},
   star:{name:'星辉石',icon:'icons/gem-star.png',levels:[2,3,4,5,6,7],cbgMinLevel:5,rule:'星辉石：3个低一级星辉石合成1个高一级星辉石，计算2—7级。藏宝阁最低上架5级。'},
@@ -228,35 +300,65 @@ document.querySelectorAll('[data-key]').forEach(input=>{const key=input.dataset.
 $('synthesisBasePrice').value=state.synthesisPrices[state.gemType];
 $('synthesisCbgRate').value=state.cbgQuote;
 $('averageSalePrice').value=state.averageSalePrices[state.gemType];
-function save(){safeStorage.set('gemCalculatorSettings',JSON.stringify(state))}
-function calc(){const accounts=Math.max(0,state.buyAccounts+state.sellAccounts);const cbgQuote=Math.max(0,state.cbgQuote);const margin=Math.max(0,state.margin/100);const fee=.05;const cardHourly=.6;const hours=24;const purchase=Math.max(0,state.purchase);const cardCost=accounts*cardHourly*hours;const sales=purchase*(1+margin);const grossProfit=purchase*margin;const feeCoins=grossProfit*fee;const cbgNetCoins=grossProfit*(1-fee);const cbgRmb=cbgNetCoins/3000*cbgQuote;const dailyNet=cbgRmb-cardCost;const rmbPerPurchaseWan=margin*(1-fee)*cbgQuote/3000;const breakEven=rmbPerPurchaseWan>0?cardCost/rmbPerPurchaseWan:0;const targetPurchase=rmbPerPurchaseWan>0?(cardCost+Math.max(0,state.targetProfit))/rmbPerPurchaseWan:0;const cbgCostBasis=margin>0?purchase*margin/(1+margin):0;return{accounts,cbgQuote,margin,fee,purchase,cardCost,sales,grossProfit,feeCoins,cbgNetCoins,cbgRmb,dailyNet,breakEven,targetPurchase,cbgCostBasis}}
+function save(){safeStorage.set('gemCalculatorSettings',JSON.stringify(state));scheduleCloudPush()}
+let toastTimer=null;function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),1800)}
+$('zoneName').addEventListener('input',()=>{activeZone().name=$('zoneName').value.trim()||'未命名';save();render()});
+$('zoneQuote').addEventListener('input',()=>{activeZone().cbgQuote=Math.max(0,num($('zoneQuote').value));save();render()});
+$('zonePurchase').addEventListener('input',()=>{activeZone().purchase=Math.max(0,num($('zonePurchase').value));save();render()});
+$('zoneMargin').addEventListener('input',()=>{activeZone().margin=Math.max(0,num($('zoneMargin').value));save();render()});
+$('delZoneBtn').addEventListener('click',()=>{if(state.zones.length<=1){toast('至少保留一个区服');return}const z=activeZone();if(!confirm(`确定删除区服「${z.name}」？`))return;state.zones=state.zones.filter(x=>x.id!==z.id);state.activeZoneId=state.zones[0].id;save();render();toast('区服已删除')});
+const CLOUD={endpoint:'https://zilin-gem-helper.app.workbuddy.host',publishableKey:'wbpk_zFJKokpBeUNzjAqOdXl4uI_QSwg7kq7en0gwIZCKq4NmX3LlN0xXiSP'};
+let cloud=null,cloudSession=null,syncTimer=null,pendingOtp=null,forgotChallenge=null;
+function setSyncUI(status,text){const chip=$('syncChip'),bar=$('syncBar');chip.classList.remove('on','busy');bar.classList.remove('on','busy');if(status==='on'||status==='busy'){chip.classList.add(status);bar.classList.add(status)}$('chipText').textContent=text;$('syncText').textContent=cloudSession?(status==='on'?'已同步到云端':status==='busy'?'正在同步…':'同步失败，将自动重试'):'数据仅存本机 · 登录后可跨设备同步';$('syncBtn').textContent=cloudSession?'账号':'登录同步'}
+function initCloud(){if(!window.WorkBuddyCloud){setSyncUI('off','未登录');return}try{cloud=WorkBuddyCloud.createWorkBuddyCloud(CLOUD)}catch(e){console.error('云组件初始化失败',e);setSyncUI('off','未登录');return}cloud.auth.getSession().then(({data,error})=>{cloudSession=(!error&&data)||null;if(cloudSession){setSyncUI('busy','同步中');cloudPull()}else setSyncUI('off','未登录')}).catch(()=>setSyncUI('off','未登录'));cloud.auth.onAuthStateChange((event,session)=>{cloudSession=session||null;if(event==='SIGNED_IN'){setSyncUI('busy','同步中');cloudPull()}else if(event==='SIGNED_OUT'){setSyncUI('off','未登录')}renderAuthModal()})}
+async function cloudPull(){if(!cloudSession)return;try{const{data,error}=await cloud.database.from('user_settings').select('payload').maybeSingle();if(error){setSyncUI('off','未登录');return}if(data&&data.payload){applyRemote(data.payload);setSyncUI('on','已同步')}else{await cloudPushNow();setSyncUI('on','已同步')}}catch(e){console.error('云端读取失败',e);setSyncUI('off','未登录')}}
+function scheduleCloudPush(){if(!cloudSession)return;clearTimeout(syncTimer);setSyncUI('busy','同步中');syncTimer=setTimeout(cloudPushNow,700)}
+async function cloudPushNow(){if(!cloudSession)return;try{const{error}=await cloud.database.from('user_settings').upsert({payload:state,updated_at:new Date().toISOString()});setSyncUI(error?'off':'on',error?'未登录':'已同步')}catch(e){console.error('云端写入失败',e);setSyncUI('off','未登录')}}
+function applyRemote(p){if(!p||typeof p!=='object')return;['targetProfit','periodDays','gemType','saleMode','cbgQuote','ratioDefaultsVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));state.activeZoneId=state.zones.some(z=>z.id===p.activeZoneId)?p.activeZoneId:state.zones[0].id}safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
+function renderAuthModal(){const logged=!!cloudSession;$('authOut').hidden=logged;$('authIn').hidden=!logged;if(logged){$('authUserEmail').textContent=(cloudSession.user&&cloudSession.user.email)||'已登录';$('authUserSync').textContent='自动同步已开启'}}
+function openAuthModal(){if(!cloud){toast('云组件未加载，请联网后刷新页面');return}renderAuthModal();$('authModal').classList.add('show');document.body.style.overflow='hidden'}
+function closeAuthModal(){$('authModal').classList.remove('show');document.body.style.overflow=''}
+function authErr(el,msg){$(el).textContent=msg}
+$('syncChip').addEventListener('click',openAuthModal);$('syncBtn').addEventListener('click',openAuthModal);
+$('authClose').addEventListener('click',closeAuthModal);$('authModal').addEventListener('click',e=>{if(e.target===$('authModal'))closeAuthModal()});
+document.querySelectorAll('[data-auth-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-auth-tab]').forEach(x=>x.classList.toggle('active',x===b));$('authOtpPane').hidden=b.dataset.authTab!=='otp';$('authPwdPane').hidden=b.dataset.authTab!=='pwd'}));
+$('sendCodeBtn').addEventListener('click',async()=>{const email=$('authEmail').value.trim();if(!email)return authErr('authError','请输入邮箱');if(!cloud)return;$('sendCodeBtn').disabled=true;const sent=await cloud.auth.sendOtp({email});if(sent.error){authErr('authError',sent.error.message||'发送失败');$('sendCodeBtn').disabled=false;return}pendingOtp={email,verificationId:sent.data.verificationId,isExistingUser:sent.data.isExistingUser};$('authPwdWrap').hidden=sent.data.isExistingUser;authErr('authError','');toast('验证码已发送');let s=60;$('sendCodeBtn').textContent=s+'s 后重发';const t=setInterval(()=>{s--;if(s<=0){clearInterval(t);$('sendCodeBtn').textContent='获取验证码';$('sendCodeBtn').disabled=false}else $('sendCodeBtn').textContent=s+'s 后重发'},1000)});
+$('otpSubmitBtn').addEventListener('click',async()=>{const email=$('authEmail').value.trim(),code=$('authCode').value.trim(),pwd=$('authNewPwd').value;if(!pendingOtp||pendingOtp.email!==email)return authErr('authError','请先获取验证码');if(!code)return authErr('authError','请输入验证码');const completed=await cloud.auth.verifyOtp({email:pendingOtp.email,verificationId:pendingOtp.verificationId,isExistingUser:pendingOtp.isExistingUser,token:code,password:pendingOtp.isExistingUser?undefined:pwd});if(completed.error)return authErr('authError',completed.error.message||'验证失败');pendingOtp=null;authErr('authError','');closeAuthModal();toast('登录成功')});
+$('pwdSubmitBtn').addEventListener('click',async()=>{const email=$('pwdEmail').value.trim(),password=$('pwdPassword').value;if(!email||!password)return authErr('pwdError','请输入邮箱和密码');const{error}=await cloud.auth.signInWithPassword({email,password});if(error)return authErr('pwdError','邮箱或密码错误');authErr('pwdError','');closeAuthModal();toast('登录成功')});
+$('forgotBtn').addEventListener('click',async()=>{const email=$('pwdEmail').value.trim();if(!email)return authErr('pwdError','请先输入邮箱');const started=await cloud.auth.resetPasswordForEmail(email);if(started.error)return authErr('pwdError',started.error.message||'发送失败');forgotChallenge=started.data;authErr('pwdError','');$('forgotWrap').hidden=false;toast('重置验证码已发送')});
+$('forgotSubmitBtn').addEventListener('click',async()=>{const nonce=$('forgotCode').value.trim(),password=$('forgotNewPwd').value;if(!nonce||!password)return authErr('pwdError','请输入验证码和新密码');if(!forgotChallenge)return authErr('pwdError','请先获取重置验证码');const completed=await forgotChallenge.updateUser({nonce,password});if(completed.error)return authErr('pwdError',completed.error.message||'重置失败');forgotChallenge=null;closeAuthModal();toast('密码已重置')});
+$('signOutBtn').addEventListener('click',async()=>{await cloud.auth.signOut();closeAuthModal();toast('已退出登录')});
+function calc(){const fee=.05,cardHourly=.6,hours=24;let accounts=0,purchase=0,sales=0,grossProfit=0,feeCoins=0,cbgNetCoins=0,cbgRmb=0,cardCost=0,weighted=0;const zoneRows=state.zones.map(z=>{const za=Math.max(0,num(z.preset,4)),zp=Math.max(0,num(z.purchase)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const zcard=za*cardHourly*hours,zgross=zp*zm,zcbg=zgross*(1-fee)/3000*zq;accounts+=za;purchase+=zp;sales+=zp*(1+zm);grossProfit+=zgross;feeCoins+=zgross*fee;cbgNetCoins+=zgross*(1-fee);cbgRmb+=zcbg;cardCost+=zcard;weighted+=zp*zm*(1-fee)*zq/3000;return{name:z.name,net:zcbg-zcard}});const rmbPerWan=purchase>0?weighted/purchase:0,dailyNet=cbgRmb-cardCost,breakEven=rmbPerWan>0?cardCost/rmbPerWan:0,targetPurchase=rmbPerWan>0?(cardCost+Math.max(0,num(state.targetProfit)))/rmbPerWan:0,margin=purchase>0?grossProfit/purchase:0,cbgCostBasis=(margin>0&&sales>0)?purchase*margin/(1+margin):0;return{accounts,purchase,sales,grossProfit,feeCoins,cbgNetCoins,cbgRmb,cardCost,dailyNet,breakEven,targetPurchase,cbgCostBasis,zoneRows}}
+function activeZone(){return state.zones.find(z=>z.id===state.activeZoneId)||state.zones[0]}
 function compositionUnits(type,level){if(type==='normal')return 2**(level-1);if(type==='star')return 3**(level-1);const units=[0,1,2];for(let current=3;current<=level;current++)units[current]=2*units[current-1]+units[current-2];return units[level]}
 function renderSynthesis(){const type=gemTypes[state.gemType];const basePrice=Math.max(0,num(state.synthesisPrices[state.gemType]));const averageSalePrice=Math.max(0,num(state.averageSalePrices[state.gemType],Math.round(basePrice*1.1)));const cbgRate=Math.max(0,num(state.cbgQuote));const averageMode=state.saleMode==='average';document.querySelectorAll('[data-gem-type]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.gemType===state.gemType);const bt=gemTypes[btn.dataset.gemType];btn.innerHTML=`<img src="${bt.icon}" alt="">${bt.name}`});document.querySelectorAll('[data-sale-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.saleMode===state.saleMode));$('saleModeBar').classList.toggle('average',averageMode);$('averageSaleField').classList.toggle('show',averageMode);$('ratioBtn').hidden=averageMode;if(document.activeElement!==$('averageSalePrice'))$('averageSalePrice').value=averageSalePrice;$('priceTableTitle').innerHTML=`<img src="${type.icon}" alt="">${type.name}价格表`;$('synthesisRule').textContent=averageMode?`${type.rule} 均价售卖：各级售价按1级售卖均价乘以所需1级数量计算。`:type.rule;const rows=[];type.levels.forEach(level=>{const units=compositionUnits(state.gemType,level);const purchasePrice=basePrice*units;const ratio=state.priceRatios[state.gemType][level];const stallCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.stall));const cbgCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.cbg));const stallPrice=Math.floor(Math.round(stallCoins/10000*1e6)/1e6);const coinTier=stallCoins>=10000000?'coin-tier-ten-million':stallCoins>=1000000?'coin-tier-million':stallCoins>=100000?'coin-tier-hundred-thousand':stallCoins>=10000?'coin-tier-wan':'';const cbgPrice=cbgCoins/30000000*cbgRate;const cbgAvailable=level>=type.cbgMinLevel;rows.push(`<div class="price-row"><span>${level}级</span><span>${fmtWan(purchasePrice/10000)}</span><span>${fmt(units,0)}</span><span class="${coinTier}">${fmt(stallPrice,0)}</span><span class="${cbgAvailable?'':'not-available'}">${cbgAvailable?fmt(cbgPrice,1):'—'}</span></div>`)});$('gemPriceRows').innerHTML=rows.join('')}
 function renderRatioRows(){const type=gemTypes[state.gemType];$('ratioModalTitle').textContent=`${type.name}售价比例调整`;const rows=[];type.levels.forEach(level=>{const ratio=state.priceRatios[state.gemType][level];const showCbg=level>=type.cbgMinLevel;rows.push(`<div class="ratio-row"><b>${level}级</b><input type="number" inputmode="decimal" min="0" step="0.01" value="${num(ratio.stall).toFixed(2)}" data-ratio-level="${level}" data-ratio-key="stall" aria-label="${level}级摆摊比例">${showCbg?`<input type="number" inputmode="decimal" min="0" step="0.01" value="${num(ratio.cbg).toFixed(2)}" data-ratio-level="${level}" data-ratio-key="cbg" aria-label="${level}级CBG比例">`:'<span class="ratio-na">不可上架</span>'}</div>`)});$('ratioRows').innerHTML=rows.join('');document.querySelectorAll('[data-ratio-level]').forEach(input=>input.addEventListener('input',()=>{const level=input.dataset.ratioLevel;state.priceRatios[state.gemType][level][input.dataset.ratioKey]=Math.max(0,num(input.value));save();renderSynthesis()}))}
-function renderHero(c){$('dailyNet').textContent=fmt(c.dailyNet);$('dailyProfitSummary').classList.toggle('loss',c.dailyNet<0);$('dailyProfitNote').textContent=c.dailyNet>=0?'已扣除手续费和账号点卡':'当前经营参数预计亏损'}
-function render(){const c=calc();renderSynthesis();renderHero(c);$('accountHint').textContent=`${c.accounts}个账号 · ${fmt(c.cardCost,1)}元点卡/天`;
+function renderHero(c){$('dailyNet').textContent=fmt(c.dailyNet);$('dailyProfitSummary').classList.toggle('loss',c.dailyNet<0);$('dailyProfitNote').textContent=c.dailyNet>=0?`${state.zones.length}个区服合计 · 已扣手续费和点卡`:'当前经营参数预计亏损'}
+function renderZones(){const chips=state.zones.map(z=>`<button type="button" class="zone-chip${z.id===state.activeZoneId?' active':''}" data-zone="${z.id}">${escapeHtml(z.name)}</button>`).join('');$('zoneChips').innerHTML=chips+'<button type="button" class="zone-chip zone-add" id="addZoneBtn">＋ 添加区服</button>';document.querySelectorAll('[data-zone]').forEach(b=>b.addEventListener('click',()=>{state.activeZoneId=b.dataset.zone;save();render()}));$('addZoneBtn').addEventListener('click',()=>{const z={id:uid(),name:'新区服',cbgQuote:210,purchase:9000,margin:17,preset:4};state.zones.push(z);state.activeZoneId=z.id;save();render();setTimeout(()=>{$('zoneName').focus();$('zoneName').select()},60)});const z=activeZone();if(document.activeElement!==$('zoneName'))$('zoneName').value=z.name;if(document.activeElement!==$('zoneQuote'))$('zoneQuote').value=z.cbgQuote;if(document.activeElement!==$('zonePurchase'))$('zonePurchase').value=z.purchase;if(document.activeElement!==$('zoneMargin'))$('zoneMargin').value=z.margin;$('delZoneBtn').style.visibility=state.zones.length>1?'visible':'hidden';$('zoneEdit').classList.add('show')}
+function render(){const c=calc();renderSynthesis();renderZones();renderHero(c);$('accountHint').textContent=`${c.accounts}个账号 · ${fmt(c.cardCost,1)}元点卡/天`;
   $('sales').innerHTML=`${fmtSmart(c.sales)}<small>万</small>`;$('grossProfit').innerHTML=`${fmtSmart(c.grossProfit)}<small>万</small>`;$('cbgRmb').innerHTML=`${fmt(c.cbgRmb)}<small>元</small>`;$('cardCost').innerHTML=`${fmt(c.cardCost,1)}<small>元</small>`;$('breakEven').innerHTML=`${fmtSmart(c.breakEven)}<small>万</small>`;const gap=c.purchase-c.breakEven;$('gap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;$('targetPurchase').textContent=`${fmtSmart(c.targetPurchase)}万`;
-  document.querySelectorAll('[data-preset]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.preset)===c.accounts&&((c.accounts===3&&state.buyAccounts===2)||(c.accounts===4&&state.buyAccounts===3))));document.querySelectorAll('[data-purchase]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.purchase)===state.purchase));
+  $('zoneBreakdown').innerHTML=c.zoneRows.map(r=>`<div class="zone-breakdown-row"><b>${escapeHtml(r.name)}</b><span class="${r.net>=0?'win':'loss'}">${r.net>=0?'+':''}${fmt(r.net)} 元/天</span></div>`).join('');
+  const az=activeZone();document.querySelectorAll('[data-preset]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.preset)===az.preset));document.querySelectorAll('[data-purchase]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.purchase)===num(az.purchase)));
   const days=Math.max(1,Math.round(state.periodDays));$('periodPurchase').innerHTML=`${fmtSmart(c.purchase*days)}<small>万</small>`;$('periodSales').innerHTML=`${fmtSmart(c.sales*days)}<small>万</small>`;$('periodCbg').innerHTML=`${fmt(c.cbgRmb*days)}<small>元</small>`;$('periodCards').innerHTML=`${fmt(c.cardCost*days)}<small>元</small>`;$('periodNet').innerHTML=`${fmt(c.dailyNet*days)}<small>元</small>`;$('playerRevenue').innerHTML=`${fmtSmart(c.purchase)}<small>万/天</small>`;$('cbgListing').innerHTML=`${fmtSmart(c.grossProfit)}<small>万/天</small>`;$('cbgCostBasis').innerHTML=`${fmtSmart(c.cbgCostBasis)}<small>万/天</small>`;$('feeCoins').innerHTML=`${fmtSmart(c.feeCoins)}<small>万/天</small>`;
   document.querySelectorAll('[data-days]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.days)===days));
 }
 function activateTab(tab,scroll=true){activeTab=tab;document.querySelectorAll('[data-tab]').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===tab));document.querySelectorAll('.tab-panel').forEach(panel=>panel.classList.toggle('active',panel.dataset.panel===tab));$('settings').classList.toggle('show',tab==='period');renderHero(calc());if(scroll)window.scrollTo({top:0,behavior:'smooth'})}
 function closeRatioModal(){$('ratioModal').classList.remove('show');document.body.style.overflow=''}
-document.querySelectorAll('[data-preset]').forEach(btn=>btn.addEventListener('click',()=>{if(btn.dataset.preset==='3'){state.buyAccounts=2;state.sellAccounts=1}else{state.buyAccounts=3;state.sellAccounts=1}$('buyAccounts').value=state.buyAccounts;$('sellAccounts').value=state.sellAccounts;save();render()}));
-document.querySelectorAll('[data-purchase]').forEach(btn=>btn.addEventListener('click',()=>{state.purchase=Number(btn.dataset.purchase);$('purchase').value=state.purchase;save();render()}));
+document.querySelectorAll('[data-preset]').forEach(btn=>btn.addEventListener('click',()=>{activeZone().preset=Number(btn.dataset.preset);save();render()}));
+document.querySelectorAll('[data-purchase]').forEach(btn=>btn.addEventListener('click',()=>{activeZone().purchase=Number(btn.dataset.purchase);save();render()}));
 document.querySelectorAll('[data-days]').forEach(btn=>btn.addEventListener('click',()=>{state.periodDays=Number(btn.dataset.days);$('periodDays').value=state.periodDays;save();render()}));
 document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>activateTab(btn.dataset.tab)));
 document.querySelectorAll('[data-gem-type]').forEach(btn=>btn.addEventListener('click',()=>{state.gemType=btn.dataset.gemType;$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];save();render()}));
 document.querySelectorAll('[data-sale-mode]').forEach(btn=>btn.addEventListener('click',()=>{state.saleMode=btn.dataset.saleMode;save();renderSynthesis()}));
 $('averageSalePrice').addEventListener('input',()=>{state.averageSalePrices[state.gemType]=Math.max(0,num($('averageSalePrice').value));state.averagePriceCustomized[state.gemType]=true;save();renderSynthesis()});
 $('synthesisBasePrice').addEventListener('input',()=>{const price=Math.max(0,num($('synthesisBasePrice').value));state.synthesisPrices[state.gemType]=price;if(!state.averagePriceCustomized[state.gemType])state.averageSalePrices[state.gemType]=Math.round(price*1.1);save();renderSynthesis();renderHero(calc())});
-$('synthesisCbgRate').addEventListener('input',()=>{state.cbgQuote=Math.max(0,num($('synthesisCbgRate').value));$('cbgQuote').value=state.cbgQuote;save();render()});
-document.querySelectorAll('[data-clear]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.clear;if(id==='synthesisBasePrice'){state.synthesisPrices[state.gemType]=0;if(!state.averagePriceCustomized[state.gemType])state.averageSalePrices[state.gemType]=0}else{state.cbgQuote=0;$('cbgQuote').value=''}$(id).value='';save();render();$(id).focus()}));
+$('synthesisCbgRate').addEventListener('input',()=>{state.cbgQuote=Math.max(0,num($('synthesisCbgRate').value));save();render()});
+document.querySelectorAll('[data-clear]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.clear;if(id==='synthesisBasePrice'){state.synthesisPrices[state.gemType]=0;if(!state.averagePriceCustomized[state.gemType])state.averageSalePrices[state.gemType]=0}else{state.cbgQuote=0}$(id).value='';save();render();$(id).focus()}));
 $('ratioBtn').addEventListener('click',()=>{renderRatioRows();$('ratioModal').classList.add('show');document.body.style.overflow='hidden'});
 $('ratioClose').addEventListener('click',closeRatioModal);$('ratioDone').addEventListener('click',closeRatioModal);$('ratioModal').addEventListener('click',event=>{if(event.target===$('ratioModal'))closeRatioModal()});
 $('resetRatios').addEventListener('click',()=>{state.priceRatios[state.gemType]=cloneRatioSet(defaultRatios[state.gemType]);save();renderRatioRows();renderSynthesis()});
-$('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*1.1)])),averagePriceCustomized:{normal:false,star:false,dust:false}});document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisCbgRate').value=state.cbgQuote;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
-try{render();activateTab('synthesis',false);save()}catch(error){console.error('初始化失败',error)}if('serviceWorker'in navigator&&window.isSecureContext)navigator.serviceWorker.register('./gem-calculator-sw.js').catch(()=>{});
+$('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*1.1)])),averagePriceCustomized:{normal:false,star:false,dust:false},zones:[{id:uid(),name:'秦淮风光',cbgQuote:210,purchase:9000,margin:17,preset:4}]});state.activeZoneId=state.zones[0].id;document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisCbgRate').value=state.cbgQuote;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
+try{render();activateTab('synthesis',false);save()}catch(error){console.error('初始化失败',error)}initCloud();if('serviceWorker'in navigator&&window.isSecureContext)navigator.serviceWorker.register('./gem-calculator-sw.js').catch(()=>{});
 </script>
 </body>
 </html>
