@@ -57,7 +57,15 @@
 .zone-preset{margin-top:12px;margin-bottom:0}
 .zone-breakdown{margin-top:11px;display:grid;gap:6px}.zone-breakdown:empty{display:none}
 .zone-breakdown-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:11px;background:#f7f8fb;font-size:12px}.zone-breakdown-row b{color:#444c60;font-weight:700}.zone-breakdown-row span{font-weight:750;font-variant-numeric:tabular-nums}.zone-breakdown-row span.loss{color:#c63838}.zone-breakdown-row span.win{color:#087c68}
+.zone-select{width:100%;height:42px;padding:0 32px 0 11px;border:1px solid var(--line);border-radius:12px;outline:0;background-color:#f8f9fc;color:var(--ink);font:700 15px/42px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='%23667585'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px;cursor:pointer}.zone-select:focus{border-color:#8278ef;background-color:#fff;box-shadow:0 0 0 3px rgba(102,88,235,.1)}
 .zone-admin-card{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:7px;background:#fafbfd}
+.single-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.single-field{min-width:0}.single-field label{display:block;margin:0 0 6px 2px;color:#6f788c;font-size:11px;font-weight:650}
+.single-field-row input{width:100%;height:46px;padding:0 13px;border:1px solid var(--line);border-radius:13px;outline:0;background:#f8f9fc;color:var(--ink);font-size:15px;font-weight:750}.single-field-row input:focus{border-color:#8278ef;background:#fff;box-shadow:0 0 0 3px rgba(102,88,235,.1)}
+.single-quick{grid-column:1/-1}.single-purchase-quick{display:flex;gap:6px;overflow:auto;padding-bottom:2px}.single-purchase-quick button{flex:0 0 auto;padding:6px 10px;border:0;border-radius:999px;background:#f0f2f7;color:#697286;font-size:11px;cursor:pointer}.single-purchase-quick button.active{background:var(--navy);color:#fff}
+.single-preset{grid-column:1/-1}.preset-zone{display:grid;grid-template-columns:1fr 1fr;gap:8px}.preset-zone button{height:43px;border:1px solid var(--line);border-radius:13px;background:#f7f8fb;color:#5f687c;font-weight:700;cursor:pointer;font-size:13px}.preset-zone button.active{border-color:#7970ed;background:var(--violet-soft);color:#4e45c9;box-shadow:inset 0 0 0 1px rgba(102,88,235,.08)}
+.single-results{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.single-results .result{min-width:0;padding:13px;border-radius:14px;background:#f7f8fb}.single-results .result.highlight{background:var(--green-soft)}.single-results .result.warning{background:var(--amber-soft)}.single-results .result-label{color:#858da0;font-size:11px}.single-results .result-value{margin-top:5px;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}.single-results .result-value small{margin-left:3px;color:#7f889a;font-size:10px;font-weight:600}.single-results .result.highlight .result-value{color:#087c68}
 .zone-admin-head{display:flex;align-items:center;gap:6px;margin-bottom:7px}.zone-admin-head input{flex:1;min-width:0;height:31px;padding:0 9px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-size:12px;font-weight:650}.zone-admin-head .zone-del{flex:0 0 auto;height:26px;width:auto;padding:0 8px;font-size:10px;margin-left:0}
 .zone-admin-net{flex:0 0 auto;min-width:44px;text-align:right;font-size:11px;font-weight:750;font-variant-numeric:tabular-nums;color:#087c68}.zone-admin-net.loss{color:#c63838}
 .zone-preset-mini{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:2px;border-radius:8px;background:#e8ebf2}.zone-preset-mini button{height:25px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:#737c8f;font-size:10.5px;font-weight:700;cursor:pointer}.zone-preset-mini button.active{background:linear-gradient(135deg,var(--navy),#5149ce);color:#fff}
@@ -86,13 +94,14 @@
       <button type="button" class="active" data-tab="synthesis">宝石合成</button>
       <button type="button" data-tab="profit">日利润</button>
       <button type="button" data-tab="period">周期</button>
+      <button type="button" data-tab="single">单服日利润</button>
     </nav>
 
     <section class="tab-panel active" data-panel="synthesis">
       <div class="card">
         <div class="card-title"><h2>宝石合成计算器</h2><span>按一级价格自动换算</span></div>
         <div class="calc-fields global-cbg-setting">
-          <div class="calc-field"><label for="synthesisCbgRate">3000万价格</label><input id="synthesisCbgRate" type="number" inputmode="decimal" min="0" step="1" value="210"><button type="button" class="clear-button" data-clear="synthesisCbgRate">清空</button></div>
+          <div class="calc-field"><label for="synthesisZoneSelect">应用区服</label><select id="synthesisZoneSelect" class="zone-select" aria-label="选择区服"></select></div>
         </div>
         <div class="gem-type-tabs" aria-label="宝石类型">
           <button type="button" class="active" data-gem-type="normal">普通宝石</button>
@@ -163,8 +172,7 @@
     </section>
 
     <section class="tab-panel" data-panel="period">
-      <div class="card">
-        <div class="card-title"><h2>周期收益</h2><span>按当前每日数据</span></div>
+      <div class="card">        <div class="card-title"><h2>周期收益</h2><span>按当前每日数据</span></div>
         <div class="period-tabs"><button data-days="7">7天</button><button data-days="30" class="active">30天</button><button data-days="31">31天</button></div>
         <div class="results" style="margin-top:12px">
           <div class="result"><div class="result-label">周期收购总额</div><div class="result-value" id="periodPurchase">0<small>万</small></div></div>
@@ -182,6 +190,41 @@
           <div class="result"><div class="result-label">藏宝阁库存成本</div><div class="result-value" id="cbgCostBasis">0<small>万/天</small></div></div>
           <div class="result"><div class="result-label">手续费（固定5%）</div><div class="result-value" id="feeCoins">0<small>万/天</small></div></div>
         </div>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="single">
+      <div class="card">
+        <div class="card-title"><h2>单服日利润</h2><span>只算一个服务器</span></div>
+        <div class="daily-profit-summary" id="singleProfitSummary">
+          <div class="daily-profit-copy"><span>单服预计净利润</span><small id="singleProfitNote">已扣手续费和点卡</small></div>
+          <div class="daily-profit-value"><strong id="singleNet">0.00</strong><em>元</em></div>
+        </div>
+        <div class="single-fields">
+          <div class="single-field"><label>3000万游戏币价格（元）</label><div class="single-field-row"><input id="singleQuote" type="number" inputmode="decimal" min="0" step="1" placeholder="元"></div></div>
+          <div class="single-field"><label>每天收购金额（万）</label><div class="single-field-row"><input id="singlePurchase" type="number" inputmode="decimal" min="0" step="100" placeholder="万游戏币"></div></div>
+          <div class="single-field"><label>实际利润率（%）</label><div class="single-field-row"><input id="singleMargin" type="number" inputmode="decimal" min="0" step="0.1" placeholder="百分比"></div></div>
+          <div class="single-field single-quick">
+            <div class="quick single-purchase-quick"><button type="button" data-single-pq="4800">4800万</button><button type="button" data-single-pq="7200">7200万</button><button type="button" data-single-pq="9000">9000万</button><button type="button" data-single-pq="9800">9800万</button></div>
+          </div>
+          <div class="single-field">
+            <label>区服汇率自动带入（可选）</label>
+            <select id="singleZoneSelect" class="zone-select" aria-label="从区服带入汇率"><option value="">— 只手动输入 —</option></select>
+          </div>
+          <div class="single-field single-preset">
+            <label>账号配置</label>
+            <div class="preset-zone"><button type="button" data-single-preset="3" class="active">2收1卖 · 3个号</button><button type="button" data-single-preset="4">3收1卖 · 4个号</button></div>
+          </div>
+        </div>
+        <div class="single-results" id="singleResults">
+          <div class="result"><div class="result-label">游戏内销售额</div><div class="result-value" id="sSales">0<small>万</small></div></div>
+          <div class="result"><div class="result-label">交易毛利润</div><div class="result-value" id="sGross">0<small>万</small></div></div>
+          <div class="result"><div class="result-label">藏宝阁到账</div><div class="result-value" id="sCbg">0<small>元</small></div></div>
+          <div class="result"><div class="result-label">每天点卡</div><div class="result-value" id="sCard">0<small>元</small></div></div>
+          <div class="result highlight"><div class="result-label">不亏本收购线</div><div class="result-value" id="sBreak">0<small>万</small></div></div>
+          <div class="result warning"><div class="result-label">距离保本线</div><div class="result-value" id="sGap">0<small>万</small></div></div>
+        </div>
+        <div class="formula">藏宝阁到账＝收购额 × 利润率 × 95% ÷ 3000万 × 3000万价格；净利润＝藏宝阁到账－账号点卡（0.6元/小时 × 24小时 × 账号数）。手续费固定5%。</div>
       </div>
     </section>
 
@@ -275,9 +318,8 @@ const gemTypes={
   star:{name:'星辉石',icon:'icons/gem-star.png',levels:[2,3,4,5,6,7],cbgMinLevel:5,rule:'星辉石：3个低一级星辉石合成1个高一级星辉石，计算2—7级。藏宝阁最低上架5级。'},
   dust:{name:'五色灵尘',icon:'icons/gem-dust.png',levels:[2,3,4,5,6,7],cbgMinLevel:5,rule:'五色灵尘：2个低一级灵尘加1个再低一级灵尘，合成1个高一级灵尘，计算2—7级。藏宝阁最低上架5级。'}
 };
-document.querySelectorAll('[data-key]').forEach(input=>{const key=input.dataset.key;input.value=state[key];input.addEventListener('input',()=>{state[key]=num(input.value,defaults[key]);if(key==='cbgQuote')$('synthesisCbgRate').value=state.cbgQuote;save();render()})});
+document.querySelectorAll('[data-key]').forEach(input=>{const key=input.dataset.key;input.value=state[key];input.addEventListener('input',()=>{state[key]=num(input.value,defaults[key]);if(key==='cbgQuote'){const sel=$('synthesisZoneSelect');if(sel)sel.value=state.cbgZoneId}save();render()})});
 $('synthesisBasePrice').value=state.synthesisPrices[state.gemType];
-$('synthesisCbgRate').value=state.cbgQuote;
 $('averageSalePrice').value=state.averageSalePrices[state.gemType];
 function save(){safeStorage.set('gemCalculatorSettings',JSON.stringify(state));scheduleCloudPush()}
 let toastTimer=null;function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),1800)}
@@ -316,6 +358,7 @@ function compositionUnits(type,level){if(type==='normal')return 2**(level-1);if(
 function renderSynthesis(){const type=gemTypes[state.gemType];const basePrice=Math.max(0,num(state.synthesisPrices[state.gemType]));const averageSalePrice=Math.max(0,num(state.averageSalePrices[state.gemType],Math.round(basePrice*1.1)));const cbgRate=Math.max(0,num(state.cbgQuote));const averageMode=state.saleMode==='average';document.querySelectorAll('[data-gem-type]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.gemType===state.gemType);const bt=gemTypes[btn.dataset.gemType];btn.innerHTML=`<img src="${bt.icon}" alt="">${bt.name}`});document.querySelectorAll('[data-sale-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.saleMode===state.saleMode));$('saleModeBar').classList.toggle('average',averageMode);$('averageSaleField').classList.toggle('show',averageMode);$('ratioBtn').hidden=averageMode;if(document.activeElement!==$('averageSalePrice'))$('averageSalePrice').value=averageSalePrice;$('priceTableTitle').innerHTML=`<img src="${type.icon}" alt="">${type.name}价格表`;$('synthesisRule').textContent=averageMode?`${type.rule} 均价售卖：各级售价按1级售卖均价乘以所需1级数量计算。`:type.rule;const rows=[];type.levels.forEach(level=>{const units=compositionUnits(state.gemType,level);const purchasePrice=basePrice*units;const ratio=state.priceRatios[state.gemType][level];const stallCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.stall));const cbgCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.cbg));const stallPrice=Math.floor(Math.round(stallCoins/10000*1e6)/1e6);const coinTier=stallCoins>=10000000?'coin-tier-ten-million':stallCoins>=1000000?'coin-tier-million':stallCoins>=100000?'coin-tier-hundred-thousand':stallCoins>=10000?'coin-tier-wan':'';const cbgPrice=cbgCoins/30000000*cbgRate;const cbgAvailable=level>=type.cbgMinLevel;rows.push(`<div class="price-row"><span>${level}级</span><span>${fmtWan(purchasePrice/10000)}</span><span>${fmt(units,0)}</span><span class="${coinTier}">${fmt(stallPrice,0)}</span><span class="${cbgAvailable?'':'not-available'}">${cbgAvailable?fmt(cbgPrice,1):'—'}</span></div>`)});$('gemPriceRows').innerHTML=rows.join('')}
 function renderRatioRows(){const type=gemTypes[state.gemType];$('ratioModalTitle').textContent=`${type.name}售价比例调整`;const rows=[];type.levels.forEach(level=>{const ratio=state.priceRatios[state.gemType][level];const showCbg=level>=type.cbgMinLevel;rows.push(`<div class="ratio-row"><b>${level}级</b><input type="number" inputmode="decimal" min="0" step="0.01" value="${num(ratio.stall).toFixed(2)}" data-ratio-level="${level}" data-ratio-key="stall" aria-label="${level}级摆摊比例">${showCbg?`<input type="number" inputmode="decimal" min="0" step="0.01" value="${num(ratio.cbg).toFixed(2)}" data-ratio-level="${level}" data-ratio-key="cbg" aria-label="${level}级CBG比例">`:'<span class="ratio-na">不可上架</span>'}</div>`)});$('ratioRows').innerHTML=rows.join('');document.querySelectorAll('[data-ratio-level]').forEach(input=>input.addEventListener('input',()=>{const level=input.dataset.ratioLevel;state.priceRatios[state.gemType][level][input.dataset.ratioKey]=Math.max(0,num(input.value));save();renderSynthesis()}))}
 function renderHero(c){$('dailyNet').textContent=fmt(c.dailyNet);$('dailyProfitSummary').classList.toggle('loss',c.dailyNet<0);$('dailyProfitNote').textContent=c.dailyNet>=0?`${state.zones.length}个区服合计 · 已扣手续费和点卡`:'当前经营参数预计亏损'}
+function renderZoneSelect(){const sel=$('synthesisZoneSelect'),zs=state.zones;if(!sel)return;sel.innerHTML=zs.map(z=>`<option value="${z.id}"${z.id===state.cbgZoneId?' selected':''}>${escapeHtml(z.name)}（${fmt(z.cbgQuote,0)}元）</option>`).join('')}
 function renderZones(){
   const zl=$('zoneAdminList');if(!zl)return;
   zl.innerHTML=state.zones.map(z=>{
@@ -332,16 +375,47 @@ function renderZones(){
         <div class="field"><label>利润率</label><div class="input-wrap"><input data-zone-input="margin" value="${z.margin}" type="number" inputmode="decimal" min="0" step="0.1"><span class="unit">%</span></div></div>
       </div>
     </div>`;
-  }).join('');
+    }).join('');
 }
-function refreshProfitNumbers(){const c=calc();renderHero(c);$('accountHint').textContent=`${state.zones.length}个区服`;$('accountHint2').textContent=`${state.zones.length}个区服 (共 ${c.accounts} 个账号)`;
-  const adminTotal=$('adminTotal');if(adminTotal)adminTotal.textContent=`${state.zones.length}个区服 · 合计净利 ${fmt(c.dailyNet)} 元/天`;
-  state.zones.forEach(z=>{const za=Math.max(0,num(z.preset,4)),zp=Math.max(0,num(z.purchase)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const badge=document.querySelector(`[data-zone="${z.id}"] .zone-admin-net`);if(badge){badge.textContent=`${net>=0?'+':''}${fmt(net,1)}`;badge.classList.toggle('loss',net<0)}});
+function render(){const c=refreshProfitNumbers();renderSynthesis();renderZones();renderSingle();renderZoneSelectSingle();renderZoneSelect();return c}
+function refreshProfitNumbers(){const c=calc();renderHero(c);renderAdminStats();renderCompanyStats();
   $('sales').innerHTML=`${fmtSmart(c.sales)}<small>万</small>`;$('grossProfit').innerHTML=`${fmtSmart(c.grossProfit)}<small>万</small>`;$('cbgRmb').innerHTML=`${fmt(c.cbgRmb)}<small>元</small>`;$('cardCost').innerHTML=`${fmt(c.cardCost,1)}<small>元</small>`;$('breakEven').innerHTML=`${fmtSmart(c.breakEven)}<small>万</small>`;const gap=c.purchase-c.breakEven;$('gap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;$('targetPurchase').textContent=`${fmtSmart(c.targetPurchase)}万`;
   $('zoneBreakdown').innerHTML=c.zoneRows.map(r=>`<div class="zone-breakdown-row"><b>${escapeHtml(r.name)}</b><span class="${r.net>=0?'win':'loss'}">${r.net>=0?'+':''}${fmt(r.net)} 元/天</span></div>`).join('');
   const days=Math.max(1,Math.round(state.periodDays));$('periodPurchase').innerHTML=`${fmtSmart(c.purchase*days)}<small>万</small>`;$('periodSales').innerHTML=`${fmtSmart(c.sales*days)}<small>万</small>`;$('periodCbg').innerHTML=`${fmt(c.cbgRmb*days)}<small>元</small>`;$('periodCards').innerHTML=`${fmt(c.cardCost*days)}<small>元</small>`;$('periodNet').innerHTML=`${fmt(c.dailyNet*days)}<small>元</small>`;$('playerRevenue').innerHTML=`${fmtSmart(c.purchase)}<small>万/天</small>`;$('cbgListing').innerHTML=`${fmtSmart(c.grossProfit)}<small>万/天</small>`;$('cbgCostBasis').innerHTML=`${fmtSmart(c.cbgCostBasis)}<small>万/天</small>`;$('feeCoins').innerHTML=`${fmtSmart(c.feeCoins)}<small>万/天</small>`;
   document.querySelectorAll('[data-days]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.days)===days));return c}
-function render(){const c=refreshProfitNumbers();renderSynthesis();renderZones();return c}
+function renderAdminStats(){const at=$('adminTotal');if(at)at.textContent=`${state.zones.length}个区服 · 合计净利 ${fmt(calc().dailyNet)} 元/天`}
+function renderCompanyStats(){const c=calc();state.zones.forEach(z=>{const za=Math.max(0,num(z.preset,4)),zp=Math.max(0,num(z.purchase)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const badge=document.querySelector(`[data-zone="${z.id}"] .zone-admin-net`);if(badge){badge.textContent=`${net>=0?'+':''}${fmt(net,1)}`;badge.classList.toggle('loss',net<0)}})}
+function renderSingle(){
+  const s=state.single;
+  const quote=Math.max(0,num(s.quote));const purchase=Math.max(0,num(s.purchase));const margin=Math.max(0,num(s.margin)/100);const preset=Math.max(0,num(s.preset,4));
+  const cardHourly=.6;const hours=24;const fee=1-.05;
+  const cardCost=preset*cardHourly*hours;
+  const sales=purchase*(1+margin);const gross=purchase*margin;
+  const cbg=gross*fee/3000*quote;
+  const dailyNet=cbg-cardCost;
+  let breakEven=0,gap=0;
+  if(margin>0&&quote>0){breakEven=cardCost/(margin*quote);gap=Math.max(0,purchase-breakEven)}
+  $('singleQuote').value=quote;$('singlePurchase').value=purchase;$('singleMargin').value=margin;
+  document.querySelectorAll('[data-single-preset]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.singlePreset)===preset));
+  document.querySelectorAll('[data-single-pq]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.singlePq)===purchase));
+  $('singleNet').textContent=fmt(dailyNet);
+  $('singleProfitSummary').classList.toggle('loss',dailyNet<0);
+  $('singleProfitNote').textContent=dailyNet>=0?'已扣手续费和点卡':'当前参数预计亏损';
+  $('sSales').innerHTML=`${fmtSmart(sales)}<small>万</small>`;
+  $('sGross').innerHTML=`${fmtSmart(gross)}<small>万</small>`;
+  $('sCbg').innerHTML=`${fmt(cbg)}<small>元</small>`;
+  $('sCard').innerHTML=`${fmt(cardCost,1)}<small>元</small>`;
+  $('sBreak').innerHTML=`${fmtSmart(breakEven)}<small>万</small>`;
+  $('sGap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;
+}
+function singleCalc(quote,purchase,margin,preset){const cardHourly=.6,hours=24,fee=1-.05;const cardCost=preset*cardHourly*hours,sales=purchase*(1+margin),gross=purchase*margin,cbg=gross*fee/3000*quote;return{cardCost,sales,gross,cbg,net:cbg-cardCost}}
+$('singleQuote').addEventListener('input',()=>{state.single.quote=Math.max(0,num($('singleQuote').value));save();renderSingle()});
+$('singlePurchase').addEventListener('input',()=>{state.single.purchase=Math.max(0,num($('singlePurchase').value));save();renderSingle()});
+$('singleMargin').addEventListener('input',()=>{state.single.margin=Math.max(0,num($('singleMargin').value));save();renderSingle()});
+document.querySelectorAll('[data-single-preset]').forEach(btn=>btn.addEventListener('click',()=>{state.single.preset=Number(btn.dataset.singlePreset);save();renderSingle()}));
+document.querySelectorAll('[data-single-pq]').forEach(btn=>btn.addEventListener('click',()=>{state.single.purchase=Number(btn.dataset.singlePq);save();renderSingle()}));
+$('singleZoneSelect').addEventListener('change',()=>{const z=state.zones.find(x=>x.id===$('singleZoneSelect').value);if(z){$('singleQuote').value=num(z.cbgQuote);state.single.quote=num(z.cbgQuote);save();renderSingle();toast(`已从「${z.name}」带入 ${fmt(z.cbgQuote,0)}元`)}});
+function renderZoneSelectSingle(){const sel=$('singleZoneSelect');if(!sel)return;sel.innerHTML='<option value="">— 只手动输入 —</option>'+state.zones.map(z=>`<option value="${z.id}"${z.id===state.cbgZoneId?' selected':''}>${escapeHtml(z.name)}（${fmt(z.cbgQuote,0)}元）</option>`).join('')}
 function activateTab(tab,scroll=true){activeTab=tab;document.querySelectorAll('[data-tab]').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===tab));document.querySelectorAll('.tab-panel').forEach(panel=>panel.classList.toggle('active',panel.dataset.panel===tab));$('settings').classList.toggle('show',tab==='period');if(tab==='admin')setSyncUI(namespace?(busyState||'on'):'off',null,'admin');renderHero(calc());if(scroll)window.scrollTo({top:0,behavior:'smooth'})}
 function handleSyncEntry(){if(namespace){activateTab('admin')}else openAuthModal()}
 function closeRatioModal(){$('ratioModal').classList.remove('show');document.body.style.overflow=''}
@@ -353,13 +427,13 @@ document.querySelectorAll('[data-gem-type]').forEach(btn=>btn.addEventListener('
 document.querySelectorAll('[data-sale-mode]').forEach(btn=>btn.addEventListener('click',()=>{state.saleMode=btn.dataset.saleMode;save();renderSynthesis()}));
 $('averageSalePrice').addEventListener('input',()=>{state.averageSalePrices[state.gemType]=Math.max(0,num($('averageSalePrice').value));state.averagePriceCustomized[state.gemType]=true;save();renderSynthesis()});
 $('synthesisBasePrice').addEventListener('input',()=>{const price=Math.max(0,num($('synthesisBasePrice').value));state.synthesisPrices[state.gemType]=price;if(!state.averagePriceCustomized[state.gemType])state.averageSalePrices[state.gemType]=Math.round(price*1.1);save();renderSynthesis();renderHero(calc())});
-$('synthesisCbgRate').addEventListener('input',()=>{state.cbgQuote=Math.max(0,num($('synthesisCbgRate').value));save();render()});
+$('synthesisZoneSelect').addEventListener('change',()=>{const zid=$('synthesisZoneSelect').value;const z=state.zones.find(x=>x.id===zid);if(z){state.cbgZoneId=zid;state.cbgQuote=z.cbgQuote;save()}});
 document.querySelectorAll('[data-clear]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.clear;if(id==='synthesisBasePrice'){state.synthesisPrices[state.gemType]=0;if(!state.averagePriceCustomized[state.gemType])state.averageSalePrices[state.gemType]=0}else{state.cbgQuote=0}$(id).value='';save();render();$(id).focus()}));
 $('ratioBtn').addEventListener('click',()=>{renderRatioRows();$('ratioModal').classList.add('show');document.body.style.overflow='hidden'});
 $('ratioClose').addEventListener('click',closeRatioModal);$('ratioDone').addEventListener('click',closeRatioModal);$('ratioModal').addEventListener('click',event=>{if(event.target===$('ratioModal'))closeRatioModal()});
 $('resetRatios').addEventListener('click',()=>{state.priceRatios[state.gemType]=cloneRatioSet(defaultRatios[state.gemType]);save();renderRatioRows();renderSynthesis()});
-$('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*1.1)])),averagePriceCustomized:{normal:false,star:false,dust:false},zones:[{id:uid(),name:'秦淮风光',cbgQuote:210,purchase:9000,margin:17,preset:4}]});state.activeZoneId=state.zones[0].id;document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisCbgRate').value=state.cbgQuote;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
-try{render();activateTab('synthesis',false);save()}catch(error){console.error('初始化失败',error)}initCloud();if('serviceWorker'in navigator&&window.isSecureContext)navigator.serviceWorker.register('./gem-calculator-sw.js').catch(()=>{});
+$('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*1.1)])),averagePriceCustomized:{normal:false,star:false,dust:false},zones:[{id:uid(),name:'秦淮风光',cbgQuote:210,purchase:9000,margin:17,preset:4}]});state.activeZoneId=state.zones[0].id;state.cbgZoneId=state.zones[0].id;document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisZoneSelect').value=state.cbgZoneId;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
+try{render();activateTab('synthesis',false);save();renderSingle();renderZoneSelectSingle()}catch(error){console.error('初始化失败',error)}initCloud();if('serviceWorker'in navigator&&window.isSecureContext)navigator.serviceWorker.register('./gem-calculator-sw.js').catch(()=>{});
 </script>
 </body>
 </html>
