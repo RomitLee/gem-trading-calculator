@@ -57,11 +57,12 @@
 .zone-preset{margin-top:12px;margin-bottom:0}
 .zone-breakdown{margin-top:11px;display:grid;gap:6px}.zone-breakdown:empty{display:none}
 .zone-breakdown-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:11px;background:#f7f8fb;font-size:12px}.zone-breakdown-row b{color:#444c60;font-weight:700}.zone-breakdown-row span{font-weight:750;font-variant-numeric:tabular-nums}.zone-breakdown-row span.loss{color:#c63838}.zone-breakdown-row span.win{color:#087c68}
-.zone-admin-card{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:#fafbfd}
-.zone-admin-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}.zone-admin-head input{flex:1;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:13px;font-weight:650;text-transform:none}.zone-admin-head .zone-del{margin-left:auto}
-.zone-admin-card .field-grid{margin-bottom:0}.zone-admin-card .field label{font-size:10px}
-.zone-admin-preset{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.zone-admin-preset button{height:36px;border:1px solid var(--line);border-radius:10px;background:#f7f8fb;color:#697286;font-size:12px;font-weight:700;cursor:pointer}.zone-admin-preset button.active{border-color:#7268eb;background:var(--violet-soft);color:#4e45c9}
-.add-zone-btn{display:block;width:100%;height:42px;margin-top:4px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:#9aa1b0;font-size:13px;font-weight:700;cursor:pointer}
+.zone-admin-card{border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:7px;background:#fafbfd}
+.zone-admin-head{display:flex;align-items:center;gap:6px;margin-bottom:7px}.zone-admin-head input{flex:1;min-width:0;height:31px;padding:0 9px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-size:12px;font-weight:650}.zone-admin-head .zone-del{flex:0 0 auto;height:26px;width:auto;padding:0 8px;font-size:10px;margin-left:0}
+.zone-admin-net{flex:0 0 auto;min-width:44px;text-align:right;font-size:11px;font-weight:750;font-variant-numeric:tabular-nums;color:#087c68}.zone-admin-net.loss{color:#c63838}
+.zone-preset-mini{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:2px;border-radius:8px;background:#e8ebf2}.zone-preset-mini button{height:25px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:#737c8f;font-size:10.5px;font-weight:700;cursor:pointer}.zone-preset-mini button.active{background:linear-gradient(135deg,var(--navy),#5149ce);color:#fff}
+.zone-admin-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.zone-admin-fields .field label{font-size:9px;margin-bottom:2px}.zone-admin-fields .input-wrap input{height:31px;font-size:13px;padding-top:0;padding-bottom:0}
+.add-zone-btn{display:block;width:100%;height:40px;margin-top:4px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:#9aa1b0;font-size:13px;font-weight:700;cursor:pointer}
 .text-button.danger{color:#c63838}
 .auth-label{display:block;margin:0 0 6px 2px;color:#6f788c;font-size:11px;font-weight:650}
 .auth-pane input,.auth-row input{width:100%;height:44px;padding:0 13px;margin-bottom:12px;border:1px solid var(--line);border-radius:12px;outline:0;background:#f8f9fc;color:var(--ink);font-size:14px}.auth-pane input:focus,.auth-row input:focus{border-color:#8278ef;background:#fff;box-shadow:0 0 0 3px rgba(102,88,235,.1)}
@@ -151,7 +152,7 @@
 
     <section class="tab-panel" data-panel="admin">
       <div class="card">
-        <div class="card-title"><h2>区服管理</h2><span>修改自动保存并同步云端</span></div>
+        <div class="card-title"><h2>区服管理</h2><span id="adminTotal">—</span></div>
         <div class="sync-bar" id="adminSyncBar"><span class="sync-dot" id="adminSyncDot"></span><span id="adminSyncText">核对口令中…</span></div>
         <div id="zoneAdminList"></div>
         <button type="button" class="add-zone-btn" id="addZoneBtn">＋ 新增区服</button>
@@ -285,8 +286,7 @@ $('zoneAdminList').addEventListener('click',e=>{const btn=e.target;const card=bt
   if(btn.id==='addZoneBtn'){const z={id:uid(),name:'新区服',cbgQuote:210,purchase:9000,margin:17,preset:4};state.zones.push(z);save();render();setTimeout(()=>{const inp=document.querySelector(`[data-zone="${z.id}"] [data-zone-input="name"]`);if(inp){inp.focus();inp.select()}},60);return}
   if(!card)return;const z=state.zones.find(x=>x.id===card.dataset.zone);if(!z)return;
   if(btn.dataset.zf==='del'){if(state.zones.length<=1){toast('至少保留一个区服');return}if(!confirm(`确定删除区服「${z.name}」？`))return;state.zones=state.zones.filter(x=>x.id!==z.id);save();render();toast(`区服「${z.name}」已删除`);return}
-  if(btn.dataset.zf==='preset'){z.preset=Number(btn.dataset.preset);save();render();return}
-  if(btn.dataset.zf==='pq'){z.purchase=Number(btn.dataset.pq);save();render();return}});
+  if(btn.dataset.zf==='preset'){z.preset=Number(btn.dataset.preset);save();render();return}});
 const CLOUD={endpoint:'https://zilin-gem-helper.app.workbuddy.host',publishableKey:'wbpk_zFJKokpBeUNzjAqOdXl4uI_QSwg7kq7en0gwIZCKq4NmX3LlN0xXiSP'};
 const TOKEN_HASH='75520fd9b44a062ae95ccca28c825d52c0a19c7b1db297cc1c981bfcb086901c';
 const SYNC_NS_KEY='gemSyncNamespace';
@@ -294,8 +294,10 @@ let cloud=null,namespace=null,syncTimer=null,busyState=null;
 async function sha256Hex(text){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return Array.from(new Uint8Array(buf),b=>b.toString(16).padStart(2,'0')).join('')}
 function setSyncUI(status,text,target){const chip=$('syncChip'),bar=$('syncBar');chip.classList.remove('on','busy');bar.classList.remove('on','busy');if(status==='on'||status==='busy'){chip.classList.add(status);bar.classList.add(status)}const label=namespace?(status==='on'?'已同步':status==='busy'?'同步中':'同步失败'):'未登录';$('chipText').textContent=text||label;const targetBar=target==='admin'?$('adminSyncText'):$('syncText');targetBar.textContent=namespace?(status==='on'?'已同步到云端':status==='busy'?'正在同步…':'同步失败，将自动重试'):(target==='admin'?'输入口令后可编辑并跨设备同步':'数据仅存本机 · 点「管理区服」输入口令同步');$('syncBtn').textContent=namespace?'管理区服':'口令登录';const adminBar=$('adminSyncBar');if(adminBar)adminBar.classList.remove('on','busy');if(target==='admin'&&(status==='on'||status==='busy'))adminBar.classList.add(status)}
 function applyRemote(p){if(!p||typeof p!=='object')return;['targetProfit','periodDays','gemType','saleMode','cbgQuote','ratioDefaultsVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));state.activeZoneId=state.zones.some(z=>z.id===p.activeZoneId)?p.activeZoneId:state.zones[0].id}safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
-function initCloud(){setSyncUI('off');if(!window.WorkBuddyCloud){console.warn('云组件未加载');return}try{cloud=WorkBuddyCloud.createWorkBuddyCloud(CLOUD)}catch(e){console.error('云组件初始化失败',e);return}const stored=safeStorage.get(SYNC_NS_KEY);if(stored){namespace=stored;setSyncUI('busy');cloudPull()}}
-async function cloudPull(){if(!namespace)return;try{const{data,error}=await cloud.database.from('zone_data').select('payload').eq('namespace',namespace).maybeSingle();if(error){setSyncUI('off');return}if(data&&data.payload){applyRemote(data.payload);setSyncUI('on')}else{await cloudPushNow();setSyncUI('on')}}catch(e){console.error('云端读取失败',e);setSyncUI('off')}}
+let retryTimer=null;
+function scheduleRetry(fn,ms){clearTimeout(retryTimer);retryTimer=setTimeout(fn,ms)}
+async function initCloud(){setSyncUI('off');const until=Date.now()+15000;while(!window.WorkBuddyCloud&&Date.now()<until){await new Promise(r=>setTimeout(r,300))}if(!window.WorkBuddyCloud){console.warn('云组件未加载');return}try{cloud=WorkBuddyCloud.createWorkBuddyCloud(CLOUD)}catch(e){console.error('云组件初始化失败',e);return}const stored=safeStorage.get(SYNC_NS_KEY);if(stored){namespace=stored;setSyncUI('busy');cloudPull()}}
+async function cloudPull(){if(!namespace)return;try{const{data,error}=await cloud.database.from('zone_data').select('payload').eq('namespace',namespace).maybeSingle();if(error){setSyncUI('off');scheduleRetry(cloudPull,30000);return}if(data&&data.payload){applyRemote(data.payload);setSyncUI('on')}else{await cloudPushNow();setSyncUI('on')}}catch(e){console.error('云端读取失败',e);setSyncUI('off');scheduleRetry(cloudPull,30000)}}
 function scheduleCloudPush(){if(!namespace)return;clearTimeout(syncTimer);setSyncUI('busy');syncTimer=setTimeout(cloudPushNow,700)}
 async function cloudPushNow(){if(!namespace)return;try{const{error}=await cloud.database.from('zone_data').upsert({namespace,payload:state,updated_at:new Date().toISOString()});setSyncUI(error?'off':'on')}catch(e){console.error('云端写入失败',e);setSyncUI('off')}}
 function openAuthModal(){$('authOut').hidden=!!namespace;$('authModal').classList.add('show');document.body.style.overflow='hidden'}
@@ -317,20 +319,24 @@ function renderHero(c){$('dailyNet').textContent=fmt(c.dailyNet);$('dailyProfitS
 function renderZones(){
   const zl=$('zoneAdminList');if(!zl)return;
   zl.innerHTML=state.zones.map(z=>{
-    const pill=(v,label,active)=>`<button type="button" class="zone-chip${active?' active':''}" data-zf="pq" data-pq="${v}">${label}</button>`;
-    const presetBtns=`<div class="zone-admin-preset"><button type="button" data-zf="preset" data-preset="3" class="${z.preset===3?'active':''}">2收1卖 · 3个号</button><button type="button" data-zf="preset" data-preset="4" class="${z.preset===4?'active':''}">3收1卖 · 4个号</button></div>`;
+    const za=Math.max(0,num(z.preset,4)),zp=Math.max(0,num(z.purchase)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));
+    const net=zp*zm*0.95/3000*zq-za*14.4;
     return `<div class="zone-admin-card" data-zone="${z.id}">
-      <div class="zone-admin-head"><input data-zone-input="name" value="${escapeHtml(z.name)}" maxlength="12" placeholder="区服名称"><button type="button" class="clear-button zone-del" data-zf="del">删除</button></div>
-      <div class="field-grid">
-        <div class="field"><label>3000万游戏币价格</label><div class="input-wrap"><input data-zone-input="cbgQuote" value="${z.cbgQuote}" type="number" inputmode="decimal" min="0" step="1"><span class="unit">元</span></div></div>
-        <div class="field"><label>实际利润率</label><div class="input-wrap"><input data-zone-input="margin" value="${z.margin}" type="number" inputmode="decimal" min="0" step="0.1"><span class="unit">%</span></div></div>
-        <div class="field full"><label>每天收购金额</label><div class="input-wrap"><input data-zone-input="purchase" value="${z.purchase}" type="number" inputmode="decimal" min="0" step="100"><span class="unit">万游戏币</span></div><div class="quick">${[4800,7200,9000,9800].map(v=>`<button type="button" data-zf="pq" data-pq="${v}" class="${num(z.purchase)===v?'active':''}">${v}万</button>`).join('')}</div></div>
+      <div class="zone-admin-head"><input data-zone-input="name" value="${escapeHtml(z.name)}" maxlength="12" placeholder="区服名称">
+        <div class="zone-preset-mini"><button type="button" data-zf="preset" data-preset="3" class="${z.preset===3?'active':''}" title="2收1卖·3个号">3号</button><button type="button" data-zf="preset" data-preset="4" class="${z.preset===4?'active':''}" title="3收1卖·4个号">4号</button></div>
+        <span class="zone-admin-net${net<0?' loss':''}">${net>=0?'+':''}${fmt(net,1)}</span>
+        <button type="button" class="clear-button zone-del" data-zf="del">删</button></div>
+      <div class="zone-admin-fields">
+        <div class="field"><label>3000万价格</label><div class="input-wrap"><input data-zone-input="cbgQuote" value="${z.cbgQuote}" type="number" inputmode="decimal" min="0" step="1"><span class="unit">元</span></div></div>
+        <div class="field"><label>每天收购</label><div class="input-wrap"><input data-zone-input="purchase" value="${z.purchase}" type="number" inputmode="decimal" min="0" step="100"><span class="unit">万</span></div></div>
+        <div class="field"><label>利润率</label><div class="input-wrap"><input data-zone-input="margin" value="${z.margin}" type="number" inputmode="decimal" min="0" step="0.1"><span class="unit">%</span></div></div>
       </div>
-      ${presetBtns}
     </div>`;
   }).join('');
 }
 function refreshProfitNumbers(){const c=calc();renderHero(c);$('accountHint').textContent=`${state.zones.length}个区服`;$('accountHint2').textContent=`${state.zones.length}个区服 (共 ${c.accounts} 个账号)`;
+  const adminTotal=$('adminTotal');if(adminTotal)adminTotal.textContent=`${state.zones.length}个区服 · 合计净利 ${fmt(c.dailyNet)} 元/天`;
+  state.zones.forEach(z=>{const za=Math.max(0,num(z.preset,4)),zp=Math.max(0,num(z.purchase)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const badge=document.querySelector(`[data-zone="${z.id}"] .zone-admin-net`);if(badge){badge.textContent=`${net>=0?'+':''}${fmt(net,1)}`;badge.classList.toggle('loss',net<0)}});
   $('sales').innerHTML=`${fmtSmart(c.sales)}<small>万</small>`;$('grossProfit').innerHTML=`${fmtSmart(c.grossProfit)}<small>万</small>`;$('cbgRmb').innerHTML=`${fmt(c.cbgRmb)}<small>元</small>`;$('cardCost').innerHTML=`${fmt(c.cardCost,1)}<small>元</small>`;$('breakEven').innerHTML=`${fmtSmart(c.breakEven)}<small>万</small>`;const gap=c.purchase-c.breakEven;$('gap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;$('targetPurchase').textContent=`${fmtSmart(c.targetPurchase)}万`;
   $('zoneBreakdown').innerHTML=c.zoneRows.map(r=>`<div class="zone-breakdown-row"><b>${escapeHtml(r.name)}</b><span class="${r.net>=0?'win':'loss'}">${r.net>=0?'+':''}${fmt(r.net)} 元/天</span></div>`).join('');
   const days=Math.max(1,Math.round(state.periodDays));$('periodPurchase').innerHTML=`${fmtSmart(c.purchase*days)}<small>万</small>`;$('periodSales').innerHTML=`${fmtSmart(c.sales*days)}<small>万</small>`;$('periodCbg').innerHTML=`${fmt(c.cbgRmb*days)}<small>元</small>`;$('periodCards').innerHTML=`${fmt(c.cardCost*days)}<small>元</small>`;$('periodNet').innerHTML=`${fmt(c.dailyNet*days)}<small>元</small>`;$('playerRevenue').innerHTML=`${fmtSmart(c.purchase)}<small>万/天</small>`;$('cbgListing').innerHTML=`${fmtSmart(c.grossProfit)}<small>万/天</small>`;$('cbgCostBasis').innerHTML=`${fmtSmart(c.cbgCostBasis)}<small>万/天</small>`;$('feeCoins').innerHTML=`${fmtSmart(c.feeCoins)}<small>万/天</small>`;
