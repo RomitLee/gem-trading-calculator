@@ -37,7 +37,8 @@
 .average-sale-field input{min-width:0;width:100%;height:38px;padding:0 8px;border:0;outline:0;background:transparent;color:var(--ink);font-size:14px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
 .average-sale-field em{color:#9aa1b0;font-size:10px;font-style:normal;font-weight:500}
 @media(max-width:380px){.average-sale-field{grid-template-columns:auto minmax(0,1fr);gap:4px;padding:0 7px}.average-sale-field em{display:none}.average-sale-field input{padding:0 4px;font-size:13px}}
-.main{margin-top:0;padding-top:14px}
+.main{margin-top:0;padding-top:calc(14px + env(safe-area-inset-top))}
+.top-tabs{top:calc(8px + env(safe-area-inset-top))}
 .global-cbg-setting{margin-bottom:14px}
 </style>
 </head>
