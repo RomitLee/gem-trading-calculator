@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gem-calculator-v32';
+const CACHE_NAME = 'gem-calculator-v33';
 const APP_SHELL = [
   './index.html',
   './GemTradingCalculator.webmanifest',
