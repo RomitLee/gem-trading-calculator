@@ -62,7 +62,7 @@
 .single-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .single-field{min-width:0}.single-field label{display:block;margin:0 0 6px 2px;color:#6f788c;font-size:11px;font-weight:650}
 .single-field-row input{width:100%;height:46px;padding:0 13px;border:1px solid var(--line);border-radius:13px;outline:0;background:#f8f9fc;color:var(--ink);font-size:15px;font-weight:750}.single-field-row input:focus{border-color:#8278ef;background:#fff;box-shadow:0 0 0 3px rgba(102,88,235,.1)}
-.single-quick{grid-column:1/-1}.single-purchase-quick{display:flex;gap:6px;overflow:auto;padding-bottom:2px}.single-purchase-quick button{flex:0 0 auto;padding:6px 10px;border:0;border-radius:999px;background:#f0f2f7;color:#697286;font-size:11px;cursor:pointer}.single-purchase-quick button.active{background:var(--navy);color:#fff}
+.single-quick{grid-column:1/-1}.single-full{grid-column:1/-1}.single-purchase-quick{display:flex;gap:6px;overflow:auto;padding-bottom:2px}.single-purchase-quick button{flex:0 0 auto;padding:6px 10px;border:0;border-radius:999px;background:#f0f2f7;color:#697286;font-size:11px;cursor:pointer}.single-purchase-quick button.active{background:var(--navy);color:#fff}
 .single-preset{grid-column:1/-1}.preset-zone{display:grid;grid-template-columns:1fr 1fr;gap:8px}.preset-zone button{height:43px;border:1px solid var(--line);border-radius:13px;background:#f7f8fb;color:#5f687c;font-weight:700;cursor:pointer;font-size:13px}.preset-zone button.active{border-color:#7970ed;background:var(--violet-soft);color:#4e45c9;box-shadow:inset 0 0 0 1px rgba(102,88,235,.08)}
 .single-results{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
 .single-results .result{min-width:0;padding:13px;border-radius:14px;background:#f7f8fb}.single-results .result.highlight{background:var(--green-soft)}.single-results .result.warning{background:var(--amber-soft)}.single-results .result-label{color:#858da0;font-size:11px}.single-results .result-value{margin-top:5px;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}.single-results .result-value small{margin-left:3px;color:#7f889a;font-size:10px;font-weight:600}.single-results .result.highlight .result-value{color:#087c68}
@@ -153,10 +153,6 @@
           <div class="result warning"><div class="result-label">距离保本线</div><div class="result-value" id="gap">0<small>万</small></div></div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-title"><h2>目标利润反推</h2><span>想赚多少，就算要收多少</span></div>
-        <div class="target-row"><div class="field"><label>目标每天净利润</label><div class="input-wrap"><input id="targetProfit" data-key="targetProfit" type="number" inputmode="decimal" min="0" step="1"><span class="unit">元</span></div></div><div class="target-output"><span>每天至少收购</span><strong id="targetPurchase">0万</strong></div></div>
-      </div>
     </section>
 
     <section class="tab-panel" data-panel="admin">
@@ -201,16 +197,12 @@
           <div class="daily-profit-value"><strong id="singleNet">0.00</strong><em>元</em></div>
         </div>
         <div class="single-fields">
-          <div class="single-field"><label>3000万游戏币价格（元）</label><div class="single-field-row"><input id="singleQuote" type="number" inputmode="decimal" min="0" step="1" placeholder="元"></div></div>
+          <div class="single-field"><label>区服</label><select id="singleZoneSelect" class="zone-select" aria-label="选择区服"></select></div>
           <div class="single-field"><label>每天收购金额（万）</label><div class="single-field-row"><input id="singlePurchase" type="number" inputmode="decimal" min="0" step="100" placeholder="万游戏币"></div></div>
-          <div class="single-field"><label>实际利润率（%）</label><div class="single-field-row"><input id="singleMargin" type="number" inputmode="decimal" min="0" step="0.1" placeholder="百分比"></div></div>
           <div class="single-field single-quick">
             <div class="quick single-purchase-quick"><button type="button" data-single-pq="4800">4800万</button><button type="button" data-single-pq="7200">7200万</button><button type="button" data-single-pq="9000">9000万</button><button type="button" data-single-pq="9800">9800万</button></div>
           </div>
-          <div class="single-field">
-            <label>区服汇率自动带入（可选）</label>
-            <select id="singleZoneSelect" class="zone-select" aria-label="从区服带入汇率"><option value="">— 只手动输入 —</option></select>
-          </div>
+          <div class="single-field single-full"><label>实际利润率（%）</label><div class="single-field-row"><input id="singleMargin" type="number" inputmode="decimal" min="0" step="0.1" placeholder="百分比"></div></div>
           <div class="single-field single-preset">
             <label>账号配置</label>
             <div class="preset-zone"><button type="button" data-single-preset="3" class="active">2收1卖 · 3个号</button><button type="button" data-single-preset="4">3收1卖 · 4个号</button></div>
@@ -224,7 +216,11 @@
           <div class="result highlight"><div class="result-label">不亏本收购线</div><div class="result-value" id="sBreak">0<small>万</small></div></div>
           <div class="result warning"><div class="result-label">距离保本线</div><div class="result-value" id="sGap">0<small>万</small></div></div>
         </div>
-        <div class="formula">藏宝阁到账＝收购额 × 利润率 × 95% ÷ 3000万 × 3000万价格；净利润＝藏宝阁到账－账号点卡（0.6元/小时 × 24小时 × 账号数）。手续费固定5%。</div>
+        <div class="formula">藏宝阁到账＝收购额 × 利润率 × 95% ÷ 3000万 × 区服汇率；净利润＝藏宝阁到账－账号点卡（0.6元/小时 × 24小时 × 账号数）。手续费固定5%。</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><h2>目标利润反推</h2><span>想赚多少，就算要收多少</span></div>
+        <div class="target-row"><div class="field"><label>目标每天净利润</label><div class="input-wrap"><input id="sTargetProfit" type="number" inputmode="decimal" min="0" step="1"><span class="unit">元</span></div></div><div class="target-output"><span>每天至少收购</span><strong id="sTargetPurchase">0万</strong></div></div>
       </div>
     </section>
 
@@ -314,7 +310,8 @@ state.zones=state.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名')
 if(!state.zones.some(z=>z.id===state.activeZoneId))state.activeZoneId=state.zones[0].id;
 delete state.purchase;delete state.margin;delete state.buyAccounts;delete state.sellAccounts;
 if(!state.single||typeof state.single!=='object')state.single={};
-state.single={quote:num(state.single.quote,210),purchase:num(state.single.purchase,9000),margin:num(state.single.margin,17),preset:Number(state.single.preset)===3?3:4};
+state.single={quote:num(state.single.quote,210),purchase:num(state.single.purchase,9000),margin:num(state.single.margin,17),preset:Number(state.single.preset)===3?3:4,targetProfit:num(state.single.targetProfit,40),zoneId:state.single.zoneId||''};
+if(!state.zones.some(z=>z.id===state.single.zoneId)){const pref=state.zones.find(z=>z.name==='秦淮风光')||state.zones[0];state.single.zoneId=pref.id;}
 const gemTypes={
   normal:{name:'普通宝石',icon:'icons/gem-normal.png',levels:[2,3,4,5,6,7,8,9,10,11,12],cbgMinLevel:8,rule:'普通宝石：2个低一级宝石合成1个高一级宝石。藏宝阁最低上架8级；摆摊售价直接去掉万位后的小数，藏宝阁售价保留1位小数。'},
   star:{name:'星辉石',icon:'icons/gem-star.png',levels:[2,3,4,5,6,7],cbgMinLevel:5,rule:'星辉石：3个低一级星辉石合成1个高一级星辉石，计算2—7级。藏宝阁最低上架5级。'},
@@ -381,7 +378,7 @@ function renderZones(){
 }
 function render(){const c=refreshProfitNumbers();renderSynthesis();renderZones();renderSingle();renderZoneSelectSingle();renderZoneSelect();return c}
 function refreshProfitNumbers(){const c=calc();renderHero(c);renderAdminStats();renderCompanyStats();
-  $('sales').innerHTML=`${fmtSmart(c.sales)}<small>万</small>`;$('grossProfit').innerHTML=`${fmtSmart(c.grossProfit)}<small>万</small>`;$('cbgRmb').innerHTML=`${fmt(c.cbgRmb)}<small>元</small>`;$('cardCost').innerHTML=`${fmt(c.cardCost,1)}<small>元</small>`;$('breakEven').innerHTML=`${fmtSmart(c.breakEven)}<small>万</small>`;const gap=c.purchase-c.breakEven;$('gap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;$('targetPurchase').textContent=`${fmtSmart(c.targetPurchase)}万`;
+  $('sales').innerHTML=`${fmtSmart(c.sales)}<small>万</small>`;$('grossProfit').innerHTML=`${fmtSmart(c.grossProfit)}<small>万</small>`;$('cbgRmb').innerHTML=`${fmt(c.cbgRmb)}<small>元</small>`;$('cardCost').innerHTML=`${fmt(c.cardCost,1)}<small>元</small>`;$('breakEven').innerHTML=`${fmtSmart(c.breakEven)}<small>万</small>`;const gap=c.purchase-c.breakEven;$('gap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;
   $('zoneBreakdown').innerHTML=c.zoneRows.map(r=>`<div class="zone-breakdown-row"><b>${escapeHtml(r.name)}</b><span class="${r.net>=0?'win':'loss'}">${r.net>=0?'+':''}${fmt(r.net)} 元/天</span></div>`).join('');
   const days=Math.max(1,Math.round(state.periodDays));$('periodPurchase').innerHTML=`${fmtSmart(c.purchase*days)}<small>万</small>`;$('periodSales').innerHTML=`${fmtSmart(c.sales*days)}<small>万</small>`;$('periodCbg').innerHTML=`${fmt(c.cbgRmb*days)}<small>元</small>`;$('periodCards').innerHTML=`${fmt(c.cardCost*days)}<small>元</small>`;$('periodNet').innerHTML=`${fmt(c.dailyNet*days)}<small>元</small>`;$('playerRevenue').innerHTML=`${fmtSmart(c.purchase)}<small>万/天</small>`;$('cbgListing').innerHTML=`${fmtSmart(c.grossProfit)}<small>万/天</small>`;$('cbgCostBasis').innerHTML=`${fmtSmart(c.cbgCostBasis)}<small>万/天</small>`;$('feeCoins').innerHTML=`${fmtSmart(c.feeCoins)}<small>万/天</small>`;
   document.querySelectorAll('[data-days]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.days)===days));return c}
@@ -389,35 +386,43 @@ function renderAdminStats(){const at=$('adminTotal');if(at)at.textContent=`${sta
 function renderCompanyStats(){const c=calc();state.zones.forEach(z=>{const za=Math.max(0,num(z.preset,4)),zp=Math.max(0,num(z.purchase)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const badge=document.querySelector(`[data-zone="${z.id}"] .zone-admin-net`);if(badge){badge.textContent=`${net>=0?'+':''}${fmt(net,1)}`;badge.classList.toggle('loss',net<0)}})}
 function renderSingle(){
   const s=state.single;
-  const quote=Math.max(0,num(s.quote));const purchase=Math.max(0,num(s.purchase));const marginRate=Math.max(0,num(s.margin));const margin=marginRate/100;const preset=Math.max(0,num(s.preset,4));
+  const sel=$('singleZoneSelect');const zsel=state.zones.find(x=>x.id===s.zoneId)||state.zones[0];
+  const quote=Math.max(0,num(zsel?zsel.cbgQuote:s.quote));
+  if(zsel)s.quote=quote;
+  const purchase=Math.max(0,num(s.purchase));const marginRate=Math.max(0,num(s.margin));const margin=marginRate/100;const preset=Math.max(0,num(s.preset,4));
   const cardHourly=.6;const hours=24;const netRate=.95;
   const cardCost=preset*cardHourly*hours;
   const sales=purchase*(1+margin);const gross=purchase*margin;
   const cbg=gross*netRate/3000*quote;
   const dailyNet=cbg-cardCost;
   const rmbPerWan=margin*netRate/3000*quote;
-  let breakEven=0,gap=0;
-  if(rmbPerWan>0){breakEven=cardCost/rmbPerWan;gap=purchase-breakEven}
-  $('singleQuote').value=quote;$('singlePurchase').value=purchase;$('singleMargin').value=marginRate;
+  let breakEven=0,gap=0,targetPurchase=0;
+  if(rmbPerWan>0){breakEven=cardCost/rmbPerWan;gap=purchase-breakEven;targetPurchase=(cardCost+Math.max(0,num(s.targetProfit)))/rmbPerWan}
+  $('singlePurchase').value=purchase;$('singleMargin').value=marginRate;$('sTargetProfit').value=Math.max(0,num(s.targetProfit));
   document.querySelectorAll('[data-single-preset]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.singlePreset)===preset));
   document.querySelectorAll('[data-single-pq]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.singlePq)===purchase));
   $('singleNet').textContent=fmt(dailyNet);
   $('singleProfitSummary').classList.toggle('loss',dailyNet<0);
-  $('singleProfitNote').textContent=dailyNet>=0?'已扣手续费和点卡':'当前参数预计亏损';
+  $('singleProfitNote').textContent=dailyNet>=0?`${zsel?zsel.name:''} · 已扣手续费和点卡`:'当前参数预计亏损';
   $('sSales').innerHTML=`${fmtSmart(sales)}<small>万</small>`;
   $('sGross').innerHTML=`${fmtSmart(gross)}<small>万</small>`;
   $('sCbg').innerHTML=`${fmt(cbg)}<small>元</small>`;
   $('sCard').innerHTML=`${fmt(cardCost,1)}<small>元</small>`;
   $('sBreak').innerHTML=`${fmtSmart(breakEven)}<small>万</small>`;
   $('sGap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;
+  $('sTargetPurchase').textContent=`${fmtSmart(targetPurchase)}万`;
 }
-$('singleQuote').addEventListener('input',()=>{state.single.quote=Math.max(0,num($('singleQuote').value));save();renderSingle()});
 $('singlePurchase').addEventListener('input',()=>{state.single.purchase=Math.max(0,num($('singlePurchase').value));save();renderSingle()});
 $('singleMargin').addEventListener('input',()=>{state.single.margin=Math.max(0,num($('singleMargin').value));save();renderSingle()});
+$('sTargetProfit').addEventListener('input',()=>{state.single.targetProfit=Math.max(0,num($('sTargetProfit').value));save();renderSingle()});
 document.querySelectorAll('[data-single-preset]').forEach(btn=>btn.addEventListener('click',()=>{state.single.preset=Number(btn.dataset.singlePreset);save();renderSingle()}));
 document.querySelectorAll('[data-single-pq]').forEach(btn=>btn.addEventListener('click',()=>{state.single.purchase=Number(btn.dataset.singlePq);save();renderSingle()}));
-$('singleZoneSelect').addEventListener('change',()=>{const z=state.zones.find(x=>x.id===$('singleZoneSelect').value);if(z){$('singleQuote').value=num(z.cbgQuote);state.single.quote=num(z.cbgQuote);save();renderSingle();toast(`已从「${z.name}」带入 ${fmt(z.cbgQuote,0)}元`)}});
-function renderZoneSelectSingle(){const sel=$('singleZoneSelect');if(!sel)return;sel.innerHTML='<option value="">— 只手动输入 —</option>'+state.zones.map(z=>`<option value="${z.id}"${z.id===state.cbgZoneId?' selected':''}>${escapeHtml(z.name)}（${fmt(z.cbgQuote,0)}元）</option>`).join('')}
+$('singleZoneSelect').addEventListener('change',()=>{const z=state.zones.find(x=>x.id===$('singleZoneSelect').value);if(!z)return;state.single.zoneId=z.id;state.single.quote=num(z.cbgQuote,210);save();renderSingle();});
+function renderZoneSelectSingle(){const sel=$('singleZoneSelect');if(!sel)return;
+  if(!state.zones.some(z=>z.id===state.single.zoneId)){const pref=state.zones.find(z=>z.name==='秦淮风光')||state.zones[0];state.single.zoneId=pref?pref.id:''}
+  sel.innerHTML=state.zones.map(z=>`<option value="${z.id}"${z.id===state.single.zoneId?' selected':''}>${escapeHtml(z.name)}（${fmt(z.cbgQuote,0)}元）</option>`).join('');
+  const z=state.zones.find(x=>x.id===state.single.zoneId);if(z)state.single.quote=num(z.cbgQuote,210);
+}
 function activateTab(tab,scroll=true){activeTab=tab;document.querySelectorAll('[data-tab]').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===tab));document.querySelectorAll('.tab-panel').forEach(panel=>panel.classList.toggle('active',panel.dataset.panel===tab));$('settings').classList.toggle('show',tab==='period');if(tab==='admin')setSyncUI(namespace?(busyState||'on'):'off',null,'admin');renderHero(calc());if(scroll)window.scrollTo({top:0,behavior:'smooth'})}
 function handleSyncEntry(){if(namespace){activateTab('admin')}else openAuthModal()}
 function closeRatioModal(){$('ratioModal').classList.remove('show');document.body.style.overflow=''}
