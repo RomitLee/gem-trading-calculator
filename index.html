@@ -313,6 +313,8 @@ if(!Array.isArray(state.zones)||!state.zones.length){const legacyPreset=(num(sta
 state.zones=state.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));
 if(!state.zones.some(z=>z.id===state.activeZoneId))state.activeZoneId=state.zones[0].id;
 delete state.purchase;delete state.margin;delete state.buyAccounts;delete state.sellAccounts;
+if(!state.single||typeof state.single!=='object')state.single={};
+state.single={quote:num(state.single.quote,210),purchase:num(state.single.purchase,9000),margin:num(state.single.margin,17),preset:Number(state.single.preset)===3?3:4};
 const gemTypes={
   normal:{name:'普通宝石',icon:'icons/gem-normal.png',levels:[2,3,4,5,6,7,8,9,10,11,12],cbgMinLevel:8,rule:'普通宝石：2个低一级宝石合成1个高一级宝石。藏宝阁最低上架8级；摆摊售价直接去掉万位后的小数，藏宝阁售价保留1位小数。'},
   star:{name:'星辉石',icon:'icons/gem-star.png',levels:[2,3,4,5,6,7],cbgMinLevel:5,rule:'星辉石：3个低一级星辉石合成1个高一级星辉石，计算2—7级。藏宝阁最低上架5级。'},
@@ -387,15 +389,16 @@ function renderAdminStats(){const at=$('adminTotal');if(at)at.textContent=`${sta
 function renderCompanyStats(){const c=calc();state.zones.forEach(z=>{const za=Math.max(0,num(z.preset,4)),zp=Math.max(0,num(z.purchase)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const badge=document.querySelector(`[data-zone="${z.id}"] .zone-admin-net`);if(badge){badge.textContent=`${net>=0?'+':''}${fmt(net,1)}`;badge.classList.toggle('loss',net<0)}})}
 function renderSingle(){
   const s=state.single;
-  const quote=Math.max(0,num(s.quote));const purchase=Math.max(0,num(s.purchase));const margin=Math.max(0,num(s.margin)/100);const preset=Math.max(0,num(s.preset,4));
-  const cardHourly=.6;const hours=24;const fee=1-.05;
+  const quote=Math.max(0,num(s.quote));const purchase=Math.max(0,num(s.purchase));const marginRate=Math.max(0,num(s.margin));const margin=marginRate/100;const preset=Math.max(0,num(s.preset,4));
+  const cardHourly=.6;const hours=24;const netRate=.95;
   const cardCost=preset*cardHourly*hours;
   const sales=purchase*(1+margin);const gross=purchase*margin;
-  const cbg=gross*fee/3000*quote;
+  const cbg=gross*netRate/3000*quote;
   const dailyNet=cbg-cardCost;
+  const rmbPerWan=margin*netRate/3000*quote;
   let breakEven=0,gap=0;
-  if(margin>0&&quote>0){breakEven=cardCost/(margin*quote);gap=Math.max(0,purchase-breakEven)}
-  $('singleQuote').value=quote;$('singlePurchase').value=purchase;$('singleMargin').value=margin;
+  if(rmbPerWan>0){breakEven=cardCost/rmbPerWan;gap=purchase-breakEven}
+  $('singleQuote').value=quote;$('singlePurchase').value=purchase;$('singleMargin').value=marginRate;
   document.querySelectorAll('[data-single-preset]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.singlePreset)===preset));
   document.querySelectorAll('[data-single-pq]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.singlePq)===purchase));
   $('singleNet').textContent=fmt(dailyNet);
@@ -408,7 +411,6 @@ function renderSingle(){
   $('sBreak').innerHTML=`${fmtSmart(breakEven)}<small>万</small>`;
   $('sGap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;
 }
-function singleCalc(quote,purchase,margin,preset){const cardHourly=.6,hours=24,fee=1-.05;const cardCost=preset*cardHourly*hours,sales=purchase*(1+margin),gross=purchase*margin,cbg=gross*fee/3000*quote;return{cardCost,sales,gross,cbg,net:cbg-cardCost}}
 $('singleQuote').addEventListener('input',()=>{state.single.quote=Math.max(0,num($('singleQuote').value));save();renderSingle()});
 $('singlePurchase').addEventListener('input',()=>{state.single.purchase=Math.max(0,num($('singlePurchase').value));save();renderSingle()});
 $('singleMargin').addEventListener('input',()=>{state.single.margin=Math.max(0,num($('singleMargin').value));save();renderSingle()});
