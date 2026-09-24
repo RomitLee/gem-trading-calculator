@@ -251,7 +251,7 @@
       <div class="ratio-row head"><b>等级</b><span>摆摊比例</span><span>CBG比例</span></div>
       <div id="ratioRows"></div>
     </div>
-    <div class="modal-actions"><button type="button" class="secondary" id="resetRatios">恢复默认</button><button type="button" class="primary" id="ratioDone">完成</button></div>
+    <div class="modal-actions"><button type="button" class="primary" id="ratioSyncBtn" style="grid-column:1/-1">同步</button></div>
   </div>
 </div>
 <div class="modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
@@ -357,6 +357,17 @@ function openAuthModal(){$('authOut').hidden=!!namespace;$('authModal').classLis
 function closeAuthModal(){$('authModal').classList.remove('show');document.body.style.overflow=''}
 function authErr(el,msg){$(el).textContent=msg}
 $('syncChip').addEventListener('click',handleSyncEntry);$('syncBtn').addEventListener('click',handleSyncEntry);
+function syncRatios(){
+  save();
+  if(cloud&&namespace){
+    setSyncUI('busy');
+    cloudPushNow().then(()=>{setSyncUI('on');toast('已同步到云端')}).catch(e=>{console.error(e);setSyncUI('off');toast('已保存，云端同步失败')});
+  }else{
+    toast(namespace?'已保存':'未连接云端，仅保存到本机');
+  }
+  closeRatioModal();
+}
+$('ratioSyncBtn').addEventListener('click',syncRatios);
 $('authClose').addEventListener('click',closeAuthModal);$('authModal').addEventListener('click',e=>{if(e.target===$('authModal'))closeAuthModal()});
 $('tokenSubmitBtn').addEventListener('click',async()=>{const input=$('authToken').value.trim();if(!input)return authErr('authError','请输入口令');if(!(window.crypto&&window.crypto.subtle))return authErr('authError','当前环境不支持加密，请刷新重试');try{const hash=await sha256Hex(input);if(hash!==TOKEN_HASH)return authErr('authError','口令不正确');namespace=hash;safeStorage.set(SYNC_NS_KEY,hash);$('authToken').value='';authErr('authError','');if(cloud){setSyncUI('busy');await cloudPull()}closeAuthModal();render();activateTab('admin');toast('口令验证成功')}catch(e){console.error(e);authErr('authError','验证失败，请重试')}});
 $('authToken').addEventListener('keydown',e=>{if(e.key==='Enter')$('tokenSubmitBtn').click()});
@@ -457,8 +468,7 @@ $('synthesisBasePrice').addEventListener('input',()=>{const price=Math.max(0,num
 $('synthesisZoneSelect').addEventListener('change',()=>{const zid=$('synthesisZoneSelect').value;const z=state.zones.find(x=>x.id===zid);if(z){state.cbgZoneId=zid;state.cbgQuote=z.cbgQuote;save()}});
 document.querySelectorAll('[data-clear]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.clear;if(id==='synthesisBasePrice'){state.synthesisPrices[state.gemType]=0;if(!state.averagePriceCustomized[state.gemType])state.averageSalePrices[state.gemType]=0}else{state.cbgQuote=0}$(id).value='';save();render();$(id).focus()}));
 $('ratioBtn').addEventListener('click',()=>{renderRatioRows();$('ratioModal').classList.add('show');document.body.style.overflow='hidden'});
-$('ratioClose').addEventListener('click',closeRatioModal);$('ratioDone').addEventListener('click',closeRatioModal);$('ratioModal').addEventListener('click',event=>{if(event.target===$('ratioModal'))closeRatioModal()});
-$('resetRatios').addEventListener('click',()=>{state.priceRatios[state.gemType]=cloneRatioSet(defaultRatios[state.gemType]);save();renderRatioRows();renderSynthesis()});
+$('ratioClose').addEventListener('click',closeRatioModal);$('ratioModal').addEventListener('click',event=>{if(event.target===$('ratioModal'))closeRatioModal()});
 $('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*1.1)])),averagePriceCustomized:{normal:false,star:false,dust:false},zones:[{id:uid(),name:'秦淮风光',cbgQuote:210,purchase:9000,margin:17,preset:4}]});state.activeZoneId=state.zones[0].id;state.cbgZoneId=state.zones[0].id;state.single.zoneId=state.zones[0].id;document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisZoneSelect').value=state.cbgZoneId;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
 try{render();activateTab('synthesis',false);save();renderSingle();renderZoneSelectSingle()}catch(error){console.error('初始化失败',error)}initCloud();if('serviceWorker'in navigator&&window.isSecureContext)navigator.serviceWorker.register('./gem-calculator-sw.js').catch(()=>{});
 </script>
