@@ -331,7 +331,7 @@ const gemTypes={
 document.querySelectorAll('[data-key]').forEach(input=>{const key=input.dataset.key;input.value=state[key];input.addEventListener('input',()=>{state[key]=num(input.value,defaults[key]);if(key==='cbgQuote'){const sel=$('synthesisZoneSelect');if(sel)sel.value=state.cbgZoneId}save();render()})});
 $('synthesisBasePrice').value=state.synthesisPrices[state.gemType];
 $('averageSalePrice').value=state.averageSalePrices[state.gemType];
-function save(){safeStorage.set('gemCalculatorSettings',JSON.stringify(state));scheduleCloudPush()}
+function save(touch){if(touch!==false)state.updatedAt=Date.now();safeStorage.set('gemCalculatorSettings',JSON.stringify(state));scheduleCloudPush()}
 let toastTimer=null;function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),1800)}
 $('zoneBreakdown').addEventListener('input',e=>{const inp=e.target;if(!inp.dataset.zoneInput)return;const row=inp.closest('[data-zone]');if(!row)return;const z=state.zones.find(x=>x.id===row.dataset.zone);if(!z)return;z.purchase=Math.max(0,num(inp.value));save();refreshProfitNumbers(true);const za=Math.max(0,num(z.preset,4)),zp=z.purchase,zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const span=row.querySelector('.zp-net');if(span){span.textContent=`${net>=0?'+':''}${fmt(net)} 元/天`;span.className=`zp-net ${net>=0?'win':'loss'}`}});
 $('zoneAdminList').addEventListener('input',e=>{const inp=e.target;if(!inp.dataset.zoneInput)return;const card=inp.closest('[data-zone]');if(!card)return;const z=state.zones.find(x=>x.id===card.dataset.zone);if(!z)return;const k=inp.dataset.zoneInput;if(k==='name'){z.name=inp.value.trim()||'未命名'}else{z[k]=Math.max(0,num(inp.value))}save();refreshProfitNumbers()});
@@ -346,26 +346,30 @@ const SYNC_NS_KEY='gemSyncNamespace';
 let cloud=null,namespace=null,syncTimer=null,busyState=null;
 async function sha256Hex(text){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return Array.from(new Uint8Array(buf),b=>b.toString(16).padStart(2,'0')).join('')}
 function setSyncUI(status,text,target){const chip=$('syncChip'),bar=$('syncBar');chip.classList.remove('on','busy');bar.classList.remove('on','busy');if(status==='on'||status==='busy'){chip.classList.add(status);bar.classList.add(status)}const label=namespace?(status==='on'?'已同步':status==='busy'?'同步中':'同步失败'):'未登录';$('chipText').textContent=text||label;const targetBar=target==='admin'?$('adminSyncText'):$('syncText');targetBar.textContent=namespace?(status==='on'?'已同步到云端':status==='busy'?'正在同步…':'同步失败，将自动重试'):(target==='admin'?'输入口令后可编辑并跨设备同步':'数据仅存本机 · 点「管理区服」输入口令同步');$('syncBtn').textContent=namespace?'管理区服':'口令登录';const adminBar=$('adminSyncBar');if(adminBar)adminBar.classList.remove('on','busy');if(target==='admin'&&(status==='on'||status==='busy'))adminBar.classList.add(status)}
-function applyRemote(p){if(!p||typeof p!=='object')return;['targetProfit','periodDays','gemType','saleMode','cbgQuote','ratioDefaultsVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));state.activeZoneId=state.zones.some(z=>z.id===p.activeZoneId)?p.activeZoneId:state.zones[0].id}safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
+function applyRemote(p){if(!p||typeof p!=='object')return;const localTs=Number(state.updatedAt)||0,remoteTs=Number(p.updatedAt)||0;if(remoteTs>0&&remoteTs+2000<localTs){console.warn('云端数据比本机旧，改为以本机为准并回推');setSyncUI('busy');scheduleCloudPush();return}
+['targetProfit','periodDays','gemType','saleMode','cbgQuote','ratioDefaultsVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.updatedAt!==undefined)state.updatedAt=remoteTs;if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));state.activeZoneId=state.zones.some(z=>z.id===p.activeZoneId)?p.activeZoneId:state.zones[0].id}safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
 let retryTimer=null;
 function scheduleRetry(fn,ms){clearTimeout(retryTimer);retryTimer=setTimeout(fn,ms)}
-async function initCloud(){setSyncUI('off');const until=Date.now()+15000;while(!window.WorkBuddyCloud&&Date.now()<until){await new Promise(r=>setTimeout(r,300))}if(!window.WorkBuddyCloud){console.warn('云组件未加载');return}try{cloud=WorkBuddyCloud.createWorkBuddyCloud(CLOUD)}catch(e){console.error('云组件初始化失败',e);return}const stored=safeStorage.get(SYNC_NS_KEY);if(stored){namespace=stored;setSyncUI('busy');cloudPull()}}
+async function initCloud(){setSyncUI('off');const until=Date.now()+15000;while(!window.WorkBuddyCloud&&Date.now()<until){await new Promise(r=>setTimeout(r,300))}if(!window.WorkBuddyCloud){console.warn('云组件未加载');if(namespace)scheduleCloudPushRetry();return}try{cloud=WorkBuddyCloud.createWorkBuddyCloud(CLOUD)}catch(e){console.error('云组件初始化失败',e);return}const stored=safeStorage.get(SYNC_NS_KEY);if(stored){namespace=stored;setSyncUI('busy');cloudPull()}}
 async function cloudPull(){if(!namespace)return;try{const{data,error}=await cloud.database.from('zone_data').select('payload').eq('namespace',namespace).maybeSingle();if(error){setSyncUI('off');scheduleRetry(cloudPull,30000);return}if(data&&data.payload){applyRemote(data.payload);setSyncUI('on')}else{await cloudPushNow();setSyncUI('on')}}catch(e){console.error('云端读取失败',e);setSyncUI('off');scheduleRetry(cloudPull,30000)}}
-function scheduleCloudPush(){if(!namespace)return;clearTimeout(syncTimer);setSyncUI('busy');syncTimer=setTimeout(cloudPushNow,700)}
-async function cloudPushNow(){if(!namespace)return;try{const{error}=await cloud.database.from('zone_data').upsert({namespace,payload:state,updated_at:new Date().toISOString()});setSyncUI(error?'off':'on')}catch(e){console.error('云端写入失败',e);setSyncUI('off')}}
+function scheduleCloudPush(){if(!namespace)return;clearTimeout(syncTimer);setSyncUI('busy');syncTimer=setTimeout(async()=>{const ok=await cloudPushNow();if(!ok)scheduleCloudPushRetry()},700)}
+let pushRetryTimer=null;
+async function cloudPushNow(){if(!namespace||!cloud)return false;state.updatedAt=Date.now();try{const{error}=await cloud.database.from('zone_data').upsert({namespace,payload:state,updated_at:new Date().toISOString()},{onConflict:'namespace'});setSyncUI(error?'off':'on');if(error)console.error('云端写入返回错误',error);return !error}catch(e){console.error('云端写入失败',e);setSyncUI('off');return false}}
+let pushRetryCount=0;
+function scheduleCloudPushRetry(){clearTimeout(pushRetryTimer);if(!namespace||pushRetryCount>=10)return;pushRetryCount++;pushRetryTimer=setTimeout(async()=>{const ok=await cloudPushNow();if(ok)pushRetryCount=0;else scheduleCloudPushRetry()},8000)}
 function openAuthModal(){$('authOut').hidden=!!namespace;$('authModal').classList.add('show');document.body.style.overflow='hidden'}
 function closeAuthModal(){$('authModal').classList.remove('show');document.body.style.overflow=''}
 function authErr(el,msg){$(el).textContent=msg}
 $('syncChip').addEventListener('click',handleSyncEntry);$('syncBtn').addEventListener('click',handleSyncEntry);
-function syncRatios(){
+async function syncRatios(){
   save();
-  if(cloud&&namespace){
-    setSyncUI('busy');
-    cloudPushNow().then(()=>{setSyncUI('on');toast('已同步到云端')}).catch(e=>{console.error(e);setSyncUI('off');toast('已保存，云端同步失败')});
-  }else{
-    toast(namespace?'已保存':'未连接云端，仅保存到本机');
-  }
+  if(!namespace){closeRatioModal();toast('未登录云端，仅保存到本机');return}
+  if(!cloud){closeRatioModal();setSyncUI('off');toast('云组件未就绪，已存本机，将自动重试');scheduleCloudPushRetry();return}
+  setSyncUI('busy');clearTimeout(syncTimer);
+  const ok=await cloudPushNow();
   closeRatioModal();
+  if(ok)toast('已同步到云端');
+  else{toast('同步失败，已存本机，将自动重试');scheduleCloudPushRetry()}
 }
 $('ratioSyncBtn').addEventListener('click',syncRatios);
 $('authClose').addEventListener('click',closeAuthModal);$('authModal').addEventListener('click',e=>{if(e.target===$('authModal'))closeAuthModal()});
@@ -470,7 +474,9 @@ document.querySelectorAll('[data-clear]').forEach(btn=>btn.addEventListener('cli
 $('ratioBtn').addEventListener('click',()=>{renderRatioRows();$('ratioModal').classList.add('show');document.body.style.overflow='hidden'});
 $('ratioClose').addEventListener('click',closeRatioModal);$('ratioModal').addEventListener('click',event=>{if(event.target===$('ratioModal'))closeRatioModal()});
 $('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*1.1)])),averagePriceCustomized:{normal:false,star:false,dust:false},zones:[{id:uid(),name:'秦淮风光',cbgQuote:210,purchase:9000,margin:17,preset:4}]});state.activeZoneId=state.zones[0].id;state.cbgZoneId=state.zones[0].id;state.single.zoneId=state.zones[0].id;document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisZoneSelect').value=state.cbgZoneId;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
-try{render();activateTab('synthesis',false);save();renderSingle();renderZoneSelectSingle()}catch(error){console.error('初始化失败',error)}initCloud();if('serviceWorker'in navigator&&window.isSecureContext)navigator.serviceWorker.register('./gem-calculator-sw.js').catch(()=>{});
+try{render();activateTab('synthesis',false);save(false);renderSingle();renderZoneSelectSingle()}catch(error){console.error('初始化失败',error)}initCloud();
+function flushSync(){clearTimeout(syncTimer);if(cloud&&namespace)cloudPushNow()}
+window.addEventListener('pagehide',flushSync);window.addEventListener('beforeunload',flushSync);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushSync()});if('serviceWorker'in navigator&&window.isSecureContext)navigator.serviceWorker.register('./gem-calculator-sw.js').catch(()=>{});
 </script>
 </body>
 </html>
