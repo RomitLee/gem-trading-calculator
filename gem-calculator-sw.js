@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gem-calculator-v45';
+const CACHE_NAME = 'gem-calculator-v46';
 const SW_VERSION = CACHE_NAME.replace('gem-calculator-', '');
 
 self.addEventListener('message', event => {
