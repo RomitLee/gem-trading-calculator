@@ -110,7 +110,7 @@
   <main class="main">
     <header class="app-header">
       <img class="app-logo" src="icons/app-logo.png" alt="子霖宝石助手">
-      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v46</span></h1>
+      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v47</span></h1>
       <button type="button" class="sync-chip" id="syncChip"><span class="admin-gear">⚙</span><span class="sync-dot" id="chipDot"></span><span id="chipText">管理员</span></button>
     </header>
     <nav class="top-tabs" aria-label="计算器页面">
@@ -340,7 +340,7 @@ if(!state.zones.some(z=>z.id===state.activeZoneId))state.activeZoneId=state.zone
 // 每天收购金额恢复为每区独立设置，默认9000万
 state.zones=state.zones.map(z=>({...z,purchase:num(z.purchase,9000)}));
 delete state.purchase;delete state.margin;delete state.buyAccounts;delete state.sellAccounts;
-if(!Array.isArray(state.syncHistory))state.syncHistory=[];
+const _legacyHist=Array.isArray(state.syncHistory)?state.syncHistory.slice(0,30):[];delete state.syncHistory;
 if(state.syncedAt===undefined)state.syncedAt=Number(state.updatedAt)||0;
 if(!Number(state.rev))state.rev=1;if(!Number(state.syncedRev))state.syncedRev=0;
 state.priceRatios&&['normal','star','dust'].forEach(t=>state.priceRatios[t]&&Object.keys(state.priceRatios[t]).forEach(l=>{const r=state.priceRatios[t][l];if(r&&Number(r.cbg)!==Number(r.stall))r.cbg=Number(r.stall)}));
@@ -378,11 +378,11 @@ async function sha256Hex(text){const buf=await crypto.subtle.digest('SHA-256',ne
 function setSyncUI(status,text,target){busyState=status;const chip=$('syncChip'),bar=$('syncBar');chip.classList.remove('on','busy');bar.classList.remove('on','busy');if(status==='on'||status==='busy'){chip.classList.add(status);bar.classList.add(status)}const label=namespace?(status==='on'?'已同步':status==='busy'?'同步中':'同步失败'):'未登录';$('chipText').textContent=text||'管理员';$('syncChip').title=label;const targetBar=target==='admin'?$('adminSyncText'):$('syncText');targetBar.textContent=namespace?(status==='on'?'已同步到云端':status==='busy'?'正在同步…':'同步失败，将自动重试'):(target==='admin'?'输入口令后可编辑并跨设备同步':'数据仅存本机 · 点「管理区服」输入口令同步');$('syncBtn').textContent=namespace?'管理区服':'口令登录';const adminBar=$('adminSyncBar');if(adminBar)adminBar.classList.remove('on','busy');if(target==='admin'&&(status==='on'||status==='busy'))adminBar.classList.add(status)}
 function mergeSyncHistory(local,remote){const map=new Map();[...(Array.isArray(remote)?remote:[]),...(Array.isArray(local)?local:[])].forEach(h=>{const t=Number(h&&h.t)||0;if(!t)return;const k=Math.round(t/1000);const prev=map.get(k);if(!prev||(h.kind==='ratio'&&prev.kind!=='ratio'))map.set(k,{t,kind:h.kind||'auto'})});return Array.from(map.values()).sort((a,b)=>b.t-a.t).slice(0,30)}
 function applyRemote(p,opts){if(!p||typeof p!=='object')return;const force=!!(opts&&opts.force);const localRev=Number(state.rev)||0,syncedRev=Number(state.syncedRev)||0,remoteRev=Number(p.rev)||0;const localTs=Number(state.updatedAt)||0,remoteTs=Number(p.updatedAt)||0;const hasLocalPending=localRev>syncedRev;if(!force&&hasLocalPending&&remoteRev<=localRev&&remoteTs+2000<localTs){console.warn('本机有未推送的改动且更新，以本机为准并回推');setSyncUI('busy');scheduleCloudPush();return}
-['targetProfit','periodDays','gemType','saleMode','cbgQuote','ratioDefaultsVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.updatedAt!==undefined){state.updatedAt=remoteTs;state.syncedAt=remoteTs}if(remoteRev>0){state.rev=remoteRev;state.syncedRev=remoteRev}state.syncHistory=mergeSyncHistory(state.syncHistory,p.syncHistory);if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));state.activeZoneId=state.zones.some(z=>z.id===p.activeZoneId)?p.activeZoneId:state.zones[0].id}lastFp=dataFingerprint();safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
+['targetProfit','periodDays','gemType','saleMode','cbgQuote','ratioDefaultsVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.updatedAt!==undefined){state.updatedAt=remoteTs;state.syncedAt=remoteTs}if(remoteRev>0){state.rev=remoteRev;state.syncedRev=remoteRev}adoptRemoteHistory(p.syncHistory);if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));state.activeZoneId=state.zones.some(z=>z.id===p.activeZoneId)?p.activeZoneId:state.zones[0].id}lastFp=dataFingerprint();safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
 let retryTimer=null;
 function scheduleRetry(fn,ms){clearTimeout(retryTimer);retryTimer=setTimeout(fn,ms)}
 async function initCloud(){setSyncUI('off');const until=Date.now()+15000;while(!window.WorkBuddyCloud&&Date.now()<until){await new Promise(r=>setTimeout(r,300))}if(!window.WorkBuddyCloud){console.warn('云组件未加载');if(namespace)scheduleCloudPushRetry();return}try{cloud=WorkBuddyCloud.createWorkBuddyCloud(CLOUD)}catch(e){console.error('云组件初始化失败',e);return}let stored=safeStorage.get(SYNC_NS_KEY);if(stored&&stored!==TOKEN_HASH&&LEGACY_NS.includes(stored)){stored=TOKEN_HASH;safeStorage.set(SYNC_NS_KEY,TOKEN_HASH)}if(stored){namespace=stored;setSyncUI('busy');await migrateLegacyNamespace();cloudPull()}}
-function mergeRemoteHistoryOnly(rp){const merged=mergeSyncHistory(state.syncHistory,rp&&rp.syncHistory);if(JSON.stringify(merged)!==JSON.stringify(state.syncHistory||[])){state.syncHistory=merged;safeStorage.set('gemCalculatorSettings',JSON.stringify(state));return true}return false}
+function mergeRemoteHistoryOnly(rp){return adoptRemoteHistory(rp&&rp.syncHistory)}
 let serverTs=null;
 async function cloudPull(opts){const force=!!(opts&&opts.force);if(!namespace||!cloud)return false;try{let res=await cloud.database.from('zone_data').select('payload,updated_at').eq('namespace',namespace).maybeSingle();if(!res||res.error)res=await cloud.database.from('zone_data').select('payload').eq('namespace',namespace).maybeSingle();const{data,error}=res||{};if(error){setSyncUI('off');if(!force)scheduleRetry(cloudPull,30000);return false}if(data&&data.updated_at){const parsed=Date.parse(data.updated_at);if(!Number.isNaN(parsed))serverTs=parsed}if(data&&data.payload){const rp=data.payload,remoteRev=Number(rp.rev)||0,syncedRev=Number(state.syncedRev)||0,remoteTs=Number(rp.updatedAt)||0,syncedTs=Number(state.syncedAt)||0,localRev=Number(state.rev)||0,localTs=Number(state.updatedAt)||0;const remoteNewer=remoteRev>localRev||(remoteRev===localRev&&remoteTs>localTs+100)||(force&&(remoteRev>syncedRev||remoteTs>syncedTs));if(remoteNewer){if(remoteRev>syncedRev||remoteTs>syncedTs+100||force){applyRemote(rp,{force});setSyncUI('on')}else setSyncUI('on')}else if(remoteRev<localRev||localRev>syncedRev){if(force&&localRev>syncedRev){applyRemote(rp,{force});setSyncUI('on')}else{console.warn('云端版本落后/本机有未推送改动，回推恢复');setSyncUI('busy');scheduleCloudPush()}}else{if(force&&mergeRemoteHistoryOnly(rp))renderAdminIfOpen();setSyncUI('on')}}else{await cloudPushNow();setSyncUI('on')}return true}catch(e){console.error('云端读取失败',e);setSyncUI('off');if(!force)scheduleRetry(cloudPull,30000);return false}}
 function renderAdminIfOpen(){if($('adminModal')&&$('adminModal').classList.contains('show'))renderAdmin()}
@@ -390,10 +390,42 @@ async function syncBoth(kind){if(!namespace)return false;if(!cloud){setSyncUI('o
 async function refreshFromCloud(){if(!namespace||!cloud)return false;setSyncUI('busy');renderAdminIfOpen();const ok=await syncBoth('auto');renderAdminIfOpen();return ok}
 function scheduleCloudPush(){if(!namespace)return;clearTimeout(syncTimer);setSyncUI('busy');syncTimer=setTimeout(async()=>{const ok=await cloudPushNow();if(!ok)scheduleCloudPushRetry()},700)}
 let pushRetryTimer=null;
-async function cloudPushNow(kind){if(!namespace||!cloud)return false;try{const chk=await cloud.database.from('zone_data').select('payload').eq('namespace',namespace).maybeSingle();const rp=chk&&chk.data&&chk.data.payload;const remoteRev=Number(rp&&rp.rev)||0,localRev=Number(state.rev)||0;if(rp&&remoteRev>localRev){console.warn('云端版本更新(rev '+remoteRev+' > 本机 '+localRev+')，先合并再推送，避免覆盖');applyRemote(rp,{force:true})}}catch(_){ }if(!state.updatedAt)state.updatedAt=Date.now();const histSnap=JSON.stringify(state.syncHistory||[]),pushTSnap=lastLocalPushT;pushSyncHistory(kind||'auto');try{const{error}=await cloud.database.from('zone_data').upsert({namespace,payload:state,updated_at:new Date().toISOString()},{onConflict:'namespace'});if(error){state.syncHistory=JSON.parse(histSnap);lastLocalPushT=pushTSnap;console.error('云端写入返回错误',error);setSyncUI('off');return false}state.syncedAt=state.updatedAt;state.syncedRev=Number(state.rev)||1;try{const res=await cloud.database.from('zone_data').select('updated_at').eq('namespace',namespace).maybeSingle();const st=res&&res.data&&Date.parse(res.data.updated_at);if(st&&!Number.isNaN(st)){serverTs=st;state.syncedAt=st;const last=Array.isArray(state.syncHistory)?state.syncHistory[0]:null;if(last&&Math.abs(Number(last.t)-st)>1500){last.t=st;lastLocalPushT=st;try{await cloud.database.from('zone_data').upsert({namespace,payload:state,updated_at:new Date().toISOString()},{onConflict:'namespace'})}catch(_){ }}}}catch(_){ }safeStorage.set('gemCalculatorSettings',JSON.stringify(state));setSyncUI('on');renderAdminIfOpen();return true}catch(e){state.syncHistory=JSON.parse(histSnap);lastLocalPushT=pushTSnap;console.error('云端写入失败',e);setSyncUI('off');return false}}
+async function cloudPushNow(kind){
+  if(!namespace||!cloud)return false;
+  // 1) 写入守卫 + 以云端历史为基准（云端是唯一真相源）
+  try{
+    const chk=await cloud.database.from('zone_data').select('payload').eq('namespace',namespace).maybeSingle();
+    const rp=chk&&chk.data&&chk.data.payload;
+    if(rp){
+      adoptRemoteHistory(rp.syncHistory);
+      const remoteRev=Number(rp.rev)||0,localRev=Number(state.rev)||0;
+      if(remoteRev>localRev){console.warn('云端版本更新(rev '+remoteRev+' > 本机 '+localRev+')，先合并再推送，避免覆盖');applyRemote(rp,{force:true})}
+    }
+  }catch(_){ }
+  if(!state.updatedAt)state.updatedAt=Date.now();
+  const pendSnap=JSON.stringify(pendingLog),pushTSnap=lastLocalPushT;
+  pushSyncHistory(kind||'auto');
+  // 2) 本机新记录并入云端历史 → 唯一的一份，整体回写
+  const merged=mergeSyncHistory(pendingLog,syncLog);
+  try{
+    const{error}=await cloud.database.from('zone_data').upsert({namespace,payload:{...state,syncHistory:merged},updated_at:new Date().toISOString()},{onConflict:'namespace'});
+    if(error){pendingLog=JSON.parse(pendSnap);lastLocalPushT=pushTSnap;console.error('云端写入返回错误',error);setSyncUI('off');return false}
+    state.syncedAt=state.updatedAt;state.syncedRev=Number(state.rev)||1;
+    // 3) 服务器时间校准，保证云端历史时间戳统一
+    try{
+      const res=await cloud.database.from('zone_data').select('updated_at').eq('namespace',namespace).maybeSingle();
+      const st=res&&res.data&&Date.parse(res.data.updated_at);
+      if(st&&!Number.isNaN(st)){serverTs=st;state.syncedAt=st;const last=merged[0];if(last&&Math.abs(Number(last.t)-st)>1500){last.t=st;lastLocalPushT=st;try{await cloud.database.from('zone_data').upsert({namespace,payload:{...state,syncHistory:merged},updated_at:new Date().toISOString()},{onConflict:'namespace'})}catch(_){ }}}
+    }catch(_){ }
+    pendingLog=[];syncLog=merged;safeStorage.set('gemCalculatorSettings',JSON.stringify(state));setSyncUI('on');renderAdminIfOpen();return true
+  }catch(e){pendingLog=JSON.parse(pendSnap);lastLocalPushT=pushTSnap;console.error('云端写入失败',e);setSyncUI('off');return false}
+}
 function fmtSyncTime(ts){const d=new Date(Number(ts)||Date.now());const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`}
 let lastLocalPushT=0;
-function pushSyncHistory(kind){if(!Array.isArray(state.syncHistory))state.syncHistory=[];const now=Date.now();const last=state.syncHistory[0];const isRatio=kind==='ratio';const localTop=!!(last&&lastLocalPushT>0&&Math.abs(Number(last.t)-lastLocalPushT)<50);if(localTop&&now-lastLocalPushT<3000){last.t=now;lastLocalPushT=now;if(isRatio)last.kind='ratio';return true}if(localTop&&!isRatio&&now-lastLocalPushT<30000){last.t=now;lastLocalPushT=now;return true}state.syncHistory.unshift({t:now,kind:kind||'auto'});lastLocalPushT=now;if(state.syncHistory.length>30)state.syncHistory.length=30;return true}
+// 同步历史只以云端为唯一真相源：syncLog=最近一次从云端读到的历史（仅内存，不落 localStorage，拉取后覆盖）；pendingLog=本次会话新产生的待上传记录
+let syncLog=_legacyHist.slice(),pendingLog=[];
+function pushSyncHistory(kind){const now=Date.now();const last=pendingLog[0];const isRatio=kind==='ratio';const localTop=!!(last&&lastLocalPushT>0&&Math.abs(Number(last.t)-lastLocalPushT)<50);if(localTop&&now-lastLocalPushT<3000){last.t=now;lastLocalPushT=now;if(isRatio)last.kind='ratio';return true}if(localTop&&!isRatio&&now-lastLocalPushT<30000){last.t=now;lastLocalPushT=now;return true}pendingLog.unshift({t:now,kind:kind||'auto'});lastLocalPushT=now;if(pendingLog.length>30)pendingLog.length=30;return true}
+function adoptRemoteHistory(list){if(!Array.isArray(list))return false;const clean=list.map(h=>({t:Number(h&&h.t)||0,kind:(h&&h.kind)||'auto'})).filter(h=>h.t>0).sort((a,b)=>b.t-a.t).slice(0,30);const changedNow=JSON.stringify(clean)!==JSON.stringify(syncLog);syncLog=clean;return changedNow}
 let pushRetryCount=0;
 function scheduleCloudPushRetry(){clearTimeout(pushRetryTimer);if(!namespace||pushRetryCount>=10)return;pushRetryCount++;pushRetryTimer=setTimeout(async()=>{const ok=await cloudPushNow();if(ok)pushRetryCount=0;else scheduleCloudPushRetry()},8000)}
 function openAuthModal(){$('authOut').hidden=!!namespace;$('authModal').classList.add('show');document.body.style.overflow='hidden'}
@@ -410,10 +442,10 @@ function renderAdmin(){
     $('adminTokenSubmit').addEventListener('click',submitAdminToken);
     return;
   }
-  const hist=Array.isArray(state.syncHistory)?state.syncHistory:[];
+  const hist=syncLog;
   const cls=busyState==='busy'?'busy':(cloud?'on':'off');
   const statusText=!cloud?'云组件未就绪，改动已存本机':(busyState==='busy'?'正在拉取云端数据…':'已连接云端 · 打开即自动拉取');
-  const rows=hist.length?hist.map(h=>`<div class="admin-history-row"><b>${fmtSyncTime(h.t)}</b><span class="hkind${h.kind==='ratio'?' ratio':''}">${h.kind==='ratio'?'比例同步':'自动同步'}</span></div>`).join(''):'<div class="admin-empty">暂无同步记录</div>';
+  const rows=hist.length?hist.map(h=>`<div class="admin-history-row"><b>${fmtSyncTime(h.t)}</b><span class="hkind${h.kind==='ratio'?' ratio':''}">${h.kind==='ratio'?'比例同步':'自动同步'}</span></div>`).join(''):(busyState==='busy'?'<div class="admin-empty">正在从云端读取…</div>':'<div class="admin-empty">暂无同步记录</div>');
   const lastTxt=hist.length?fmtSyncTime(hist[0].t):'—';
   body.innerHTML=`<div class="admin-status ${cls}"><span class="sync-dot"></span><span>${statusText} · 上次同步 ${lastTxt}</span></div>
     ${serverTs?`<div class="admin-server-ts">云端记录时间 ${fmtSyncTime(serverTs)}（服务器时间，两台设备一致）</div>`:''}
@@ -423,7 +455,7 @@ function renderAdmin(){
     <button type="button" class="admin-revoke" id="adminRevoke">清除本机授权</button>`;
   $('adminSyncNow').addEventListener('click',async()=>{if(!cloud){toast('云组件未就绪');return}setSyncUI('busy');renderAdmin();const ok=await syncBoth('ratio');renderAdmin();toast(ok?'已与云端双向同步':'同步失败，将自动重试');if(!ok)scheduleCloudPushRetry()});
   $('adminGotoZones').addEventListener('click',()=>{closeAdminModal();activateTab('admin')});
-  $('adminRevoke').addEventListener('click',()=>{if(!confirm('清除本机口令授权？云端数据不会删除，清除后本机回到只读模式。'))return;namespace=null;safeStorage.set(SYNC_NS_KEY,'');clearTimeout(syncTimer);setSyncUI('off');renderAdmin();toast('已清除本机授权')});
+  $('adminRevoke').addEventListener('click',()=>{if(!confirm('清除本机口令授权？云端数据不会删除，清除后本机回到只读模式。'))return;namespace=null;safeStorage.set(SYNC_NS_KEY,'');clearTimeout(syncTimer);syncLog=[];pendingLog=[];setSyncUI('off');renderAdmin();toast('已清除本机授权')});
 }
 async function submitAdminToken(){
   const val=$('adminToken').value.trim();
