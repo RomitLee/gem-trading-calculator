@@ -404,7 +404,7 @@ function renderAdmin(){
     <div class="modal-actions"><button type="button" class="primary" id="adminSyncNow">立即同步</button><button type="button" class="secondary" id="adminGotoZones">区服管理</button></div>
     <button type="button" class="admin-revoke" id="adminRevoke">清除本机授权</button>`;
   $('adminSyncNow').addEventListener('click',async()=>{if(!cloud){toast('云组件未就绪');return}setSyncUI('busy');const ok=await cloudPushNow('ratio');renderAdmin();toast(ok?'已同步到云端':'同步失败，将自动重试');if(!ok)scheduleCloudPushRetry()});
-  $('adminGotoZones').addEventListener('click',()=>{closeAdminModal();activateTab('period')});
+  $('adminGotoZones').addEventListener('click',()=>{closeAdminModal();activateTab('admin')});
   $('adminRevoke').addEventListener('click',()=>{if(!confirm('清除本机口令授权？云端数据不会删除，清除后本机回到只读模式。'))return;namespace=null;safeStorage.set(SYNC_NS_KEY,'');clearTimeout(syncTimer);setSyncUI('off');renderAdmin();toast('已清除本机授权')});
 }
 async function submitAdminToken(){
