@@ -553,7 +553,7 @@ $('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthe
 try{render();activateTab('synthesis',false);save(false);renderSingle();renderZoneSelectSingle()}catch(error){console.error('初始化失败',error)}initCloud();
 function flushSync(){clearTimeout(syncTimer);if(cloud&&namespace)cloudPushNow()}
 window.addEventListener('pagehide',flushSync);window.addEventListener('beforeunload',flushSync);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushSync();else if(cloud&&namespace)cloudPull()});
-let pullInterval=null;function schedulePeriodicPull(){clearInterval(pullInterval);pullInterval=setInterval(()=>{if(cloud&&namespace&&document.visibilityState==='visible'&&!document.activeElement?.dataset?.zoneInput&&!document.activeElement?.dataset?.ratioLevel)cloudPull()},20000)}schedulePeriodicPull();if('serviceWorker'in navigator&&window.isSecureContext)navigator.serviceWorker.register('./gem-calculator-sw.js').catch(()=>{});
+let pullInterval=null;function schedulePeriodicPull(){clearInterval(pullInterval);pullInterval=setInterval(()=>{if(cloud&&namespace&&document.visibilityState==='visible'&&!document.activeElement?.dataset?.zoneInput&&!document.activeElement?.dataset?.ratioLevel)cloudPull()},20000)}schedulePeriodicPull();if('serviceWorker'in navigator&&window.isSecureContext){navigator.serviceWorker.register('./gem-calculator-sw.js').then(r=>{if(r)r.update()}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{flushSync();setTimeout(()=>window.location.reload(),300)})}
 </script>
 </body>
 </html>
