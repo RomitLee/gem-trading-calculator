@@ -110,7 +110,7 @@
   <main class="main">
     <header class="app-header">
       <img class="app-logo" src="icons/app-logo.png" alt="子霖宝石助手">
-      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v47</span></h1>
+      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v48</span></h1>
       <button type="button" class="sync-chip" id="syncChip"><span class="admin-gear">⚙</span><span class="sync-dot" id="chipDot"></span><span id="chipText">管理员</span></button>
     </header>
     <nav class="top-tabs" aria-label="计算器页面">
@@ -386,7 +386,7 @@ function mergeRemoteHistoryOnly(rp){return adoptRemoteHistory(rp&&rp.syncHistory
 let serverTs=null;
 async function cloudPull(opts){const force=!!(opts&&opts.force);if(!namespace||!cloud)return false;try{let res=await cloud.database.from('zone_data').select('payload,updated_at').eq('namespace',namespace).maybeSingle();if(!res||res.error)res=await cloud.database.from('zone_data').select('payload').eq('namespace',namespace).maybeSingle();const{data,error}=res||{};if(error){setSyncUI('off');if(!force)scheduleRetry(cloudPull,30000);return false}if(data&&data.updated_at){const parsed=Date.parse(data.updated_at);if(!Number.isNaN(parsed))serverTs=parsed}if(data&&data.payload){const rp=data.payload,remoteRev=Number(rp.rev)||0,syncedRev=Number(state.syncedRev)||0,remoteTs=Number(rp.updatedAt)||0,syncedTs=Number(state.syncedAt)||0,localRev=Number(state.rev)||0,localTs=Number(state.updatedAt)||0;const remoteNewer=remoteRev>localRev||(remoteRev===localRev&&remoteTs>localTs+100)||(force&&(remoteRev>syncedRev||remoteTs>syncedTs));if(remoteNewer){if(remoteRev>syncedRev||remoteTs>syncedTs+100||force){applyRemote(rp,{force});setSyncUI('on')}else setSyncUI('on')}else if(remoteRev<localRev||localRev>syncedRev){if(force&&localRev>syncedRev){applyRemote(rp,{force});setSyncUI('on')}else{console.warn('云端版本落后/本机有未推送改动，回推恢复');setSyncUI('busy');scheduleCloudPush()}}else{if(force&&mergeRemoteHistoryOnly(rp))renderAdminIfOpen();setSyncUI('on')}}else{await cloudPushNow();setSyncUI('on')}return true}catch(e){console.error('云端读取失败',e);setSyncUI('off');if(!force)scheduleRetry(cloudPull,30000);return false}}
 function renderAdminIfOpen(){if($('adminModal')&&$('adminModal').classList.contains('show'))renderAdmin()}
-async function syncBoth(kind){if(!namespace)return false;if(!cloud){setSyncUI('off');scheduleCloudPushRetry();return false}setSyncUI('busy');const localRev=Number(state.rev)||0,syncedRev=Number(state.syncedRev)||0;let pushed=true;if(localRev>syncedRev)pushed=await cloudPushNow(kind||'auto');const ok=await cloudPull({force:!!pushed});setSyncUI(ok&&pushed?'on':(ok?'on':'off'));renderAdminIfOpen();return ok&&pushed}
+async function syncBoth(kind){if(!namespace)return false;if(!cloud){setSyncUI('off');scheduleCloudPushRetry();return false}setSyncUI('busy');const localRev=Number(state.rev)||0,syncedRev=Number(state.syncedRev)||0;let pushed=true;if(kind==='ratio'||localRev>syncedRev)pushed=await cloudPushNow(kind||'auto');const ok=await cloudPull({force:!!pushed});setSyncUI(ok&&pushed?'on':(ok?'on':'off'));renderAdminIfOpen();return ok&&pushed}
 async function refreshFromCloud(){if(!namespace||!cloud)return false;setSyncUI('busy');renderAdminIfOpen();const ok=await syncBoth('auto');renderAdminIfOpen();return ok}
 function scheduleCloudPush(){if(!namespace)return;clearTimeout(syncTimer);setSyncUI('busy');syncTimer=setTimeout(async()=>{const ok=await cloudPushNow();if(!ok)scheduleCloudPushRetry()},700)}
 let pushRetryTimer=null;
@@ -424,7 +424,7 @@ function fmtSyncTime(ts){const d=new Date(Number(ts)||Date.now());const p=n=>Str
 let lastLocalPushT=0;
 // 同步历史只以云端为唯一真相源：syncLog=最近一次从云端读到的历史（仅内存，不落 localStorage，拉取后覆盖）；pendingLog=本次会话新产生的待上传记录
 let syncLog=_legacyHist.slice(),pendingLog=[];
-function pushSyncHistory(kind){const now=Date.now();const last=pendingLog[0];const isRatio=kind==='ratio';const localTop=!!(last&&lastLocalPushT>0&&Math.abs(Number(last.t)-lastLocalPushT)<50);if(localTop&&now-lastLocalPushT<3000){last.t=now;lastLocalPushT=now;if(isRatio)last.kind='ratio';return true}if(localTop&&!isRatio&&now-lastLocalPushT<30000){last.t=now;lastLocalPushT=now;return true}pendingLog.unshift({t:now,kind:kind||'auto'});lastLocalPushT=now;if(pendingLog.length>30)pendingLog.length=30;return true}
+function pushSyncHistory(kind){if(kind!=='ratio')return false;const now=Date.now();const last=pendingLog[0];const localTop=!!(last&&lastLocalPushT>0&&Math.abs(Number(last.t)-lastLocalPushT)<50);if(localTop&&now-lastLocalPushT<3000){last.t=now;lastLocalPushT=now;return true}pendingLog.unshift({t:now,kind:'ratio'});lastLocalPushT=now;if(pendingLog.length>30)pendingLog.length=30;return true}
 function adoptRemoteHistory(list){if(!Array.isArray(list))return false;const clean=list.map(h=>({t:Number(h&&h.t)||0,kind:(h&&h.kind)||'auto'})).filter(h=>h.t>0).sort((a,b)=>b.t-a.t).slice(0,30);const changedNow=JSON.stringify(clean)!==JSON.stringify(syncLog);syncLog=clean;return changedNow}
 let pushRetryCount=0;
 function scheduleCloudPushRetry(){clearTimeout(pushRetryTimer);if(!namespace||pushRetryCount>=10)return;pushRetryCount++;pushRetryTimer=setTimeout(async()=>{const ok=await cloudPushNow();if(ok)pushRetryCount=0;else scheduleCloudPushRetry()},8000)}
@@ -432,7 +432,8 @@ function openAuthModal(){$('authOut').hidden=!!namespace;$('authModal').classLis
 function closeAuthModal(){$('authModal').classList.remove('show');document.body.style.overflow=''}
 function authErr(el,msg){$(el).textContent=msg}
 $('syncChip').addEventListener('click',openAdminModal);$('syncBtn').addEventListener('click',handleSyncEntry);
-function openAdminModal(){renderAdmin();$('adminModal').classList.add('show');document.body.style.overflow='hidden';if(namespace&&cloud)refreshFromCloud()}
+let panelLoading=false;
+function openAdminModal(){panelLoading=!!(namespace&&cloud);renderAdmin();$('adminModal').classList.add('show');document.body.style.overflow='hidden';if(namespace&&cloud){refreshFromCloud().finally(()=>{panelLoading=false;renderAdminIfOpen()})}}
 function closeAdminModal(){$('adminModal').classList.remove('show');document.body.style.overflow=''}
 function renderAdmin(){
   const body=$('adminBody');if(!body)return;
@@ -442,10 +443,10 @@ function renderAdmin(){
     $('adminTokenSubmit').addEventListener('click',submitAdminToken);
     return;
   }
-  const hist=syncLog;
+  const hist=panelLoading?[]:syncLog;
   const cls=busyState==='busy'?'busy':(cloud?'on':'off');
   const statusText=!cloud?'云组件未就绪，改动已存本机':(busyState==='busy'?'正在拉取云端数据…':'已连接云端 · 打开即自动拉取');
-  const rows=hist.length?hist.map(h=>`<div class="admin-history-row"><b>${fmtSyncTime(h.t)}</b><span class="hkind${h.kind==='ratio'?' ratio':''}">${h.kind==='ratio'?'比例同步':'自动同步'}</span></div>`).join(''):(busyState==='busy'?'<div class="admin-empty">正在从云端读取…</div>':'<div class="admin-empty">暂无同步记录</div>');
+  const rows=hist.length?hist.map(h=>`<div class="admin-history-row"><b>${fmtSyncTime(h.t)}</b><span class="hkind ratio">手动同步</span></div>`).join(''):(panelLoading?'<div class="admin-empty">正在从云端读取…</div>':'<div class="admin-empty">暂无同步记录（点「立即同步」产生记录）</div>');
   const lastTxt=hist.length?fmtSyncTime(hist[0].t):'—';
   body.innerHTML=`<div class="admin-status ${cls}"><span class="sync-dot"></span><span>${statusText} · 上次同步 ${lastTxt}</span></div>
     ${serverTs?`<div class="admin-server-ts">云端记录时间 ${fmtSyncTime(serverTs)}（服务器时间，两台设备一致）</div>`:''}
@@ -585,8 +586,9 @@ $('ratioClose').addEventListener('click',closeRatioModal);$('ratioModal').addEve
 $('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*1.1)])),averagePriceCustomized:{normal:false,star:false,dust:false},zones:[{id:uid(),name:'秦淮风光',cbgQuote:210,purchase:9000,margin:17,preset:4}]});state.activeZoneId=state.zones[0].id;state.cbgZoneId=state.zones[0].id;state.single.zoneId=state.zones[0].id;document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisZoneSelect').value=state.cbgZoneId;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
 try{render();activateTab('synthesis',false);save(false);renderSingle();renderZoneSelectSingle()}catch(error){console.error('初始化失败',error)}initCloud();
 function flushSync(){clearTimeout(syncTimer);if(cloud&&namespace&&(Number(state.rev)||0)>(Number(state.syncedRev)||0))cloudPushNow()}
-window.addEventListener('pagehide',flushSync);window.addEventListener('beforeunload',flushSync);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushSync();else if(cloud&&namespace)cloudPull()});
-let pullInterval=null;function schedulePeriodicPull(){clearInterval(pullInterval);pullInterval=setInterval(()=>{if(cloud&&namespace&&document.visibilityState==='visible'&&!document.activeElement?.dataset?.zoneInput&&!document.activeElement?.dataset?.ratioLevel)cloudPull()},20000)}schedulePeriodicPull();if('serviceWorker'in navigator&&window.isSecureContext){navigator.serviceWorker.register('./gem-calculator-sw.js').then(r=>{if(r)r.update()}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{flushSync();setTimeout(()=>window.location.reload(),300)});navigator.serviceWorker.ready.then(r=>{if(r.active)r.active.postMessage({type:'GET_VERSION'})}).catch(()=>{});navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='GEM_VERSION'){const el=document.getElementById('appVersion');if(el)el.textContent=e.data.version}})}
+window.addEventListener('pagehide',flushSync);window.addEventListener('beforeunload',flushSync);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushSync()});
+// 不再注册 Service Worker、不做后台周期拉取：页面每次打开都是网络最新版，管理员面板数据只在打开时从云端读取
+if('serviceWorker'in navigator){navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='SW_REMOVED')window.location.reload()});if(window.caches&&caches.keys)caches.keys().then(ks=>ks.forEach(k=>{if(String(k).startsWith('gem-calculator-'))caches.delete(k)})).catch(()=>{})}
 </script>
 </body>
 </html>

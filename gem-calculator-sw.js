@@ -1,68 +1,18 @@
-const CACHE_NAME = 'gem-calculator-v47';
-const SW_VERSION = CACHE_NAME.replace('gem-calculator-', '');
-
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'GET_VERSION') {
-    event.source.postMessage({ type: 'GEM_VERSION', version: SW_VERSION });
-  }
-});
-const APP_SHELL = [
-  './index.html',
-  './GemTradingCalculator.webmanifest',
-  './icons/gem-calculator-icon-180.png',
-  './icons/gem-calculator-icon-192.png',
-  './icons/gem-calculator-icon-512.png',
-  './icons/gem-normal.png',
-  './icons/gem-star.png',
-  './icons/gem-dust.png',
-  './icons/app-logo.png'
-];
-const OFFLINE_PAGE = new URL('./index.html', self.location.href).href;
-
-self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
-  );
-  self.clients.claim();
-});
-
-self.addEventListener('fetch', event => {
-  const request = event.request;
-  if (request.method !== 'GET') return;
-
-  const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
-
-  if (request.mode === 'navigate') {
-    event.respondWith((async () => {
-      try {
-        const response = await fetch(request);
-        if (response.ok) {
-          const cache = await caches.open(CACHE_NAME);
-          await cache.put(OFFLINE_PAGE, response.clone());
-        }
-        return response;
-      } catch {
-        return (await caches.match(request, { ignoreSearch: true })) || caches.match(OFFLINE_PAGE);
-      }
-    })());
-    return;
-  }
-
-  event.respondWith((async () => {
-    const cached = await caches.match(request, { ignoreSearch: true });
-    if (cached) return cached;
-
-    const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      await cache.put(request, response.clone());
-    }
-    return response;
+// 自毁 Service Worker：一次性用品
+// 作用：旧版本浏览器的 SW 更新检查会拿到本文件 → 激活后清空全部 gem-calculator-* 缓存并注销自己，
+// 然后通知页面刷新。此后本应用不再使用任何离线缓存，每次打开都是网络最新版本。
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter(k => String(k).startsWith('gem-calculator-')).map(k => caches.delete(k)));
+    } catch (e) { /* ignore */ }
+    try { await self.registration.unregister(); } catch (e) { /* ignore */ }
+    try {
+      const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      clients.forEach(c => c.postMessage({ type: 'SW_REMOVED' }));
+    } catch (e) { /* ignore */ }
   })());
 });
+// 不监听 fetch：不拦截任何网络请求
