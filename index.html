@@ -88,7 +88,19 @@
 .auth-submit{width:100%;height:46px;margin-top:2px;border:0;border-radius:13px;background:var(--navy);color:#fff;font-size:14px;font-weight:750;cursor:pointer}.auth-submit.secondary{background:#f1f3f7;color:#444c60}
 .auth-error{min-height:16px;margin:-4px 0 8px;color:#c63838;font-size:11px}.auth-hint{margin-top:10px;color:#9aa1b0;font-size:11px;line-height:1.6}
 .auth-user-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:8px;border-radius:12px;background:#f7f8fb;font-size:13px}.auth-user-label{color:#858da0;font-size:11px}
-.sync-chip{display:flex;align-items:center;gap:6px;margin-left:auto;height:32px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:#fff;color:#7c8495;font-size:11px;font-weight:700;cursor:pointer}.sync-chip .sync-dot{width:7px;height:7px;border-radius:50%;background:#c9cfda}.sync-chip.on{color:#087c68;border-color:#bfe8dc;background:var(--green-soft)}.sync-chip.on .sync-dot{background:#0f9f88}.sync-chip.busy .sync-dot{background:#b76e00}
+.sync-chip{display:flex;align-items:center;gap:6px;margin-left:auto;height:32px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:#fff;color:#7c8495;font-size:11px;font-weight:700;cursor:pointer}.sync-chip .sync-dot{width:7px;height:7px;border-radius:50%;background:#c9cfda}.sync-chip .admin-gear{font-size:12px;line-height:1;color:#8a93a6}
+.admin-status{padding:9px 12px;border:1px dashed var(--line);border-radius:12px;background:#fafbfd;font-size:11px;color:#7c8495;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.admin-status .sync-dot{width:7px;height:7px;border-radius:50%;background:#c9cfda;flex:0 0 auto}
+.admin-status.on .sync-dot{background:#0f9f88}.admin-status.busy .sync-dot{background:#b76e00}
+.admin-section-title{margin:0 0 8px 2px;color:#6f788c;font-size:11px;font-weight:650}
+.admin-history{max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fafbfd;margin-bottom:12px}
+.admin-history-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);font-size:12px}
+.admin-history-row:last-child{border-bottom:0}
+.admin-history-row b{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.admin-history-row .hkind{margin-left:auto;padding:2px 8px;border-radius:999px;background:#eef0f6;color:#6f788c;font-size:10px;font-weight:700}
+.admin-history-row .hkind.ratio{background:var(--green-soft);color:#087c68}
+.admin-empty{padding:18px 12px;text-align:center;color:#98a1b2;font-size:12px}
+.admin-revoke{margin-top:10px;width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;color:#98a1b2;font-size:12px;font-weight:650;padding:10px;cursor:pointer}.sync-chip.on{color:#087c68;border-color:#bfe8dc;background:var(--green-soft)}.sync-chip.on .sync-dot{background:#0f9f88}.sync-chip.busy .sync-dot{background:#b76e00}
 </style>
 </head>
 <body>
@@ -97,7 +109,7 @@
     <header class="app-header">
       <img class="app-logo" src="icons/app-logo.png" alt="子霖宝石助手">
       <h1 class="app-name">子霖宝石助手</h1>
-      <button type="button" class="sync-chip" id="syncChip"><span class="sync-dot" id="chipDot"></span><span id="chipText">未登录</span></button>
+      <button type="button" class="sync-chip" id="syncChip"><span class="admin-gear">⚙</span><span class="sync-dot" id="chipDot"></span><span id="chipText">管理员</span></button>
     </header>
     <nav class="top-tabs" aria-label="计算器页面">
       <button type="button" class="active" data-tab="synthesis">宝石合成</button>
@@ -248,10 +260,16 @@
   <div class="modal-card">
     <div class="modal-title"><h2 id="ratioModalTitle">售价比例调整</h2><button type="button" class="modal-close" id="ratioClose" aria-label="关闭">×</button></div>
     <div class="ratio-grid">
-      <div class="ratio-row head"><b>等级</b><span>摆摊比例</span><span>CBG比例</span></div>
+      <div class="ratio-row head"><b>等级</b><span>售价比例（摆摊与藏宝阁共用）</span></div>
       <div id="ratioRows"></div>
     </div>
     <div class="modal-actions"><button type="button" class="primary" id="ratioSyncBtn" style="grid-column:1/-1">同步</button></div>
+  </div>
+</div>
+<div class="modal" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+  <div class="modal-card">
+    <div class="modal-title"><h2 id="adminModalTitle">管理员</h2><button type="button" class="modal-close" id="adminClose" aria-label="关闭">×</button></div>
+    <div id="adminBody"></div>
   </div>
 </div>
 <div class="modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
@@ -320,6 +338,8 @@ if(!state.zones.some(z=>z.id===state.activeZoneId))state.activeZoneId=state.zone
 // 每天收购金额恢复为每区独立设置，默认9000万
 state.zones=state.zones.map(z=>({...z,purchase:num(z.purchase,9000)}));
 delete state.purchase;delete state.margin;delete state.buyAccounts;delete state.sellAccounts;
+if(!Array.isArray(state.syncHistory))state.syncHistory=[];
+state.priceRatios&&['normal','star','dust'].forEach(t=>state.priceRatios[t]&&Object.keys(state.priceRatios[t]).forEach(l=>{const r=state.priceRatios[t][l];if(r&&Number(r.cbg)!==Number(r.stall))r.cbg=Number(r.stall)}));
 if(!state.single||typeof state.single!=='object')state.single={};
 state.single={quote:num(state.single.quote,210),purchase:num(state.single.purchase,9000),margin:num(state.single.margin,17),preset:Number(state.single.preset)===3?3:4,targetProfit:num(state.single.targetProfit,40),zoneId:state.single.zoneId||''};
 if(!state.zones.some(z=>z.id===state.single.zoneId)){const pref=state.zones.find(z=>z.name==='秦淮风光')||state.zones[0];state.single.zoneId=pref.id;}
@@ -345,28 +365,67 @@ const TOKEN_HASH='75520fd9b44a062ae95ccca28c825d52c0a19c7b1db297cc1c981bfcb08690
 const SYNC_NS_KEY='gemSyncNamespace';
 let cloud=null,namespace=null,syncTimer=null,busyState=null;
 async function sha256Hex(text){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return Array.from(new Uint8Array(buf),b=>b.toString(16).padStart(2,'0')).join('')}
-function setSyncUI(status,text,target){const chip=$('syncChip'),bar=$('syncBar');chip.classList.remove('on','busy');bar.classList.remove('on','busy');if(status==='on'||status==='busy'){chip.classList.add(status);bar.classList.add(status)}const label=namespace?(status==='on'?'已同步':status==='busy'?'同步中':'同步失败'):'未登录';$('chipText').textContent=text||label;const targetBar=target==='admin'?$('adminSyncText'):$('syncText');targetBar.textContent=namespace?(status==='on'?'已同步到云端':status==='busy'?'正在同步…':'同步失败，将自动重试'):(target==='admin'?'输入口令后可编辑并跨设备同步':'数据仅存本机 · 点「管理区服」输入口令同步');$('syncBtn').textContent=namespace?'管理区服':'口令登录';const adminBar=$('adminSyncBar');if(adminBar)adminBar.classList.remove('on','busy');if(target==='admin'&&(status==='on'||status==='busy'))adminBar.classList.add(status)}
+function setSyncUI(status,text,target){const chip=$('syncChip'),bar=$('syncBar');chip.classList.remove('on','busy');bar.classList.remove('on','busy');if(status==='on'||status==='busy'){chip.classList.add(status);bar.classList.add(status)}const label=namespace?(status==='on'?'已同步':status==='busy'?'同步中':'同步失败'):'未登录';$('chipText').textContent=text||'管理员';$('syncChip').title=label;const targetBar=target==='admin'?$('adminSyncText'):$('syncText');targetBar.textContent=namespace?(status==='on'?'已同步到云端':status==='busy'?'正在同步…':'同步失败，将自动重试'):(target==='admin'?'输入口令后可编辑并跨设备同步':'数据仅存本机 · 点「管理区服」输入口令同步');$('syncBtn').textContent=namespace?'管理区服':'口令登录';const adminBar=$('adminSyncBar');if(adminBar)adminBar.classList.remove('on','busy');if(target==='admin'&&(status==='on'||status==='busy'))adminBar.classList.add(status)}
 function applyRemote(p){if(!p||typeof p!=='object')return;const localTs=Number(state.updatedAt)||0,remoteTs=Number(p.updatedAt)||0;if(remoteTs>0&&remoteTs+2000<localTs){console.warn('云端数据比本机旧，改为以本机为准并回推');setSyncUI('busy');scheduleCloudPush();return}
-['targetProfit','periodDays','gemType','saleMode','cbgQuote','ratioDefaultsVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.updatedAt!==undefined)state.updatedAt=remoteTs;if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));state.activeZoneId=state.zones.some(z=>z.id===p.activeZoneId)?p.activeZoneId:state.zones[0].id}safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
+['targetProfit','periodDays','gemType','saleMode','cbgQuote','ratioDefaultsVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.updatedAt!==undefined)state.updatedAt=remoteTs;if(Array.isArray(p.syncHistory))state.syncHistory=p.syncHistory.slice(0,30);if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));state.activeZoneId=state.zones.some(z=>z.id===p.activeZoneId)?p.activeZoneId:state.zones[0].id}safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
 let retryTimer=null;
 function scheduleRetry(fn,ms){clearTimeout(retryTimer);retryTimer=setTimeout(fn,ms)}
 async function initCloud(){setSyncUI('off');const until=Date.now()+15000;while(!window.WorkBuddyCloud&&Date.now()<until){await new Promise(r=>setTimeout(r,300))}if(!window.WorkBuddyCloud){console.warn('云组件未加载');if(namespace)scheduleCloudPushRetry();return}try{cloud=WorkBuddyCloud.createWorkBuddyCloud(CLOUD)}catch(e){console.error('云组件初始化失败',e);return}const stored=safeStorage.get(SYNC_NS_KEY);if(stored){namespace=stored;setSyncUI('busy');cloudPull()}}
 async function cloudPull(){if(!namespace)return;try{const{data,error}=await cloud.database.from('zone_data').select('payload').eq('namespace',namespace).maybeSingle();if(error){setSyncUI('off');scheduleRetry(cloudPull,30000);return}if(data&&data.payload){applyRemote(data.payload);setSyncUI('on')}else{await cloudPushNow();setSyncUI('on')}}catch(e){console.error('云端读取失败',e);setSyncUI('off');scheduleRetry(cloudPull,30000)}}
 function scheduleCloudPush(){if(!namespace)return;clearTimeout(syncTimer);setSyncUI('busy');syncTimer=setTimeout(async()=>{const ok=await cloudPushNow();if(!ok)scheduleCloudPushRetry()},700)}
 let pushRetryTimer=null;
-async function cloudPushNow(){if(!namespace||!cloud)return false;state.updatedAt=Date.now();try{const{error}=await cloud.database.from('zone_data').upsert({namespace,payload:state,updated_at:new Date().toISOString()},{onConflict:'namespace'});setSyncUI(error?'off':'on');if(error)console.error('云端写入返回错误',error);return !error}catch(e){console.error('云端写入失败',e);setSyncUI('off');return false}}
+async function cloudPushNow(kind){if(!namespace||!cloud)return false;state.updatedAt=Date.now();try{const{error}=await cloud.database.from('zone_data').upsert({namespace,payload:state,updated_at:new Date().toISOString()},{onConflict:'namespace'});if(!error){pushSyncHistory(kind||'auto');safeStorage.set('gemCalculatorSettings',JSON.stringify(state))}setSyncUI(error?'off':'on');if(error)console.error('云端写入返回错误',error);return !error}catch(e){console.error('云端写入失败',e);setSyncUI('off');return false}}
+function fmtSyncTime(ts){const d=new Date(Number(ts)||Date.now());const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`}
+function pushSyncHistory(kind){if(!Array.isArray(state.syncHistory))state.syncHistory=[];const now=Date.now();const last=state.syncHistory[0];const isRatio=kind==='ratio';if(last&&now-Number(last.t)<3000){last.t=now;if(isRatio)last.kind='ratio';return true}if(last&&!isRatio&&now-Number(last.t)<30000){last.t=now;return true}state.syncHistory.unshift({t:now,kind:kind||'auto'});if(state.syncHistory.length>30)state.syncHistory.length=30;return true}
 let pushRetryCount=0;
 function scheduleCloudPushRetry(){clearTimeout(pushRetryTimer);if(!namespace||pushRetryCount>=10)return;pushRetryCount++;pushRetryTimer=setTimeout(async()=>{const ok=await cloudPushNow();if(ok)pushRetryCount=0;else scheduleCloudPushRetry()},8000)}
 function openAuthModal(){$('authOut').hidden=!!namespace;$('authModal').classList.add('show');document.body.style.overflow='hidden'}
 function closeAuthModal(){$('authModal').classList.remove('show');document.body.style.overflow=''}
 function authErr(el,msg){$(el).textContent=msg}
-$('syncChip').addEventListener('click',handleSyncEntry);$('syncBtn').addEventListener('click',handleSyncEntry);
+$('syncChip').addEventListener('click',openAdminModal);$('syncBtn').addEventListener('click',handleSyncEntry);
+function openAdminModal(){renderAdmin();$('adminModal').classList.add('show');document.body.style.overflow='hidden'}
+function closeAdminModal(){$('adminModal').classList.remove('show');document.body.style.overflow=''}
+function renderAdmin(){
+  const body=$('adminBody');if(!body)return;
+  if(!namespace){
+    body.innerHTML=`<label class="auth-label">管理口令</label><div class="auth-row"><input id="adminToken" type="password" placeholder="请输入管理口令" autocomplete="off"><button type="button" class="auth-code-btn" id="adminTokenSubmit">进入</button></div><div class="auth-error" id="adminError"></div><div class="auth-hint">登录后区服与售价比例可在多设备间同步，并保留最近 30 条同步记录。</div>`;
+    const inp=$('adminToken');if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')$('adminTokenSubmit').click()});
+    $('adminTokenSubmit').addEventListener('click',submitAdminToken);
+    return;
+  }
+  const hist=Array.isArray(state.syncHistory)?state.syncHistory:[];
+  const cls=busyState==='busy'?'busy':(cloud?'on':'off');
+  const statusText=!cloud?'云组件未就绪，改动已存本机':(busyState==='busy'?'正在同步…':'已连接云端');
+  const rows=hist.length?hist.map(h=>`<div class="admin-history-row"><b>${fmtSyncTime(h.t)}</b><span class="hkind${h.kind==='ratio'?' ratio':''}">${h.kind==='ratio'?'比例同步':'自动同步'}</span></div>`).join(''):'<div class="admin-empty">暂无同步记录</div>';
+  const lastTxt=hist.length?fmtSyncTime(hist[0].t):'—';
+  body.innerHTML=`<div class="admin-status ${cls}"><span class="sync-dot"></span><span>${statusText} · 上次同步 ${lastTxt}</span></div>
+    <div class="admin-section-title">历史同步记录（${hist.length}）</div>
+    <div class="admin-history">${rows}</div>
+    <div class="modal-actions"><button type="button" class="primary" id="adminSyncNow">立即同步</button><button type="button" class="secondary" id="adminGotoZones">区服管理</button></div>
+    <button type="button" class="admin-revoke" id="adminRevoke">清除本机授权</button>`;
+  $('adminSyncNow').addEventListener('click',async()=>{if(!cloud){toast('云组件未就绪');return}setSyncUI('busy');const ok=await cloudPushNow('ratio');renderAdmin();toast(ok?'已同步到云端':'同步失败，将自动重试');if(!ok)scheduleCloudPushRetry()});
+  $('adminGotoZones').addEventListener('click',()=>{closeAdminModal();activateTab('period')});
+  $('adminRevoke').addEventListener('click',()=>{if(!confirm('清除本机口令授权？云端数据不会删除，清除后本机回到只读模式。'))return;namespace=null;safeStorage.set(SYNC_NS_KEY,'');clearTimeout(syncTimer);setSyncUI('off');renderAdmin();toast('已清除本机授权')});
+}
+async function submitAdminToken(){
+  const val=$('adminToken').value.trim();
+  if(!val)return $('adminError').textContent='请输入口令';
+  if(!(window.crypto&&window.crypto.subtle))return $('adminError').textContent='当前环境不支持加密，请刷新重试';
+  try{
+    const hash=await sha256Hex(val);
+    if(hash!==TOKEN_HASH){$('adminError').textContent='口令不正确';return}
+    namespace=hash;safeStorage.set(SYNC_NS_KEY,hash);$('adminError').textContent='';
+    if(cloud){setSyncUI('busy');await cloudPull()}
+    renderAdmin();toast('口令验证成功');
+  }catch(e){console.error(e);$('adminError').textContent='验证失败，请重试'}
+}
+$('adminClose').addEventListener('click',closeAdminModal);$('adminModal').addEventListener('click',e=>{if(e.target===$('adminModal'))closeAdminModal()});
 async function syncRatios(){
   save();
   if(!namespace){closeRatioModal();toast('未登录云端，仅保存到本机');return}
   if(!cloud){closeRatioModal();setSyncUI('off');toast('云组件未就绪，已存本机，将自动重试');scheduleCloudPushRetry();return}
   setSyncUI('busy');clearTimeout(syncTimer);
-  const ok=await cloudPushNow();
+  const ok=await cloudPushNow('ratio');
   closeRatioModal();
   if(ok)toast('已同步到云端');
   else{toast('同步失败，已存本机，将自动重试');scheduleCloudPushRetry()}
@@ -390,8 +449,8 @@ function staminaPointsFor(type,level){let t=0;
   if(type==='star'){for(let l=2;l<=level;l++)t=3*t+30*l;return t}
   const arr=[0,0];for(let l=2;l<=level;l++)arr[l]=2*arr[l-1]+arr[l-2]+30*l;return arr[level]||0}
 function staminaCostCoinsFor(type,level){return staminaPointsFor(type,level)/40*3000}
-function renderSynthesis(){const type=gemTypes[state.gemType];const basePrice=Math.max(0,num(state.synthesisPrices[state.gemType]));const averageSalePrice=Math.max(0,num(state.averageSalePrices[state.gemType],Math.round(basePrice*1.1)));const cbgRate=Math.max(0,num(state.cbgQuote));const averageMode=state.saleMode==='average';document.querySelectorAll('[data-gem-type]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.gemType===state.gemType);const bt=gemTypes[btn.dataset.gemType];btn.innerHTML=`<img src="${bt.icon}" alt="">${bt.name}`});document.querySelectorAll('[data-sale-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.saleMode===state.saleMode));$('saleModeBar').classList.toggle('average',averageMode);$('averageSaleField').classList.toggle('show',averageMode);$('ratioBtn').hidden=averageMode;if(document.activeElement!==$('averageSalePrice'))$('averageSalePrice').value=averageSalePrice;$('priceTableTitle').innerHTML=`<img src="${type.icon}" alt="">${type.name}价格表`;$('synthesisRule').textContent=averageMode?`${type.rule} 均价售卖：各级售价按1级售卖均价乘以所需1级数量计算。`:type.rule;const hasStamina=state.gemType==='normal'||state.gemType==='star'||state.gemType==='dust';const headRow=$('priceTableHeadRow');if(headRow)headRow.innerHTML=`<span>等级</span><span>${hasStamina?'成本':'收购价'}（万）</span><span>需1级宝石</span><span>摆摊售价（万）</span><span>藏宝阁售价（元）</span>`;$('gemPriceTable').classList.toggle('with-stamina',hasStamina);const rows=[];type.levels.forEach(level=>{const units=compositionUnits(state.gemType,level);const purchasePrice=basePrice*units;const ratio=state.priceRatios[state.gemType][level];const stallCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.stall));const cbgCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.cbg));const stallPrice=Math.floor(Math.round(stallCoins/10000*1e6)/1e6);const coinTier=stallCoins>=10000000?'coin-tier-ten-million':stallCoins>=1000000?'coin-tier-million':stallCoins>=100000?'coin-tier-hundred-thousand':stallCoins>=10000?'coin-tier-wan':'';const cbgPrice=cbgCoins/30000000*cbgRate;const cbgAvailable=level>=type.cbgMinLevel;rows.push(`<div class="price-row"><span>${level}级</span>${hasStamina?(()=>{const pw=purchasePrice/10000,sw=staminaCostCoinsFor(state.gemType,level)/10000;return `<span class="cost-merge" title="收购价 ${fmt(pw,1)}万 + 体力成本 ${fmt(sw,1)}万（合成消耗${staminaPointsFor(state.gemType,level)}点体力，按40体力=3000游戏币折算）"><b>${fmt(pw+sw,1)}</b><small>${fmt(pw,1)} + ${fmt(sw,1)}</small></span>`})():`<span>${fmtWan(purchasePrice/10000)}</span>`}<span>${fmt(units,0)}</span><span class="${coinTier}">${fmt(stallPrice,0)}</span><span class="${cbgAvailable?'':'not-available'}">${cbgAvailable?fmt(cbgPrice,1):'—'}</span></div>`)});$('gemPriceRows').innerHTML=rows.join('')}
-function renderRatioRows(){const type=gemTypes[state.gemType];$('ratioModalTitle').textContent=`${type.name}售价比例调整`;const rows=[];type.levels.forEach(level=>{const ratio=state.priceRatios[state.gemType][level];const showCbg=level>=type.cbgMinLevel;rows.push(`<div class="ratio-row"><b>${level}级</b><input type="number" inputmode="decimal" min="0" step="0.01" value="${num(ratio.stall).toFixed(2)}" data-ratio-level="${level}" data-ratio-key="stall" aria-label="${level}级摆摊比例">${showCbg?`<input type="number" inputmode="decimal" min="0" step="0.01" value="${num(ratio.cbg).toFixed(2)}" data-ratio-level="${level}" data-ratio-key="cbg" aria-label="${level}级CBG比例">`:'<span class="ratio-na">不可上架</span>'}</div>`)});$('ratioRows').innerHTML=rows.join('');document.querySelectorAll('[data-ratio-level]').forEach(input=>input.addEventListener('input',()=>{const level=input.dataset.ratioLevel;state.priceRatios[state.gemType][level][input.dataset.ratioKey]=Math.max(0,num(input.value));save();renderSynthesis()}))}
+function renderSynthesis(){const type=gemTypes[state.gemType];const basePrice=Math.max(0,num(state.synthesisPrices[state.gemType]));const averageSalePrice=Math.max(0,num(state.averageSalePrices[state.gemType],Math.round(basePrice*1.1)));const cbgRate=Math.max(0,num(state.cbgQuote));const averageMode=state.saleMode==='average';document.querySelectorAll('[data-gem-type]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.gemType===state.gemType);const bt=gemTypes[btn.dataset.gemType];btn.innerHTML=`<img src="${bt.icon}" alt="">${bt.name}`});document.querySelectorAll('[data-sale-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.saleMode===state.saleMode));$('saleModeBar').classList.toggle('average',averageMode);$('averageSaleField').classList.toggle('show',averageMode);$('ratioBtn').hidden=averageMode;if(document.activeElement!==$('averageSalePrice'))$('averageSalePrice').value=averageSalePrice;$('priceTableTitle').innerHTML=`<img src="${type.icon}" alt="">${type.name}价格表`;$('synthesisRule').textContent=averageMode?`${type.rule} 均价售卖：各级售价按1级售卖均价乘以所需1级数量计算。`:type.rule;const hasStamina=state.gemType==='normal'||state.gemType==='star'||state.gemType==='dust';const headRow=$('priceTableHeadRow');if(headRow)headRow.innerHTML=`<span>等级</span><span>${hasStamina?'成本':'收购价'}（万）</span><span>需1级宝石</span><span>摆摊售价（万）</span><span>藏宝阁售价（元）</span>`;$('gemPriceTable').classList.toggle('with-stamina',hasStamina);const rows=[];type.levels.forEach(level=>{const units=compositionUnits(state.gemType,level);const purchasePrice=basePrice*units;const ratio=state.priceRatios[state.gemType][level];const stallCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.stall));const cbgCoins=stallCoins;const stallPrice=Math.floor(Math.round(stallCoins/10000*1e6)/1e6);const coinTier=stallCoins>=10000000?'coin-tier-ten-million':stallCoins>=1000000?'coin-tier-million':stallCoins>=100000?'coin-tier-hundred-thousand':stallCoins>=10000?'coin-tier-wan':'';const cbgPrice=cbgCoins/30000000*cbgRate;const cbgAvailable=level>=type.cbgMinLevel;rows.push(`<div class="price-row"><span>${level}级</span>${hasStamina?(()=>{const pw=purchasePrice/10000,sw=staminaCostCoinsFor(state.gemType,level)/10000;return `<span class="cost-merge" title="收购价 ${fmt(pw,1)}万 + 体力成本 ${fmt(sw,1)}万（合成消耗${staminaPointsFor(state.gemType,level)}点体力，按40体力=3000游戏币折算）"><b>${fmt(pw+sw,1)}</b><small>${fmt(pw,1)} + ${fmt(sw,1)}</small></span>`})():`<span>${fmtWan(purchasePrice/10000)}</span>`}<span>${fmt(units,0)}</span><span class="${coinTier}">${fmt(stallPrice,0)}</span><span class="${cbgAvailable?'':'not-available'}">${cbgAvailable?fmt(cbgPrice,1):'—'}</span></div>`)});$('gemPriceRows').innerHTML=rows.join('')}
+function renderRatioRows(){const type=gemTypes[state.gemType];$('ratioModalTitle').textContent=`${type.name}售价比例调整`;const rows=[];type.levels.forEach(level=>{const ratio=state.priceRatios[state.gemType][level];const cbgNA=level<type.cbgMinLevel;rows.push(`<div class="ratio-row"><b>${level}级</b><input type="number" inputmode="decimal" min="0" step="0.01" value="${num(ratio.stall).toFixed(2)}" data-ratio-level="${level}" data-ratio-key="stall" aria-label="${level}级售价比例">${cbgNA?'<span class="ratio-na">藏宝阁不可上架</span>':'<span class="ratio-na">藏宝阁同比例</span>'}</div>`)});$('ratioRows').innerHTML=rows.join('');document.querySelectorAll('[data-ratio-level]').forEach(input=>input.addEventListener('input',()=>{const level=input.dataset.ratioLevel;const v=Math.max(0,num(input.value));const r=state.priceRatios[state.gemType][level];r.stall=v;r.cbg=v;save();renderSynthesis()}))}
 function renderHero(c){$('dailyNet').textContent=fmt(c.dailyNet);$('dailyProfitSummary').classList.toggle('loss',c.dailyNet<0);$('dailyProfitNote').textContent=c.dailyNet>=0?`${state.zones.length}个区服合计 · 已扣手续费和点卡`:'当前经营参数预计亏损'}
 function renderZoneSelect(){const sel=$('synthesisZoneSelect'),zs=state.zones;if(!sel)return;sel.innerHTML=zs.map(z=>`<option value="${z.id}"${z.id===state.cbgZoneId?' selected':''}>${escapeHtml(z.name)}（${fmt(z.cbgQuote,0)}元）</option>`).join('')}
 function renderZones(){
