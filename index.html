@@ -102,6 +102,7 @@
 .admin-empty{padding:18px 12px;text-align:center;color:#98a1b2;font-size:12px}
 .admin-server-ts{font-size:11px;color:#8b93a4;margin:-6px 0 12px;padding-left:2px}
 .admin-revoke{margin-top:10px;width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;color:#98a1b2;font-size:12px;font-weight:650;padding:10px;cursor:pointer}.sync-chip.on{color:#087c68;border-color:#bfe8dc;background:var(--green-soft)}.sync-chip.on .sync-dot{background:#0f9f88}.sync-chip.busy .sync-dot{background:#b76e00}
+.app-version{margin-left:6px;font-size:10px;font-weight:700;color:#98a1b2;background:#f0f2f7;border:1px solid var(--line);border-radius:999px;padding:1px 7px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -109,7 +110,7 @@
   <main class="main">
     <header class="app-header">
       <img class="app-logo" src="icons/app-logo.png" alt="子霖宝石助手">
-      <h1 class="app-name">子霖宝石助手</h1>
+      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v43</span></h1>
       <button type="button" class="sync-chip" id="syncChip"><span class="admin-gear">⚙</span><span class="sync-dot" id="chipDot"></span><span id="chipText">管理员</span></button>
     </header>
     <nav class="top-tabs" aria-label="计算器页面">
@@ -553,7 +554,7 @@ $('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthe
 try{render();activateTab('synthesis',false);save(false);renderSingle();renderZoneSelectSingle()}catch(error){console.error('初始化失败',error)}initCloud();
 function flushSync(){clearTimeout(syncTimer);if(cloud&&namespace)cloudPushNow()}
 window.addEventListener('pagehide',flushSync);window.addEventListener('beforeunload',flushSync);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushSync();else if(cloud&&namespace)cloudPull()});
-let pullInterval=null;function schedulePeriodicPull(){clearInterval(pullInterval);pullInterval=setInterval(()=>{if(cloud&&namespace&&document.visibilityState==='visible'&&!document.activeElement?.dataset?.zoneInput&&!document.activeElement?.dataset?.ratioLevel)cloudPull()},20000)}schedulePeriodicPull();if('serviceWorker'in navigator&&window.isSecureContext){navigator.serviceWorker.register('./gem-calculator-sw.js').then(r=>{if(r)r.update()}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{flushSync();setTimeout(()=>window.location.reload(),300)})}
+let pullInterval=null;function schedulePeriodicPull(){clearInterval(pullInterval);pullInterval=setInterval(()=>{if(cloud&&namespace&&document.visibilityState==='visible'&&!document.activeElement?.dataset?.zoneInput&&!document.activeElement?.dataset?.ratioLevel)cloudPull()},20000)}schedulePeriodicPull();if('serviceWorker'in navigator&&window.isSecureContext){navigator.serviceWorker.register('./gem-calculator-sw.js').then(r=>{if(r)r.update()}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{flushSync();setTimeout(()=>window.location.reload(),300)});navigator.serviceWorker.ready.then(r=>{if(r.active)r.active.postMessage({type:'GET_VERSION'})}).catch(()=>{});navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='GEM_VERSION'){const el=document.getElementById('appVersion');if(el)el.textContent=e.data.version}})}
 </script>
 </body>
 </html>

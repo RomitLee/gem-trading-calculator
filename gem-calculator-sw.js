@@ -1,4 +1,11 @@
-const CACHE_NAME = 'gem-calculator-v42';
+const CACHE_NAME = 'gem-calculator-v43';
+const SW_VERSION = CACHE_NAME.replace('gem-calculator-', '');
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'GET_VERSION') {
+    event.source.postMessage({ type: 'GEM_VERSION', version: SW_VERSION });
+  }
+});
 const APP_SHELL = [
   './index.html',
   './GemTradingCalculator.webmanifest',
