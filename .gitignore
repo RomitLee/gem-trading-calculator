@@ -1,1 +1,5 @@
 .workbuddy/
+
+# 本地运维脚本（含凭据，禁止提交）
+.ssh-run.py
+.deploy-env.sh
