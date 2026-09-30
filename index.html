@@ -111,7 +111,7 @@
   <main class="main">
     <header class="app-header">
       <img class="app-logo" src="icons/app-logo.png" alt="子霖宝石助手">
-      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v52</span></h1>
+      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v53</span></h1>
       <button type="button" class="sync-chip" id="syncChip"><span class="admin-gear">⚙</span><span class="sync-dot" id="chipDot"></span><span id="chipText">管理员</span></button>
     </header>
     <nav class="top-tabs" aria-label="计算器页面">
@@ -359,7 +359,10 @@ $('zoneAdminList').addEventListener('click',e=>{const btn=e.target;const card=bt
   if(!card)return;const z=state.zones.find(x=>x.id===card.dataset.zone);if(!z)return;
   if(btn.dataset.zf==='del'){if(state.zones.length<=1){toast('至少保留一个区服');return}if(!confirm(`确定删除区服「${z.name}」？`))return;state.zones=state.zones.filter(x=>x.id!==z.id);save();render();toast(`区服「${z.name}」已删除`);return}
   if(btn.dataset.zf==='preset'){z.preset=Number(btn.dataset.preset);save();render();return}});
-const CLOUD={endpoint:'https://zilin-gem-helper.app.workbuddy.host',publishableKey:'wbpk_zFJKokpBeUNzjAqOdXl4uI_QSwg7kq7en0gwIZCKq4NmX3LlN0xXiSP'};
+// 云接口按来源域名鉴权：请求必须来自同一域名。
+// 因此始终用 location.origin —— 官方域名下直连；部署到自有域名（如腾讯云二级域名）时，
+// 由服务器把 /.cloud/ 反向代理到官方域名并改写 Origin，同步照常可用。
+const CLOUD={endpoint:location.origin,publishableKey:'wbpk_zFJKokpBeUNzjAqOdXl4uI_QSwg7kq7en0gwIZCKq4NmX3LlN0xXiSP'};
 const TOKEN_HASH='7ace42671474dd929f250fd4a627fd26934b3e26fbc06a50eb65d06648542e3f';
 const SYNC_NS_KEY='gemSyncNamespace';
 // 云端数据行 key：旧版本已弃用，仅此一行，不再做任何新旧迁移
