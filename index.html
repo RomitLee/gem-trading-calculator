@@ -111,7 +111,7 @@
   <main class="main">
     <header class="app-header">
       <img class="app-logo" src="icons/app-logo.png" alt="子霖宝石助手">
-      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v53</span></h1>
+      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v54</span></h1>
       <button type="button" class="sync-chip" id="syncChip"><span class="admin-gear">⚙</span><span class="sync-dot" id="chipDot"></span><span id="chipText">管理员</span></button>
     </header>
     <nav class="top-tabs" aria-label="计算器页面">
@@ -477,7 +477,7 @@ async function syncRatios(){
 }
 $('ratioSyncBtn').addEventListener('click',syncRatios);
 $('authClose').addEventListener('click',closeAuthModal);$('authModal').addEventListener('click',e=>{if(e.target===$('authModal'))closeAuthModal()});
-$('tokenSubmitBtn').addEventListener('click',async()=>{const input=$('authToken').value.trim();if(!input)return authErr('authError','请输入口令');if(!(window.crypto&&window.crypto.subtle))return authErr('authError','当前环境不支持加密，请刷新重试');try{const hash=await sha256Hex(input);if(hash!==TOKEN_HASH)return authErr('authError','口令不正确');namespace=hash;safeStorage.set(SYNC_NS_KEY,hash);$('authToken').value='';authErr('authError','');if(cloud){setSyncUI('busy');await cloudPull()}closeAuthModal();render();activateTab('admin');toast('口令验证成功')}catch(e){console.error(e);authErr('authError','验证失败，请重试')}});
+$('tokenSubmitBtn').addEventListener('click',async()=>{const input=$('authToken').value.trim();if(!input)return authErr('authError','请输入口令');if(!(window.crypto&&window.crypto.subtle))return authErr('authError','当前环境不支持加密，请刷新重试');try{const hash=await sha256Hex(input);if(hash!==TOKEN_HASH)return authErr('authError','口令不正确');namespace=ROW_NS;safeStorage.set(SYNC_NS_KEY,hash);$('authToken').value='';authErr('authError','');if(cloud){setSyncUI('busy');await cloudPull()}closeAuthModal();render();activateTab('admin');toast('口令验证成功')}catch(e){console.error(e);authErr('authError','验证失败，请重试')}});
 $('authToken').addEventListener('keydown',e=>{if(e.key==='Enter')$('tokenSubmitBtn').click()});
 $('addZoneBtn').addEventListener('click',()=>{const z={id:uid(),name:'新区服',cbgQuote:210,purchase:9000,margin:17,preset:4};state.zones.push(z);save();render();setTimeout(()=>{const inp=document.querySelector(`[data-zone="${z.id}"] [data-zone-input="name"]`);if(inp){inp.focus();inp.select()}},60);});
 $('exitAdminBtn').addEventListener('click',()=>{activateTab('profit')});
