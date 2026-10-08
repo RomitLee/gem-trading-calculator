@@ -16,6 +16,8 @@ from urllib.parse import urlparse, parse_qs
 
 DB_PATH = os.environ.get('GEM_DB', '/var/www/gem-data/zone_data.db')
 PORT = int(os.environ.get('GEM_API_PORT', '8787'))
+# Caddy 若跑在 Docker 里，127.0.0.1 对它不可达，需绑定 docker 网桥在宿主机一侧的网关地址
+HOST = os.environ.get('GEM_HOST', '127.0.0.1')
 TZ = timezone(timedelta(hours=8))
 
 
@@ -116,4 +118,5 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     connect().close()
-    ThreadingHTTPServer(('127.0.0.1', PORT), Handler).serve_forever()
+    sys.stderr.write('gem-api 监听 %s:%d  DB=%s\n' % (HOST, PORT, DB_PATH))
+    ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
