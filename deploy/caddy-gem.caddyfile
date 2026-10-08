@@ -2,12 +2,17 @@
 # 放到 /etc/caddy/conf.d/gem.caddyfile（主 Caddyfile 里 import /etc/caddy/conf.d/*.caddyfile）
 # __DOMAIN__ → gem.maipi.top     __ROOT__ → /var/www/gem
 
-# 云同步接口路径（页面里 CLOUD.endpoint = location.origin，故请求落在 /\.cloud/ 下）
 __DOMAIN__ {
 	encode gzip
 
-	# 1) 云同步代理：WorkBuddy 云接口按来源域名鉴权（陌生 Origin 一律 403），
-	#    这里把 /.cloud/ 反向代理到官方域名，并改写 Origin/Referer，让自建域名也能读写云端数据。
+	# 1) 自建数据接口：页面读写 /api/zone_data，由本机 127.0.0.1:8787 的 Python 服务处理
+	@api path_regexp api ^/api/
+	handle @api {
+		reverse_proxy 127.0.0.1:8787
+	}
+
+	# 2) 兼容旧版本页面：老页面走 WorkBuddy 云接口，这里照样反代到官方域名并改写 Origin。
+	#    新版本（v55 起）已改为读自建接口，此块仅为旧缓存页面兜底。
 	@cloudpath path_regexp cloud ^/\.cloud/
 	handle @cloudpath {
 		reverse_proxy https://zilin-gem-helper.app.workbuddy.host {
@@ -16,7 +21,6 @@ __DOMAIN__ {
 			header_up Referer https://zilin-gem-helper.app.workbuddy.host/
 			header_up X-Forwarded-Proto https
 
-			# 上游回的 CORS 头写的是官方域名，改回本站来源，否则浏览器拦截
 			header_down -Access-Control-Allow-Origin
 			header_down -Access-Control-Allow-Credentials
 			header_down +Access-Control-Allow-Origin "{http.request.header.Origin}"
@@ -25,7 +29,7 @@ __DOMAIN__ {
 		}
 	}
 
-	# 2) 静态站点：首页与 SW 不缓存，保证每次打开都是最新版
+	# 3) 静态站点：首页与 SW 不缓存，保证每次打开都是最新版
 	handle {
 		root * __ROOT__
 		header /index.html Cache-Control "no-store"

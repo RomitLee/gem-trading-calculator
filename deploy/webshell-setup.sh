@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
-# 子霖宝石助手 —— 服务器一键部署（腾讯云控制台「登录 / WebShell」里执行）
+# 子霖宝石助手 —— 腾讯云一键部署（在控制台「登录 / WebShell」里执行）
 #
-# 用法：在 WebShell 终端粘贴这一行回车即可
 #   curl -fsSL https://raw.githubusercontent.com/RomitLee/gem-trading-calculator/main/deploy/webshell-setup.sh | sudo bash
 #
-# 背景：本地网络只放行 80/443，无法用 SSH 推送，故改为服务器自己拉取。
+# 部署内容：页面静态文件 + 自建数据接口（Python/SQLite）+ Caddy 站点与 HTTPS
+# 本地网络只放行 80/443，无法用 SSH 推送，故改为服务器自己拉取。
 
 DOMAIN=gem.maipi.top
 ROOT=/var/www/gem
+API_DIR=/var/www/gem-api
+DATA_DIR=/var/www/gem-data
+NS='7ace42671474dd929f250fd4a627fd26934b3e26fbc06a50eb65d06648542e3f:v50'
 REPO=RomitLee/gem-trading-calculator
 BRANCH=main
 RAW=https://raw.githubusercontent.com/$REPO/$BRANCH
 TS=$(date +%Y%m%d-%H%M%S)
 
-# 国内服务器访问 GitHub 可能不通，逐个尝试镜像
 MIRRORS=(
   "$RAW"
   "https://cdn.jsdelivr.net/gh/$REPO@$BRANCH"
@@ -48,33 +50,34 @@ fetch() { # fetch <相对路径> <输出文件> [optional]
 
 CADDY_BIN=$(command -v caddy || echo /usr/bin/caddy)
 
-say "0/6 诊断现有环境"
+say "0/8 诊断现有环境"
 echo "    caddy: $($CADDY_BIN version 2>/dev/null | head -1 || echo '未找到')"
-# 定位真正加载的主配置文件
+echo "    python3: $(command -v python3 >/dev/null && python3 -V || echo '未安装')"
+echo "    systemd: $(command -v systemctl >/dev/null && echo 有 || echo 无)"
 CF=""
 for c in /etc/caddy/Caddyfile /usr/local/caddy/Caddyfile /www/server/caddy/Caddyfile /opt/caddy/Caddyfile; do
   [ -f "$c" ] && CF="$c" && break
 done
-if [ -z "$CF" ]; then
-  CF=$(ps -eo args 2>/dev/null | grep -m1 '[c]addy' | grep -o -- '--config[= ][^ ]*' | sed 's/--config[= ]//' | head -1)
-fi
 [ -z "$CF" ] && CF=/etc/caddy/Caddyfile
 echo "    主配置: $CF"
 if [ -f "$CF" ]; then
-  echo "    --- 现有主配置内容 ---"
+  echo "    --- 现有主配置 ---"
   sed 's/^/    | /' "$CF"
   echo "    --- 结束 ---"
 else
-  warn "主配置文件不存在，将新建"
+  warn "主配置不存在，将新建"
 fi
 echo "    /var/www:"; ls -1 /var/www 2>/dev/null | sed 's/^/      /' || true
-echo "    caddy 服务: $(systemctl is-active caddy 2>/dev/null || echo '非 systemd / 未运行')"
 
-say "1/6 准备目录 $ROOT"
-mkdir -p "$ROOT/icons" /var/log/caddy
-chown caddy:caddy /var/log/caddy 2>/dev/null || true
+say "1/8 准备目录"
+mkdir -p "$ROOT/icons" "$API_DIR" "$DATA_DIR" /var/log/caddy
+chown -R ubuntu:ubuntu "$DATA_DIR" 2>/dev/null || true
+if ! command -v python3 >/dev/null; then
+  warn "未找到 python3，尝试安装"
+  (apt-get update -qq && apt-get install -y -qq python3) || die "python3 安装失败，数据接口无法运行"
+fi
 
-say "2/6 下载站点文件"
+say "2/8 下载站点文件"
 fetch index.html                        "$ROOT/index.html"
 fetch gem-calculator-sw.js              "$ROOT/gem-calculator-sw.js"
 fetch GemTradingCalculator.webmanifest  "$ROOT/GemTradingCalculator.webmanifest" optional
@@ -82,16 +85,59 @@ for f in app-logo.png gem-calculator-icon-180.png gem-calculator-icon-192.png \
          gem-calculator-icon-512.png gem-dust.png gem-normal.png gem-star.png; do
   fetch "icons/$f" "$ROOT/icons/$f" optional
 done
-grep -q 'appVersion' "$ROOT/index.html" || warn "index.html 内容异常，请检查"
-ok "index.html $(wc -c < "$ROOT/index.html") 字节"
+grep -q 'appVersion' "$ROOT/index.html" || warn "index.html 内容异常"
+printf '    版本徽章: '; grep -o 'id="appVersion">[^<]*' "$ROOT/index.html" | head -1
 
-say "3/6 写入站点配置"
+say "3/8 安装数据接口（Python + SQLite）"
+fetch deploy/gem-api/server.py "$API_DIR/server.py"
+fetch deploy/gem-api/seed.py   "$API_DIR/seed.py"
+fetch deploy/gem-api/gem-api.service "$API_DIR/gem-api.service"
+if command -v systemctl >/dev/null && [ -d /run/systemd/system ]; then
+  cp "$API_DIR/gem-api.service" /etc/systemd/system/gem-api.service
+  systemctl daemon-reload
+  systemctl enable gem-api >/dev/null 2>&1 || true
+  systemctl restart gem-api
+  sleep 2
+  echo "    服务状态: $(systemctl is-active gem-api 2>/dev/null)"
+  if [ "$(systemctl is-active gem-api 2>/dev/null)" != "active" ]; then
+    journalctl -u gem-api -n 20 --no-pager 2>/dev/null | sed 's/^/    /'
+    warn "服务未起来"
+  fi
+else
+  warn "无 systemd，改用 nohup 常驻"
+  pkill -f 'gem-api/server.py' 2>/dev/null || true
+  sudo -u ubuntu nohup python3 "$API_DIR/server.py" >/var/log/gem-api.log 2>&1 &
+  sleep 2
+fi
+printf '    本机自检: '; curl -s --max-time 8 "http://127.0.0.1:8787/api/zone_data?namespace=eq.__probe__" || echo "无响应"
+echo
+
+say "4/8 导入现有云端数据"
+python3 "$API_DIR/seed.py" 2>&1 | sed 's/^/    /' || warn "导入未成功"
+printf '    本地库现状:\n'
+python3 - "$DATA_DIR/zone_data.db" <<'PY' 2>&1 | sed 's/^/      /'
+import sqlite3, sys, json
+try:
+    c = sqlite3.connect(sys.argv[1])
+    rows = list(c.execute('SELECT namespace, payload, updated_at FROM zone_data'))
+    if not rows:
+        print('空库')
+    for ns, pl, ua in rows:
+        try:
+            p = json.loads(pl or '{}')
+            print('%s  rev=%s  区服=%s  updated_at=%s' % (ns[-8:], p.get('rev'), len(p.get('zones') or []), ua))
+        except Exception:
+            print('%s  payload 解析失败' % ns[-8:])
+except Exception as e:
+    print('查询失败:', e)
+PY
+
+say "5/8 写入 Caddy 配置"
 mkdir -p /etc/caddy/conf.d
 fetch deploy/caddy-gem.caddyfile /tmp/gem.caddyfile
 sed -e "s|__DOMAIN__|$DOMAIN|g" -e "s|__ROOT__|$ROOT|g" /tmp/gem.caddyfile > /etc/caddy/conf.d/gem.caddyfile
 ok "站点配置 → /etc/caddy/conf.d/gem.caddyfile"
 
-# 主配置：摘掉已存在的 gem.maipi.top 站点块（避免 duplicate site address），再确保 import conf.d
 if [ -f "$CF" ]; then
   cp "$CF" "$CF.bak.$TS"
   ok "主配置已备份 → $CF.bak.$TS"
@@ -122,8 +168,6 @@ PY
     else
       warn "无 python3，跳过摘除；若报 duplicate site address 请手动编辑 $CF"
     fi
-  else
-    ok "主配置中没有 $DOMAIN 站点块，无需摘除"
   fi
   grep -q 'conf.d' "$CF" || printf '\n# [gem-deploy] 子霖宝石助手\nimport /etc/caddy/conf.d/*.caddyfile\n' >> "$CF"
 else
@@ -134,7 +178,7 @@ fi
 echo "    --- 修改后的主配置 ---"
 sed 's/^/    | /' "$CF"
 
-say "4/6 校验并重载 Caddy"
+say "6/8 校验并重载 Caddy"
 if ! "$CADDY_BIN" validate --config "$CF" --adapter caddyfile 2>&1 | sed 's/^/    /'; then
   warn "校验失败，回滚主配置"
   [ -f "$CF.bak.$TS" ] && cp "$CF.bak.$TS" "$CF"
@@ -144,20 +188,22 @@ ok "配置校验通过"
 systemctl reload caddy 2>/dev/null || "$CADDY_BIN" reload --config "$CF" --adapter caddyfile || service caddy reload || true
 sleep 3
 
-say "5/6 自检"
-printf '    本地回环 HTTP : '; curl -s -o /dev/null -w "%{http_code}\n" --max-time 10 -H "Host: $DOMAIN" http://127.0.0.1/ || echo 失败
-printf '    文件版本     : '; grep -o 'id="appVersion">[^<]*' "$ROOT/index.html" | head -1
+say "7/8 自检"
+printf '    本地 HTTP : '; curl -s -o /dev/null -w "%{http_code}\n" --max-time 10 -H "Host: $DOMAIN" http://127.0.0.1/ || echo 失败
+printf '    本地接口 : '; curl -s --max-time 10 -H "Host: $DOMAIN" "http://127.0.0.1/api/zone_data?namespace=eq.$NS" | head -c 150; echo
 
-say "6/6 证书状态（HTTPS 首次签发需 1~2 分钟）"
+say "8/8 证书状态（首次签发需 1~2 分钟）"
 code=000
 for i in 1 2 3 4 5 6; do
   code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 12 "https://$DOMAIN/" 2>/dev/null || echo 000)
-  printf '    第 %d 次探测 https://%s/ → %s\n' "$i" "$DOMAIN" "$code"
+  printf '    第 %d 次 https://%s/ → %s\n' "$i" "$DOMAIN" "$code"
   [ "$code" = "200" ] && break
   sleep 20
 done
-if [ "$code" != "200" ]; then
-  warn "HTTPS 仍未就绪，下面是 Caddy 最近日志（请把这段发我）"
+if [ "$code" = "200" ]; then
+  printf '    线上接口 : '; curl -s --max-time 12 "https://$DOMAIN/api/zone_data?namespace=eq.$NS" | head -c 200; echo
+else
+  warn "HTTPS 未就绪，Caddy 最近日志（请把这段发我）："
   journalctl -u caddy -n 30 --no-pager 2>/dev/null | sed 's/^/    /' || tail -30 /var/log/caddy/gem.log 2>/dev/null | sed 's/^/    /'
 fi
 
@@ -165,9 +211,10 @@ cat <<EOF
 
 ============================================
  部署流程结束
- 访问： https://$DOMAIN/
- 右上角徽章应为 v53
- 云同步： /.cloud/ 已反代到官方接口并改写 Origin
- 回滚：  cp $CF.bak.$TS $CF && systemctl reload caddy
+ 页面   https://$DOMAIN/        （徽章应为 v55）
+ 数据   $DATA_DIR/zone_data.db  （自建 SQLite，不再走 WorkBuddy 云）
+ 接口   127.0.0.1:8787，经 Caddy 以 /api/ 暴露
+ 日志   journalctl -u gem-api -f
+ 回滚   cp $CF.bak.$TS $CF && systemctl reload caddy
 ============================================
 EOF

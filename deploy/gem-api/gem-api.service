@@ -1,0 +1,15 @@
+[Unit]
+Description=子霖宝石助手 数据接口 (gem-api)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/var/www/gem-api
+ExecStart=/usr/bin/python3 /var/www/gem-api/server.py
+Restart=always
+RestartSec=3
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
