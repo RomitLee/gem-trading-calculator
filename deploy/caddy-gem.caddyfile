@@ -1,25 +1,27 @@
 # 子霖宝石助手 —— Caddy 站点配置（服务器已装 Caddy，HTTPS 证书自动签发）
-# 放到 /etc/caddy/conf.d/gem.caddyfile（或在主 Caddyfile 里 import /etc/caddy/conf.d/*.caddyfile）
+# 放到 /etc/caddy/conf.d/gem.caddyfile（主 Caddyfile 里 import /etc/caddy/conf.d/*.caddyfile）
 # __DOMAIN__ → gem.maipi.top     __ROOT__ → /var/www/gem
 
+# 云同步接口路径（页面里 CLOUD.endpoint = location.origin，故请求落在 /\.cloud/ 下）
 __DOMAIN__ {
 	encode gzip
 
-	# 1) 云同步代理：WorkBuddy 云接口只接受官方域名的来源，
-	#    这里把 /.cloud/ 反向代理到官方域名，改写 Origin/Referer 与 CORS 响应头，
-	#    让页面在自建域名下也能正常读写云端数据。
-	handle /.cloud/* {
+	# 1) 云同步代理：WorkBuddy 云接口按来源域名鉴权（陌生 Origin 一律 403），
+	#    这里把 /.cloud/ 反向代理到官方域名，并改写 Origin/Referer，让自建域名也能读写云端数据。
+	@cloudpath path_regexp cloud ^/\.cloud/
+	handle @cloudpath {
 		reverse_proxy https://zilin-gem-helper.app.workbuddy.host {
 			header_up Host zilin-gem-helper.app.workbuddy.host
 			header_up Origin https://zilin-gem-helper.app.workbuddy.host
 			header_up Referer https://zilin-gem-helper.app.workbuddy.host/
 			header_up X-Forwarded-Proto https
 
-			# 上游返回的 CORS 头写的是官方域名，需改回本站来源，否则浏览器拦截
+			# 上游回的 CORS 头写的是官方域名，改回本站来源，否则浏览器拦截
 			header_down -Access-Control-Allow-Origin
 			header_down -Access-Control-Allow-Credentials
 			header_down +Access-Control-Allow-Origin "{http.request.header.Origin}"
 			header_down +Access-Control-Allow-Credentials "true"
+			header_down +Access-Control-Expose-Headers "content-range, x-wb-total-count"
 		}
 	}
 
