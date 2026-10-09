@@ -92,7 +92,8 @@
 .admin-status{padding:9px 12px;border:1px dashed var(--line);border-radius:12px;background:#fafbfd;font-size:11px;color:#7c8495;display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .admin-status .sync-dot{width:7px;height:7px;border-radius:50%;background:#c9cfda;flex:0 0 auto}
 .admin-status.on .sync-dot{background:#0f9f88}.admin-status.busy .sync-dot{background:#b76e00}
-.admin-section-title{margin:0 0 8px 2px;color:#6f788c;font-size:11px;font-weight:650}
+.admin-section-title{margin:0 0 8px 2px;color:#6f788c;font-size:11px;font-weight:650;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.admin-section-hint{font-weight:400;color:#9aa3b2;font-size:10px}
 .admin-history{max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fafbfd;margin-bottom:12px}
 .admin-history-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);font-size:12px}
 .admin-history-row:last-child{border-bottom:0}
@@ -111,7 +112,7 @@
   <main class="main">
     <header class="app-header">
       <img class="app-logo" src="icons/app-logo.png" alt="子霖宝石助手">
-      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v57</span></h1>
+      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v58</span></h1>
       <button type="button" class="sync-chip" id="syncChip"><span class="admin-gear">⚙</span><span class="sync-dot" id="chipDot"></span><span id="chipText">管理员</span></button>
     </header>
     <nav class="top-tabs" aria-label="计算器页面">
@@ -418,7 +419,11 @@ function initCloud(){
 let serverTs=null;
 async function cloudPull(opts){const force=!!(opts&&opts.force);if(!cloud)return false;try{let res=await cloud.database.from('zone_data').select('payload,updated_at').eq('namespace',namespace).maybeSingle();if(!res||res.error)res=await cloud.database.from('zone_data').select('payload').eq('namespace',namespace).maybeSingle();const{data,error}=res||{};if(error){setSyncUI('off');if(!force)scheduleRetry(cloudPull,30000);return false}if(data&&data.updated_at){const parsed=Date.parse(data.updated_at);if(!Number.isNaN(parsed))serverTs=parsed}if(data&&data.payload){const rp=data.payload,remoteRev=Number(rp.rev)||0,syncedRev=Number(state.syncedRev)||0,remoteTs=Number(rp.updatedAt)||0,syncedTs=Number(state.syncedAt)||0,localRev=Number(state.rev)||0,localTs=Number(state.updatedAt)||0;const remoteNewer=remoteRev>localRev||(remoteRev===localRev&&remoteTs>localTs+100)||(force&&(remoteRev>syncedRev||remoteTs>syncedTs));if(remoteNewer){if(remoteRev>syncedRev||remoteTs>syncedTs+100||force){applyRemote(rp,{force});setSyncUI('on')}else setSyncUI('on')}else if(remoteRev<localRev||localRev>syncedRev){if(force&&localRev>syncedRev){applyRemote(rp,{force});setSyncUI('on')}else{console.warn('云端版本落后/本机有未推送改动，回推恢复');setSyncUI('busy');scheduleCloudPush()}}else{if(force){applyRemote(rp,{force:true});renderAdminIfOpen()}setSyncUI('on')}}else{await cloudPushNow();setSyncUI('on')}return true}catch(e){console.error('云端读取失败',e);setSyncUI('off');if(!force)scheduleRetry(cloudPull,30000);return false}}
 function renderAdminIfOpen(){if($('adminModal')&&$('adminModal').classList.contains('show'))renderAdmin()}
-async function syncBoth(kind){if(!namespace)return false;if(!cloud){setSyncUI('off');scheduleCloudPushRetry();return false}setSyncUI('busy');const localRev=Number(state.rev)||0,syncedRev=Number(state.syncedRev)||0;let pushed=true;if(kind==='ratio'||localRev>syncedRev)pushed=await cloudPushNow(kind||'auto');const ok=await cloudPull({force:!!pushed});setSyncUI(ok&&pushed?'on':(ok?'on':'off'));renderAdminIfOpen();return ok&&pushed}
+// kind 语义：
+//   'ratio' —— 售价比例弹框的【同步】按钮，唯一会产生「手动同步」记录的入口
+//   'force' —— 强制推送但不写历史（管理面板「立即同步」）
+//   'auto'  —— 自动同步，仅本地版本更新时才推送，不写历史
+async function syncBoth(kind){if(!namespace)return false;if(!cloud){setSyncUI('off');scheduleCloudPushRetry();return false}setSyncUI('busy');const localRev=Number(state.rev)||0,syncedRev=Number(state.syncedRev)||0;let pushed=true;if(kind==='ratio'||kind==='force'||localRev>syncedRev)pushed=await cloudPushNow(kind||'auto');const ok=await cloudPull({force:!!pushed});setSyncUI(ok&&pushed?'on':(ok?'on':'off'));renderAdminIfOpen();return ok&&pushed}
 async function refreshFromCloud(){if(!namespace||!cloud)return false;setSyncUI('busy');renderAdminIfOpen();const ok=await syncBoth('auto');renderAdminIfOpen();return ok}
 function scheduleCloudPush(){if(!namespace)return;clearTimeout(syncTimer);setSyncUI('busy');syncTimer=setTimeout(async()=>{const ok=await cloudPushNow();if(!ok)scheduleCloudPushRetry()},700)}
 let pushRetryTimer=null;
@@ -457,7 +462,10 @@ function fmtSyncTime(ts){const d=new Date(Number(ts)||Date.now());const p=n=>Str
 let lastLocalPushT=0;
 // 同步历史只以云端为唯一真相源：syncLog=最近一次从云端读到的历史（仅内存，不落 localStorage，拉取后覆盖）；pendingLog=本次会话新产生的待上传记录
 let syncLog=[],pendingLog=[];
-function pushSyncHistory(kind){if(kind!=='ratio')return false;const now=Date.now();const last=pendingLog[0];const localTop=!!(last&&lastLocalPushT>0&&Math.abs(Number(last.t)-lastLocalPushT)<50);if(localTop&&now-lastLocalPushT<3000){last.t=now;lastLocalPushT=now;return true}pendingLog.unshift({t:now,kind:'ratio'});lastLocalPushT=now;if(pendingLog.length>30)pendingLog.length=30;return true}
+// 「手动同步」记录的唯一入口：只有售价比例弹框的【同步】按钮会先置 ratioSyncIntent=true。
+// 任何自动同步、进入页面、区服改动、管理面板「立即同步」都不会置位，因此绝不会写历史。
+let ratioSyncIntent=false;
+function pushSyncHistory(kind){if(kind!=='ratio'||!ratioSyncIntent)return false;ratioSyncIntent=false;const now=Date.now();const last=pendingLog[0];const localTop=!!(last&&lastLocalPushT>0&&Math.abs(Number(last.t)-lastLocalPushT)<50);if(localTop&&now-lastLocalPushT<3000){last.t=now;lastLocalPushT=now;return true}pendingLog.unshift({t:now,kind:'ratio'});lastLocalPushT=now;if(pendingLog.length>30)pendingLog.length=30;return true}
 function adoptRemoteHistory(list){if(!Array.isArray(list))return false;const clean=list.map(h=>({t:Number(h&&h.t)||0,kind:(h&&h.kind)||'auto'})).filter(h=>h.t>0&&h.kind==='ratio').sort((a,b)=>b.t-a.t).slice(0,30);const changedNow=JSON.stringify(clean)!==JSON.stringify(syncLog);syncLog=clean;return changedNow}
 let pushRetryCount=0;
 function scheduleCloudPushRetry(){clearTimeout(pushRetryTimer);if(!namespace||pushRetryCount>=10)return;pushRetryCount++;pushRetryTimer=setTimeout(async()=>{const ok=await cloudPushNow();if(ok)pushRetryCount=0;else scheduleCloudPushRetry()},8000)}
@@ -479,15 +487,16 @@ function renderAdmin(){
   const hist=panelLoading?[]:syncLog;
   const cls=busyState==='busy'?'busy':(cloud?'on':'off');
   const statusText=!cloud?'云组件未就绪，改动已存本机':(busyState==='busy'?'正在拉取云端数据…':'已连接云端 · 打开即自动拉取');
-  const rows=hist.length?hist.map(h=>`<div class="admin-history-row"><b>${fmtSyncTime(h.t)}</b><span class="hkind ratio">手动同步</span></div>`).join(''):(panelLoading?'<div class="admin-empty">正在从云端读取…</div>':'<div class="admin-empty">暂无同步记录（点「立即同步」产生记录）</div>');
+  const rows=hist.length?hist.map(h=>`<div class="admin-history-row"><b>${fmtSyncTime(h.t)}</b><span class="hkind ratio">手动同步</span></div>`).join(''):(panelLoading?'<div class="admin-empty">正在从云端读取…</div>':'<div class="admin-empty">暂无同步记录（只有「售价比例」弹框里的【同步】按钮会产生记录）</div>');
   const lastTxt=hist.length?fmtSyncTime(hist[0].t):'—';
   body.innerHTML=`<div class="admin-status ${cls}"><span class="sync-dot"></span><span>${statusText} · 上次同步 ${lastTxt}</span></div>
     ${serverTs?`<div class="admin-server-ts">云端记录时间 ${fmtSyncTime(serverTs)}（服务器时间，两台设备一致）</div>`:''}
-    <div class="admin-section-title">历史同步记录（${hist.length}）</div>
+    <div class="admin-section-title">历史同步记录（${hist.length}）<span class="admin-section-hint">仅在「售价比例」弹框点【同步】时记录</span></div>
     <div class="admin-history">${rows}</div>
     <div class="modal-actions"><button type="button" class="primary" id="adminSyncNow">立即同步</button><button type="button" class="secondary" id="adminGotoZones">区服管理</button></div>
     <button type="button" class="admin-revoke" id="adminRevoke">清除本机授权</button>`;
-  $('adminSyncNow').addEventListener('click',async()=>{if(!cloud){toast('云组件未就绪');return}setSyncUI('busy');renderAdmin();const ok=await syncBoth('ratio');renderAdmin();toast(ok?'已与云端双向同步':'同步失败，将自动重试');if(!ok)scheduleCloudPushRetry()});
+  // 这里只做「立刻把本机改动推上去并拉回最新」，不写同步历史
+  $('adminSyncNow').addEventListener('click',async()=>{if(!cloud){toast('云组件未就绪');return}setSyncUI('busy');renderAdmin();const ok=await syncBoth('force');renderAdmin();toast(ok?'已与云端双向同步':'同步失败，将自动重试');if(!ok)scheduleCloudPushRetry()});
   $('adminGotoZones').addEventListener('click',()=>{closeAdminModal();activateTab('admin')});
   $('adminRevoke').addEventListener('click',()=>{if(!confirm('清除本机口令授权？云端数据不会删除，清除后本机回到只读模式。'))return;namespace=null;safeStorage.set(SYNC_NS_KEY,'');clearTimeout(syncTimer);syncLog=[];pendingLog=[];setSyncUI('off');renderAdmin();toast('已清除本机授权')});
 }
@@ -509,7 +518,9 @@ async function syncRatios(){
   if(!namespace){closeRatioModal();toast('仅保存到本机 · 输入管理口令后才能同步给所有人');return}
   if(!cloud){closeRatioModal();setSyncUI('off');toast('云组件未就绪，已存本机，将自动重试');scheduleCloudPushRetry();return}
   setSyncUI('busy');clearTimeout(syncTimer);
+  ratioSyncIntent=true;          // 唯一授权点：售价比例弹框的【同步】按钮
   const ok=await cloudPushNow('ratio');
+  ratioSyncIntent=false;
   closeRatioModal();
   if(ok)toast('已同步到云端');
   else{toast('同步失败，已存本机，将自动重试');scheduleCloudPushRetry()}
