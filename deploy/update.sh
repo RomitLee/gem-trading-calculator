@@ -57,7 +57,8 @@ for f in app-logo.png gem-calculator-icon-180.png gem-calculator-icon-192.png \
          gem-calculator-icon-512.png gem-dust.png gem-normal.png gem-star.png; do
   fetch "icons/$f" "$WORK/new/icons/$f" optional
 done
-NEW_VER=$(grep -o 'id="appVersion">[^<]*' "$WORK/new/index.html" | head -1 | sed 's/.*>//')
+RAW=$(grep -o 'id="appVersion">[^<]*' "$WORK/new/index.html" | head -1)
+NEW_VER="${RAW##*>}"
 [ -n "$NEW_VER" ] || die "下载的 index.html 里找不到版本徽章，可能拉到的不是本项目的文件"
 ok "待更新版本: $NEW_VER"
 
@@ -113,7 +114,12 @@ echo "    宿主机路径    : ${STATIC_HOST:-无挂载}"
 
 say "3/5 更新前备份"
 mkdir -p "$HOST_ROOT"
-OLD_VER=$([ -f "$HOST_ROOT/index.html" ] && grep -o 'id="appVersion">[^<]*' "$HOST_ROOT/index.html" | head -1 | sed 's/.*>//' || echo "未知")
+if [ -f "$HOST_ROOT/index.html" ]; then
+  RAW=$(grep -o 'id="appVersion">[^<]*' "$HOST_ROOT/index.html" | head -1)
+  OLD_VER="${RAW##*>}"
+else
+  OLD_VER="未知"
+fi
 mkdir -p "$HOST_ROOT"
 cp -a "$HOST_ROOT/index.html" "$HOST_ROOT/index.html.bak.$TS" 2>/dev/null && ok "已备份旧版 → $HOST_ROOT/index.html.bak.$TS（${OLD_VER:-未知}）" || warn "备份失败（可能首次部署）"
 
@@ -138,7 +144,8 @@ fi
 say "5/5 线上自检"
 LIVE=""
 for i in 1 2 3; do
-  LIVE=$(curl -s --max-time 12 "https://$DOMAIN/" | grep -o 'id="appVersion">v[0-9]*' | head -1 | sed 's/.*>v/v')
+  RAW=$(curl -s --max-time 12 "https://$DOMAIN/" | grep -o 'id="appVersion">v[0-9]*' | head -1)
+  LIVE="${RAW##*>}"
   if [ -n "$LIVE" ]; then
     printf '    https://%s/  →  %s\n' "$DOMAIN" "$LIVE"
     break
