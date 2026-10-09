@@ -72,12 +72,12 @@
 .single-field{min-width:0}.single-field label{display:block;margin:0 0 6px 2px;color:#6f788c;font-size:11px;font-weight:650}
 .single-field-row input{width:100%;height:46px;padding:0 13px;border:1px solid var(--line);border-radius:13px;outline:0;background:#f8f9fc;color:var(--ink);font-size:15px;font-weight:750}.single-field-row input:focus{border-color:#8278ef;background:#fff;box-shadow:0 0 0 3px rgba(102,88,235,.1)}
 .single-quick{grid-column:1/-1}.single-full{grid-column:1/-1}.single-purchase-quick{display:flex;gap:6px;overflow:auto;padding-bottom:2px}.single-purchase-quick button{flex:0 0 auto;padding:6px 10px;border:0;border-radius:999px;background:#f0f2f7;color:#697286;font-size:11px;cursor:pointer}.single-purchase-quick button.active{background:var(--navy);color:#fff}
-.single-preset{grid-column:1/-1}.preset-zone{display:grid;grid-template-columns:1fr 1fr;gap:8px}.preset-zone button{height:43px;border:1px solid var(--line);border-radius:13px;background:#f7f8fb;color:#5f687c;font-weight:700;cursor:pointer;font-size:13px}.preset-zone button.active{border-color:#7970ed;background:var(--violet-soft);color:#4e45c9;box-shadow:inset 0 0 0 1px rgba(102,88,235,.08)}
+.single-preset{grid-column:1/-1}.preset-zone{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.preset-zone button{height:43px;border:1px solid var(--line);border-radius:13px;background:#f7f8fb;color:#5f687c;font-weight:700;cursor:pointer;font-size:13px}.preset-zone button.active{border-color:#7970ed;background:var(--violet-soft);color:#4e45c9;box-shadow:inset 0 0 0 1px rgba(102,88,235,.08)}
 .single-results{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
 .single-results .result{min-width:0;padding:13px;border-radius:14px;background:#f7f8fb}.single-results .result.highlight{background:var(--green-soft)}.single-results .result.warning{background:var(--amber-soft)}.single-results .result-label{color:#858da0;font-size:11px}.single-results .result-value{margin-top:5px;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}.single-results .result-value small{margin-left:3px;color:#7f889a;font-size:10px;font-weight:600}.single-results .result.highlight .result-value{color:#087c68}
 .zone-admin-head{display:flex;align-items:center;gap:6px;margin-bottom:7px}.zone-admin-head input{flex:1;min-width:0;height:31px;padding:0 9px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-size:12px;font-weight:650}.zone-admin-head .zone-del{flex:0 0 auto;height:26px;width:auto;padding:0 8px;font-size:10px;margin-left:0}
 .zone-admin-net{flex:0 0 auto;min-width:44px;text-align:right;font-size:11px;font-weight:750;font-variant-numeric:tabular-nums;color:#087c68}.zone-admin-net.loss{color:#c63838}
-.zone-preset-mini{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:2px;border-radius:8px;background:#e8ebf2}.zone-preset-mini button{height:25px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:#737c8f;font-size:10.5px;font-weight:700;cursor:pointer}.zone-preset-mini button.active{background:linear-gradient(135deg,var(--navy),#5149ce);color:#fff}
+.zone-preset-mini{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:2px;border-radius:8px;background:#e8ebf2}.zone-preset-mini button{height:25px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:#737c8f;font-size:10.5px;font-weight:700;cursor:pointer}.zone-preset-mini button.active{background:linear-gradient(135deg,var(--navy),#5149ce);color:#fff}
 .zone-admin-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.zone-admin-fields .field label{font-size:9px;margin-bottom:2px}.zone-admin-fields .input-wrap input{height:31px;font-size:13px;padding-top:0;padding-bottom:0}
 .add-zone-btn{display:block;width:100%;height:40px;margin-top:4px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:#9aa1b0;font-size:13px;font-weight:700;cursor:pointer}
 .text-button.danger{color:#c63838}
@@ -111,7 +111,7 @@
   <main class="main">
     <header class="app-header">
       <img class="app-logo" src="icons/app-logo.png" alt="子霖宝石助手">
-      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v56</span></h1>
+      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v57</span></h1>
       <button type="button" class="sync-chip" id="syncChip"><span class="admin-gear">⚙</span><span class="sync-dot" id="chipDot"></span><span id="chipText">管理员</span></button>
     </header>
     <nav class="top-tabs" aria-label="计算器页面">
@@ -164,7 +164,7 @@
         <div class="sync-bar" id="syncBar"><span class="sync-dot" id="syncDot"></span><span id="syncText">数据仅存本机</span><button type="button" class="sync-link" id="syncBtn">管理区服</button></div>
         <div class="zone-label">各区服净利（输入每天收购金额）</div>
         <div class="zone-breakdown" id="zoneBreakdown"></div>
-        <div class="formula">藏宝阁到账＝各区服（收购额 × 利润率 × 95% ÷ 3000万 × 该区汇率）之和；净利润＝到账合计－所有账号点卡。点卡按每号每小时0.6元、每天24小时计。保本线与目标反推按当前各区收购占比加权计算。</div>
+        <div class="formula">藏宝阁到账＝各区服（收购额 × 利润率 × 95% ÷ 3000万 × 该区汇率）之和；净利润＝到账合计－所有账号点卡。点卡按每号每小时0.6元、每天24小时＝每号14.4元/天，账号配置几收即几个号。保本线与目标反推按当前各区收购占比加权计算。</div>
       </div>
       <div class="card">
         <div class="card-title"><h2>利润明细</h2><span id="accountHint2">0个账号</span></div>
@@ -229,7 +229,7 @@
           <div class="single-field single-full"><label>实际利润率（%）</label><div class="single-field-row"><input id="singleMargin" type="number" inputmode="decimal" min="0" step="0.1" placeholder="百分比"></div></div>
           <div class="single-field single-preset">
             <label>账号配置</label>
-            <div class="preset-zone"><button type="button" data-single-preset="3" class="active">2收1卖 · 3个号</button><button type="button" data-single-preset="4">3收1卖 · 4个号</button></div>
+            <div class="preset-zone"><button type="button" data-single-preset="1" title="1个号 · 点卡14.4元/天">1收</button><button type="button" data-single-preset="2" title="2个号 · 点卡28.8元/天">2收</button><button type="button" data-single-preset="3" class="active" title="3个号 · 点卡43.2元/天">3收</button></div>
           </div>
         </div>
         <div class="single-results" id="singleResults">
@@ -240,7 +240,7 @@
           <div class="result highlight"><div class="result-label">不亏本收购线</div><div class="result-value" id="sBreak">0<small>万</small></div></div>
           <div class="result warning"><div class="result-label">距离保本线</div><div class="result-value" id="sGap">0<small>万</small></div></div>
         </div>
-        <div class="formula">藏宝阁到账＝收购额 × 利润率 × 95% ÷ 3000万 × 区服汇率；净利润＝藏宝阁到账－账号点卡（0.6元/小时 × 24小时 × 账号数）。手续费固定5%。</div>
+        <div class="formula">藏宝阁到账＝收购额 × 利润率 × 95% ÷ 3000万 × 区服汇率；净利润＝藏宝阁到账－账号点卡。点卡每个号 0.6元/小时 × 24小时 = 14.4元/天，几收就是几个号：1收 14.4元、2收 28.8元、3收 43.2元。手续费固定5%。</div>
       </div>
       <div class="card">
         <div class="card-title"><h2>目标利润反推</h2><span>想赚多少，就算要收多少</span></div>
@@ -329,14 +329,23 @@ const fmtSmart=value=>{const n=num(value);return n>=10000?fmt(n,0):n>=1000?fmt(n
 const fmtWan=value=>num(value).toLocaleString('zh-CN',{minimumFractionDigits:0,maximumFractionDigits:1});
 const uid=()=>'z'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-if(!Array.isArray(state.zones)||!state.zones.length)state.zones=[{id:uid(),name:'秦淮风光',cbgQuote:num(state.cbgQuote,210),purchase:9000,margin:17,preset:4}];
-state.zones=state.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));
+// 账号配置：【1收】【2收】【3收】—— 几「收」就是几个账号的点卡。
+// 点卡：每小时 6 点 = 0.6 元，一天 24 小时 = 每个号 14.4 元/天。
+//   1收 = 1 个号 = 14.4 元/天    2收 = 2 个号 = 28.8 元/天    3收 = 3 个号 = 43.2 元/天
+const CARD_PER_ACCOUNT=14.4;
+function accountsOf(v){const n=Math.round(num(v,3));return n===1?1:n===2?2:3}
+// 旧版本用的是「几收几卖」的总号数：3 个号(2收1卖) → 2收；4 个号(3收1卖) → 3收。保留「收」的个数。
+function migrateLegacyPreset(v){const n=Math.round(num(v,4));return n>=4?3:2}
+if(!Array.isArray(state.zones)||!state.zones.length)state.zones=[{id:uid(),name:'秦淮风光',cbgQuote:num(state.cbgQuote,210),purchase:9000,margin:17,preset:3}];
+state.zones=state.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:accountsOf(z.preset)}));
 if(!state.zones.some(z=>z.id===state.activeZoneId))state.activeZoneId=state.zones[0].id;
 delete state.purchase;delete state.margin;delete state.buyAccounts;delete state.sellAccounts;delete state.syncHistory;
 if(state.syncedAt===undefined)state.syncedAt=Number(state.updatedAt)||0;
 if(!Number(state.rev))state.rev=1;if(!Number(state.syncedRev))state.syncedRev=0;
 if(!state.single||typeof state.single!=='object')state.single={};
-state.single={quote:num(state.single.quote,210),purchase:num(state.single.purchase,9000),margin:num(state.single.margin,17),preset:Number(state.single.preset)===3?3:4,targetProfit:num(state.single.targetProfit,40),zoneId:state.single.zoneId||''};
+state.single={quote:num(state.single.quote,210),purchase:num(state.single.purchase,9000),margin:num(state.single.margin,17),preset:accountsOf(state.single.preset),targetProfit:num(state.single.targetProfit,40),zoneId:state.single.zoneId||''};
+// 一次性迁移：旧「几收几卖」总号数 → 新的「几收」（只执行一次）
+if(Number(state.presetVersion)!==2){state.zones.forEach(z=>{z.preset=migrateLegacyPreset(z.preset)});state.single.preset=migrateLegacyPreset(state.single.preset);state.presetVersion=2}
 if(!state.zones.some(z=>z.id===state.single.zoneId)){const pref=state.zones.find(z=>z.name==='秦淮风光')||state.zones[0];state.single.zoneId=pref.id;}
 const gemTypes={
   normal:{name:'普通宝石',icon:'icons/gem-normal.png',levels:[2,3,4,5,6,7,8,9,10,11,12],cbgMinLevel:8,rule:'普通宝石：2个低一级宝石合成1个高一级宝石。藏宝阁最低上架8级；摆摊售价直接去掉万位后的小数，藏宝阁售价保留1位小数。'},
@@ -351,10 +360,10 @@ function dataFingerprint(){const c={...state};delete c.updatedAt;delete c.synced
 function bumpRev(){state.rev=Math.max(Number(state.rev)||0,Number(state.syncedRev)||0)+1;state.updatedAt=Date.now()}
 function save(touch){const fp=dataFingerprint();const changed=lastFp!==null&&fp!==lastFp;lastFp=fp;if(changed){if(touch!==false)bumpRev();if(!state.updatedAt)state.updatedAt=Date.now()}safeStorage.set('gemCalculatorSettings',JSON.stringify(state));if(changed)scheduleCloudPush()}
 let toastTimer=null;function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),1800)}
-$('zoneBreakdown').addEventListener('input',e=>{const inp=e.target;if(!inp.dataset.zoneInput)return;const row=inp.closest('[data-zone]');if(!row)return;const z=state.zones.find(x=>x.id===row.dataset.zone);if(!z)return;z.purchase=Math.max(0,num(inp.value));save();refreshProfitNumbers(true);const za=Math.max(0,num(z.preset,4)),zp=z.purchase,zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const span=row.querySelector('.zp-net');if(span){span.textContent=`${net>=0?'+':''}${fmt(net)} 元/天`;span.className=`zp-net ${net>=0?'win':'loss'}`}});
+$('zoneBreakdown').addEventListener('input',e=>{const inp=e.target;if(!inp.dataset.zoneInput)return;const row=inp.closest('[data-zone]');if(!row)return;const z=state.zones.find(x=>x.id===row.dataset.zone);if(!z)return;z.purchase=Math.max(0,num(inp.value));save();refreshProfitNumbers(true);const za=Math.max(0,accountsOf(z.preset)),zp=z.purchase,zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const span=row.querySelector('.zp-net');if(span){span.textContent=`${net>=0?'+':''}${fmt(net)} 元/天`;span.className=`zp-net ${net>=0?'win':'loss'}`}});
 $('zoneAdminList').addEventListener('input',e=>{const inp=e.target;if(!inp.dataset.zoneInput)return;const card=inp.closest('[data-zone]');if(!card)return;const z=state.zones.find(x=>x.id===card.dataset.zone);if(!z)return;const k=inp.dataset.zoneInput;if(k==='name'){z.name=inp.value.trim()||'未命名'}else{z[k]=Math.max(0,num(inp.value))}save();refreshProfitNumbers()});
 $('zoneAdminList').addEventListener('click',e=>{const btn=e.target;const card=btn.closest('[data-zone]');
-  if(btn.id==='addZoneBtn'){const z={id:uid(),name:'新区服',cbgQuote:210,purchase:9000,margin:17,preset:4};state.zones.push(z);save();render();setTimeout(()=>{const inp=document.querySelector(`[data-zone="${z.id}"] [data-zone-input="name"]`);if(inp){inp.focus();inp.select()}},60);return}
+  if(btn.id==='addZoneBtn'){const z={id:uid(),name:'新区服',cbgQuote:210,purchase:9000,margin:17,preset:3};state.zones.push(z);save();render();setTimeout(()=>{const inp=document.querySelector(`[data-zone="${z.id}"] [data-zone-input="name"]`);if(inp){inp.focus();inp.select()}},60);return}
   if(!card)return;const z=state.zones.find(x=>x.id===card.dataset.zone);if(!z)return;
   if(btn.dataset.zf==='del'){if(state.zones.length<=1){toast('至少保留一个区服');return}if(!confirm(`确定删除区服「${z.name}」？`))return;state.zones=state.zones.filter(x=>x.id!==z.id);save();render();toast(`区服「${z.name}」已删除`);return}
   if(btn.dataset.zf==='preset'){z.preset=Number(btn.dataset.preset);save();render();return}});
@@ -370,7 +379,7 @@ async function sha256Hex(text){const buf=await crypto.subtle.digest('SHA-256',ne
 function setSyncUI(status,text,target){busyState=status;const chip=$('syncChip'),bar=$('syncBar');chip.classList.remove('on','busy');bar.classList.remove('on','busy');if(status==='on'||status==='busy'){chip.classList.add(status);bar.classList.add(status)}const label=namespace?(status==='on'?'已同步':status==='busy'?'同步中':'同步失败'):'只读';$('chipText').textContent=text||(namespace?'管理员':'只读');$('syncChip').title=label;const targetBar=target==='admin'?$('adminSyncText'):$('syncText');targetBar.textContent=namespace?(status==='on'?'已同步到云端':status==='busy'?'正在同步…':'同步失败，将自动重试'):(target==='admin'?'输入口令后可编辑并跨设备同步':'已读取服务器最新数据 · 输入口令后可修改');$('syncBtn').textContent=namespace?'管理区服':'口令登录';const adminBar=$('adminSyncBar');if(adminBar)adminBar.classList.remove('on','busy');if(target==='admin'&&(status==='on'||status==='busy'))adminBar.classList.add(status)}
 function mergeSyncHistory(local,remote){const map=new Map();[...(Array.isArray(remote)?remote:[]),...(Array.isArray(local)?local:[])].forEach(h=>{const t=Number(h&&h.t)||0;if(!t)return;const k=Math.round(t/1000);const prev=map.get(k);if(!prev||(h.kind==='ratio'&&prev.kind!=='ratio'))map.set(k,{t,kind:h.kind||'auto'})});return Array.from(map.values()).sort((a,b)=>b.t-a.t).slice(0,30)}
 function applyRemote(p,opts){if(!p||typeof p!=='object')return;const force=!!(opts&&opts.force);const localRev=Number(state.rev)||0,syncedRev=Number(state.syncedRev)||0,remoteRev=Number(p.rev)||0;const localTs=Number(state.updatedAt)||0,remoteTs=Number(p.updatedAt)||0;const hasLocalPending=localRev>syncedRev;if(!force&&hasLocalPending&&remoteRev<=localRev&&remoteTs+2000<localTs){console.warn('本机有未推送的改动且更新，以本机为准并回推');setSyncUI('busy');scheduleCloudPush();return}
-['targetProfit','periodDays','cbgQuote','ratioDefaultsVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.updatedAt!==undefined){state.updatedAt=remoteTs;state.syncedAt=remoteTs}if(remoteRev>0){state.rev=remoteRev;state.syncedRev=remoteRev}adoptRemoteHistory(p.syncHistory);if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:Number(z.preset)===3?3:4}));state.activeZoneId=state.zones.some(z=>z.id===state.activeZoneId)?state.activeZoneId:state.zones[0].id}lastFp=dataFingerprint();safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
+['targetProfit','periodDays','cbgQuote','ratioDefaultsVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.updatedAt!==undefined){state.updatedAt=remoteTs;state.syncedAt=remoteTs}if(remoteRev>0){state.rev=remoteRev;state.syncedRev=remoteRev}adoptRemoteHistory(p.syncHistory);if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){const rmNew=Number(p.presetVersion)===2;state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:rmNew?accountsOf(z.preset):migrateLegacyPreset(z.preset)}));state.activeZoneId=state.zones.some(z=>z.id===state.activeZoneId)?state.activeZoneId:state.zones[0].id}lastFp=dataFingerprint();safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
 let retryTimer=null;
 function scheduleRetry(fn,ms){clearTimeout(retryTimer);retryTimer=setTimeout(fn,ms)}
 // 自建数据接口适配层：接口形状与原来的云 SDK 保持一致，上层同步逻辑无需改动
@@ -509,10 +518,10 @@ $('ratioSyncBtn').addEventListener('click',syncRatios);
 $('authClose').addEventListener('click',closeAuthModal);$('authModal').addEventListener('click',e=>{if(e.target===$('authModal'))closeAuthModal()});
 $('tokenSubmitBtn').addEventListener('click',async()=>{const input=$('authToken').value.trim();if(!input)return authErr('authError','请输入口令');if(!(window.crypto&&window.crypto.subtle))return authErr('authError','当前环境不支持加密，请刷新重试');try{const hash=await sha256Hex(input);if(hash!==TOKEN_HASH)return authErr('authError','口令不正确');namespace=ROW_NS;safeStorage.set(SYNC_NS_KEY,hash);$('authToken').value='';authErr('authError','');if(cloud){setSyncUI('busy');await cloudPull()}closeAuthModal();render();activateTab('admin');toast('口令验证成功')}catch(e){console.error(e);authErr('authError','验证失败，请重试')}});
 $('authToken').addEventListener('keydown',e=>{if(e.key==='Enter')$('tokenSubmitBtn').click()});
-$('addZoneBtn').addEventListener('click',()=>{const z={id:uid(),name:'新区服',cbgQuote:210,purchase:9000,margin:17,preset:4};state.zones.push(z);save();render();setTimeout(()=>{const inp=document.querySelector(`[data-zone="${z.id}"] [data-zone-input="name"]`);if(inp){inp.focus();inp.select()}},60);});
+$('addZoneBtn').addEventListener('click',()=>{const z={id:uid(),name:'新区服',cbgQuote:210,purchase:9000,margin:17,preset:3};state.zones.push(z);save();render();setTimeout(()=>{const inp=document.querySelector(`[data-zone="${z.id}"] [data-zone-input="name"]`);if(inp){inp.focus();inp.select()}},60);});
 $('exitAdminBtn').addEventListener('click',()=>{activateTab('profit')});
 $('revokeBtn').addEventListener('click',()=>{if(!confirm('清除本机口令授权？云端数据不会删除，清除后本机将回到只读模式，下次需重新输入口令。'))return;namespace=null;safeStorage.set(SYNC_NS_KEY,'');clearTimeout(syncTimer);setSyncUI('off');render();activateTab('profit');toast('已清除本机授权')});
-function calc(){const fee=.05,cardHourly=.6,hours=24;let accounts=0,purchase=0,sales=0,grossProfit=0,feeCoins=0,cbgNetCoins=0,cbgRmb=0,cardCost=0,weighted=0;const zoneRows=state.zones.map(z=>{const za=Math.max(0,num(z.preset,4)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const zcard=za*cardHourly*hours,zgross=zp*zm,zcbg=zgross*(1-fee)/3000*zq;accounts+=za;purchase+=zp;sales+=zp*(1+zm);grossProfit+=zgross;feeCoins+=zgross*fee;cbgNetCoins+=zgross*(1-fee);cbgRmb+=zcbg;cardCost+=zcard;weighted+=zp*zm*(1-fee)*zq/3000;return{name:z.name,net:zcbg-zcard}});const rmbPerWan=purchase>0?weighted/purchase:0,dailyNet=cbgRmb-cardCost,breakEven=rmbPerWan>0?cardCost/rmbPerWan:0,targetPurchase=rmbPerWan>0?(cardCost+Math.max(0,num(state.targetProfit)))/rmbPerWan:0,margin=purchase>0?grossProfit/purchase:0,cbgCostBasis=(margin>0&&sales>0)?purchase*margin/(1+margin):0;return{accounts,purchase,sales,grossProfit,feeCoins,cbgNetCoins,cbgRmb,cardCost,dailyNet,breakEven,targetPurchase,cbgCostBasis,zoneRows}}
+function calc(){const fee=.05,cardHourly=.6,hours=24;let accounts=0,purchase=0,sales=0,grossProfit=0,feeCoins=0,cbgNetCoins=0,cbgRmb=0,cardCost=0,weighted=0;const zoneRows=state.zones.map(z=>{const za=Math.max(0,accountsOf(z.preset)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const zcard=za*cardHourly*hours,zgross=zp*zm,zcbg=zgross*(1-fee)/3000*zq;accounts+=za;purchase+=zp;sales+=zp*(1+zm);grossProfit+=zgross;feeCoins+=zgross*fee;cbgNetCoins+=zgross*(1-fee);cbgRmb+=zcbg;cardCost+=zcard;weighted+=zp*zm*(1-fee)*zq/3000;return{name:z.name,net:zcbg-zcard}});const rmbPerWan=purchase>0?weighted/purchase:0,dailyNet=cbgRmb-cardCost,breakEven=rmbPerWan>0?cardCost/rmbPerWan:0,targetPurchase=rmbPerWan>0?(cardCost+Math.max(0,num(state.targetProfit)))/rmbPerWan:0,margin=purchase>0?grossProfit/purchase:0,cbgCostBasis=(margin>0&&sales>0)?purchase*margin/(1+margin):0;return{accounts,purchase,sales,grossProfit,feeCoins,cbgNetCoins,cbgRmb,cardCost,dailyNet,breakEven,targetPurchase,cbgCostBasis,zoneRows}}
 function activeZone(){return state.zones.find(z=>z.id===state.activeZoneId)||state.zones[0]}
 function compositionUnits(type,level){if(type==='normal')return 2**(level-1);if(type==='star')return 3**(level-1);const units=[0,1,2];for(let current=3;current<=level;current++)units[current]=2*units[current-1]+units[current-2];return units[level]}
 // 体力消耗：普通宝石 T(N)=2×T(N-1)+10×(N-1)（2合1，单次操作=原料级×10）；
@@ -531,11 +540,11 @@ function renderZoneSelect(){const sel=$('synthesisZoneSelect'),zs=state.zones;if
 function renderZones(){
   const zl=$('zoneAdminList');if(!zl)return;
   zl.innerHTML=state.zones.map(z=>{
-    const za=Math.max(0,num(z.preset,4)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));
+    const za=Math.max(0,accountsOf(z.preset)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));
     const net=zp*zm*0.95/3000*zq-za*14.4;
     return `<div class="zone-admin-card" data-zone="${z.id}">
       <div class="zone-admin-head"><input data-zone-input="name" value="${escapeHtml(z.name)}" maxlength="12" placeholder="区服名称">
-        <div class="zone-preset-mini"><button type="button" data-zf="preset" data-preset="3" class="${z.preset===3?'active':''}" title="2收1卖·3个号">3号</button><button type="button" data-zf="preset" data-preset="4" class="${z.preset===4?'active':''}" title="3收1卖·4个号">4号</button></div>
+        <div class="zone-preset-mini"><button type="button" data-zf="preset" data-preset="1" class="${z.preset===1?'active':''}" title="1收 · 1个号 · 点卡14.4元/天">1收</button><button type="button" data-zf="preset" data-preset="2" class="${z.preset===2?'active':''}" title="2收 · 2个号 · 点卡28.8元/天">2收</button><button type="button" data-zf="preset" data-preset="3" class="${z.preset===3?'active':''}" title="3收 · 3个号 · 点卡43.2元/天">3收</button></div>
         <span class="zone-admin-net${net<0?' loss':''}">${net>=0?'+':''}${fmt(net,1)}</span>
         <button type="button" class="clear-button zone-del" data-zf="del">删</button></div>
       <div class="zone-admin-fields">
@@ -551,15 +560,15 @@ function refreshProfitNumbers(skipZoneRows){const c=calc();renderHero(c);renderA
   if(!skipZoneRows)renderProfitZones(c);
   const days=Math.max(1,Math.round(state.periodDays));$('periodPurchase').innerHTML=`${fmtSmart(c.purchase*days)}<small>万</small>`;$('periodSales').innerHTML=`${fmtSmart(c.sales*days)}<small>万</small>`;$('periodCbg').innerHTML=`${fmt(c.cbgRmb*days)}<small>元</small>`;$('periodCards').innerHTML=`${fmt(c.cardCost*days)}<small>元</small>`;$('periodNet').innerHTML=`${fmt(c.dailyNet*days)}<small>元</small>`;$('playerRevenue').innerHTML=`${fmtSmart(c.purchase)}<small>万/天</small>`;$('cbgListing').innerHTML=`${fmtSmart(c.grossProfit)}<small>万/天</small>`;$('cbgCostBasis').innerHTML=`${fmtSmart(c.cbgCostBasis)}<small>万/天</small>`;$('feeCoins').innerHTML=`${fmtSmart(c.feeCoins)}<small>万/天</small>`;
   document.querySelectorAll('[data-days]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.days)===days));return c}
-function renderProfitZones(c){const nets={};state.zones.forEach((z,i)=>{const za=Math.max(0,num(z.preset,4)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));nets[z.id]=zp*zm*0.95/3000*zq-za*14.4});$('zoneBreakdown').innerHTML=state.zones.map(z=>{const net=nets[z.id];return `<div class="zone-breakdown-row zone-profit-row" data-zone="${z.id}"><b>${escapeHtml(z.name)}</b><input class="zp-input" data-zone-input="purchase" value="${num(z.purchase,9000)}" type="number" inputmode="decimal" min="0" step="100" placeholder="9000"><span class="zp-net ${net>=0?'win':'loss'}">${net>=0?'+':''}${fmt(net)} 元/天</span></div>`}).join('')}
+function renderProfitZones(c){const nets={};state.zones.forEach((z,i)=>{const za=Math.max(0,accountsOf(z.preset)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));nets[z.id]=zp*zm*0.95/3000*zq-za*14.4});$('zoneBreakdown').innerHTML=state.zones.map(z=>{const net=nets[z.id];return `<div class="zone-breakdown-row zone-profit-row" data-zone="${z.id}"><b>${escapeHtml(z.name)}</b><input class="zp-input" data-zone-input="purchase" value="${num(z.purchase,9000)}" type="number" inputmode="decimal" min="0" step="100" placeholder="9000"><span class="zp-net ${net>=0?'win':'loss'}">${net>=0?'+':''}${fmt(net)} 元/天</span></div>`}).join('')}
 function renderAdminStats(){const at=$('adminTotal');if(at)at.textContent=`${state.zones.length}个区服 · 合计净利 ${fmt(calc().dailyNet)} 元/天`}
-function renderCompanyStats(){state.zones.forEach(z=>{const za=Math.max(0,num(z.preset,4)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const badge=document.querySelector(`[data-zone="${z.id}"] .zone-admin-net`);if(badge){badge.textContent=`${net>=0?'+':''}${fmt(net,1)}`;badge.classList.toggle('loss',net<0)}})}
+function renderCompanyStats(){state.zones.forEach(z=>{const za=Math.max(0,accountsOf(z.preset)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const badge=document.querySelector(`[data-zone="${z.id}"] .zone-admin-net`);if(badge){badge.textContent=`${net>=0?'+':''}${fmt(net,1)}`;badge.classList.toggle('loss',net<0)}})}
 function renderSingle(){
   const s=state.single;
   const sel=$('singleZoneSelect');const zsel=state.zones.find(x=>x.id===s.zoneId)||state.zones[0];
   const quote=Math.max(0,num(zsel?zsel.cbgQuote:s.quote));
   if(zsel)s.quote=quote;
-  const purchase=Math.max(0,num(s.purchase));const marginRate=Math.max(0,num(s.margin));const margin=marginRate/100;const preset=Math.max(0,num(s.preset,4));
+  const purchase=Math.max(0,num(s.purchase));const marginRate=Math.max(0,num(s.margin));const margin=marginRate/100;const preset=Math.max(0,accountsOf(s.preset));
   const cardHourly=.6;const hours=24;const netRate=.95;
   const cardCost=preset*cardHourly*hours;
   const sales=purchase*(1+margin);const gross=purchase*margin;
@@ -608,7 +617,7 @@ document.querySelectorAll('[data-clear]').forEach(btn=>btn.addEventListener('cli
 function updateRatioSyncTime(loading){const el=$('ratioSyncTime');if(!el)return;if(loading){el.textContent='正在读取云端最新比例…';return}const last=syncLog[0];const latest=last?`当前为云端最新比例 · 最近同步 ${fmtSyncTime(last.t)}`:'当前为云端最新比例';el.textContent=namespace?latest:latest+'（只读）'}
 $('ratioBtn').addEventListener('click',async()=>{renderRatioRows();updateRatioSyncTime();$('ratioModal').classList.add('show');document.body.style.overflow='hidden';if(cloud){updateRatioSyncTime(true);await cloudPull({force:true});renderRatioRows();updateRatioSyncTime()}});
 $('ratioClose').addEventListener('click',closeRatioModal);$('ratioModal').addEventListener('click',event=>{if(event.target===$('ratioModal'))closeRatioModal()});
-$('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*1.1)])),averagePriceCustomized:{normal:false,star:false,dust:false},zones:[{id:uid(),name:'秦淮风光',cbgQuote:210,purchase:9000,margin:17,preset:4}]});state.activeZoneId=state.zones[0].id;state.cbgZoneId=state.zones[0].id;state.single.zoneId=state.zones[0].id;document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisZoneSelect').value=state.cbgZoneId;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
+$('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*1.1)])),averagePriceCustomized:{normal:false,star:false,dust:false},zones:[{id:uid(),name:'秦淮风光',cbgQuote:210,purchase:9000,margin:17,preset:3}]});state.activeZoneId=state.zones[0].id;state.cbgZoneId=state.zones[0].id;state.single.zoneId=state.zones[0].id;document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisZoneSelect').value=state.cbgZoneId;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
 try{render();activateTab('synthesis',false);save(false);renderSingle();renderZoneSelectSingle()}catch(error){console.error('初始化失败',error)}initCloud();
 function flushSync(){clearTimeout(syncTimer);if(cloud&&namespace&&(Number(state.rev)||0)>(Number(state.syncedRev)||0))cloudPushNow()}
 window.addEventListener('pagehide',flushSync);window.addEventListener('beforeunload',flushSync);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushSync()});
