@@ -146,7 +146,6 @@ else
     die "请把上面这段和 0/9 的输出一起发我，我按实际路径改脚本"
   fi
   ok "已从容器取出配置（$(wc -c < "$WORK/caddy.conf") 字节）"
-  ok "已从容器取出配置（${#} 字节）"
 fi
 docker exec "$CTR" cp "$CTR_CFG" "$CTR_CFG.bak.$TS" 2>/dev/null && ok "容器内已备份 → $CTR_CFG.bak.$TS"
 cp "$WORK/caddy.conf" "$WORK/caddy.conf.bak"
