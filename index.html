@@ -112,7 +112,7 @@
   <main class="main">
     <header class="app-header">
       <img class="app-logo" src="icons/app-logo.png" alt="子霖宝石助手">
-      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v58</span></h1>
+      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v59</span></h1>
       <button type="button" class="sync-chip" id="syncChip"><span class="admin-gear">⚙</span><span class="sync-dot" id="chipDot"></span><span id="chipText">管理员</span></button>
     </header>
     <nav class="top-tabs" aria-label="计算器页面">
@@ -160,12 +160,12 @@
         <div class="card-title"><h2>日利润总览</h2><span id="accountHint">0个区服</span></div>
         <div class="daily-profit-summary" id="dailyProfitSummary">
           <div class="daily-profit-copy"><span>预计每天净利润</span><small id="dailyProfitNote">各区服合计，已扣除手续费和账号点卡</small></div>
-          <div class="daily-profit-value"><strong id="dailyNet">0.00</strong><em>元</em></div>
+          <div class="daily-profit-value"><strong id="dailyNet">0.00</strong><em>万</em></div>
         </div>
         <div class="sync-bar" id="syncBar"><span class="sync-dot" id="syncDot"></span><span id="syncText">数据仅存本机</span><button type="button" class="sync-link" id="syncBtn">管理区服</button></div>
         <div class="zone-label">各区服净利（输入每天收购金额）</div>
         <div class="zone-breakdown" id="zoneBreakdown"></div>
-        <div class="formula">藏宝阁到账＝各区服（收购额 × 利润率 × 95% ÷ 3000万 × 该区汇率）之和；净利润＝到账合计－所有账号点卡。点卡按每号每小时0.6元、每天24小时＝每号14.4元/天，账号配置几收即几个号。保本线与目标反推按当前各区收购占比加权计算。</div>
+        <div class="formula">各区服净利（万游戏币）＝收购额 × 利润率 × 95% − 点卡折算的游戏币，合计即日利润。点卡按每号每小时0.6元、每天24小时＝每号14.4元/天，再按「3000万＝该区服汇率」换成游戏币后扣除，账号配置几收即几个号。保本线与目标反推按当前各区收购占比加权计算。</div>
       </div>
       <div class="card">
         <div class="card-title"><h2>利润明细</h2><span id="accountHint2">0个账号</span></div>
@@ -200,7 +200,7 @@
           <div class="result"><div class="result-label">周期销售总额</div><div class="result-value" id="periodSales">0<small>万</small></div></div>
           <div class="result"><div class="result-label">藏宝阁到账</div><div class="result-value" id="periodCbg">0<small>元</small></div></div>
           <div class="result"><div class="result-label">点卡总成本</div><div class="result-value" id="periodCards">0<small>元</small></div></div>
-          <div class="result highlight" style="grid-column:1/-1"><div class="result-label">周期净利润</div><div class="result-value" id="periodNet">0<small>元</small></div></div>
+          <div class="result highlight" style="grid-column:1/-1"><div class="result-label">周期净利润</div><div class="result-value" id="periodNet">0<small>万</small></div></div>
         </div>
       </div>
       <div class="card">
@@ -219,7 +219,7 @@
         <div class="card-title"><h2>单服日利润</h2><span>只算一个服务器</span></div>
         <div class="daily-profit-summary" id="singleProfitSummary">
           <div class="daily-profit-copy"><span>单服预计净利润</span><small id="singleProfitNote">已扣手续费和点卡</small></div>
-          <div class="daily-profit-value"><strong id="singleNet">0.00</strong><em>元</em></div>
+          <div class="daily-profit-value"><strong id="singleNet">0.00</strong><em>万</em></div>
         </div>
         <div class="single-fields">
           <div class="single-field"><label>区服</label><select id="singleZoneSelect" class="zone-select" aria-label="选择区服"></select></div>
@@ -241,7 +241,7 @@
           <div class="result highlight"><div class="result-label">不亏本收购线</div><div class="result-value" id="sBreak">0<small>万</small></div></div>
           <div class="result warning"><div class="result-label">距离保本线</div><div class="result-value" id="sGap">0<small>万</small></div></div>
         </div>
-        <div class="formula">藏宝阁到账＝收购额 × 利润率 × 95% ÷ 3000万 × 区服汇率；净利润＝藏宝阁到账－账号点卡。点卡每个号 0.6元/小时 × 24小时 = 14.4元/天，几收就是几个号：1收 14.4元、2收 28.8元、3收 43.2元。手续费固定5%。</div>
+        <div class="formula">净利（万游戏币）＝收购额 × 利润率 × 95% − 点卡折算的游戏币。点卡每个号 0.6元/小时 × 24小时 = 14.4元/天，按该区服汇率（3000万 = X元）折算：1元 = 3000 ÷ X 万游戏币。几收就是几个号：1收 14.4元、2收 28.8元、3收 43.2元。手续费固定5%。</div>
       </div>
       <div class="card">
         <div class="card-title"><h2>目标利润反推</h2><span>想赚多少，就算要收多少</span></div>
@@ -334,6 +334,9 @@ const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>'
 // 点卡：每小时 6 点 = 0.6 元，一天 24 小时 = 每个号 14.4 元/天。
 //   1收 = 1 个号 = 14.4 元/天    2收 = 2 个号 = 28.8 元/天    3收 = 3 个号 = 43.2 元/天
 const CARD_PER_ACCOUNT=14.4;
+// 人民币 → 游戏币（单位：万）。藏宝阁报价 cbgQuote 的含义是「3000万游戏币 = quote 元」，
+// 因此 1 元 = 3000/quote 万游戏币。点卡是人民币支出，换算成游戏币后才能与收购/利润同单位相减。
+function rmbToWan(rmb,quote){const q=Math.max(0,num(quote));return q>0?Math.max(0,num(rmb))*3000/q:0}
 function accountsOf(v){const n=Math.round(num(v,3));return n===1?1:n===2?2:3}
 // 旧版本用的是「几收几卖」的总号数：3 个号(2收1卖) → 2收；4 个号(3收1卖) → 3收。保留「收」的个数。
 function migrateLegacyPreset(v){const n=Math.round(num(v,4));return n>=4?3:2}
@@ -361,7 +364,7 @@ function dataFingerprint(){const c={...state};delete c.updatedAt;delete c.synced
 function bumpRev(){state.rev=Math.max(Number(state.rev)||0,Number(state.syncedRev)||0)+1;state.updatedAt=Date.now()}
 function save(touch){const fp=dataFingerprint();const changed=lastFp!==null&&fp!==lastFp;lastFp=fp;if(changed){if(touch!==false)bumpRev();if(!state.updatedAt)state.updatedAt=Date.now()}safeStorage.set('gemCalculatorSettings',JSON.stringify(state));if(changed)scheduleCloudPush()}
 let toastTimer=null;function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),1800)}
-$('zoneBreakdown').addEventListener('input',e=>{const inp=e.target;if(!inp.dataset.zoneInput)return;const row=inp.closest('[data-zone]');if(!row)return;const z=state.zones.find(x=>x.id===row.dataset.zone);if(!z)return;z.purchase=Math.max(0,num(inp.value));save();refreshProfitNumbers(true);const za=Math.max(0,accountsOf(z.preset)),zp=z.purchase,zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const span=row.querySelector('.zp-net');if(span){span.textContent=`${net>=0?'+':''}${fmt(net)} 元/天`;span.className=`zp-net ${net>=0?'win':'loss'}`}});
+$('zoneBreakdown').addEventListener('input',e=>{const inp=e.target;if(!inp.dataset.zoneInput)return;const row=inp.closest('[data-zone]');if(!row)return;const z=state.zones.find(x=>x.id===row.dataset.zone);if(!z)return;z.purchase=Math.max(0,num(inp.value));save();refreshProfitNumbers(true);const za=Math.max(0,accountsOf(z.preset)),zp=z.purchase,zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95-rmbToWan(za*14.4,zq);const span=row.querySelector('.zp-net');if(span){span.textContent=`${net>=0?'+':''}${fmtSmart(net)} 万/天`;span.className=`zp-net ${net>=0?'win':'loss'}`}});
 $('zoneAdminList').addEventListener('input',e=>{const inp=e.target;if(!inp.dataset.zoneInput)return;const card=inp.closest('[data-zone]');if(!card)return;const z=state.zones.find(x=>x.id===card.dataset.zone);if(!z)return;const k=inp.dataset.zoneInput;if(k==='name'){z.name=inp.value.trim()||'未命名'}else{z[k]=Math.max(0,num(inp.value))}save();refreshProfitNumbers()});
 $('zoneAdminList').addEventListener('click',e=>{const btn=e.target;const card=btn.closest('[data-zone]');
   if(btn.id==='addZoneBtn'){const z={id:uid(),name:'新区服',cbgQuote:210,purchase:9000,margin:17,preset:3};state.zones.push(z);save();render();setTimeout(()=>{const inp=document.querySelector(`[data-zone="${z.id}"] [data-zone-input="name"]`);if(inp){inp.focus();inp.select()}},60);return}
@@ -532,7 +535,10 @@ $('authToken').addEventListener('keydown',e=>{if(e.key==='Enter')$('tokenSubmitB
 $('addZoneBtn').addEventListener('click',()=>{const z={id:uid(),name:'新区服',cbgQuote:210,purchase:9000,margin:17,preset:3};state.zones.push(z);save();render();setTimeout(()=>{const inp=document.querySelector(`[data-zone="${z.id}"] [data-zone-input="name"]`);if(inp){inp.focus();inp.select()}},60);});
 $('exitAdminBtn').addEventListener('click',()=>{activateTab('profit')});
 $('revokeBtn').addEventListener('click',()=>{if(!confirm('清除本机口令授权？云端数据不会删除，清除后本机将回到只读模式，下次需重新输入口令。'))return;namespace=null;safeStorage.set(SYNC_NS_KEY,'');clearTimeout(syncTimer);setSyncUI('off');render();activateTab('profit');toast('已清除本机授权')});
-function calc(){const fee=.05,cardHourly=.6,hours=24;let accounts=0,purchase=0,sales=0,grossProfit=0,feeCoins=0,cbgNetCoins=0,cbgRmb=0,cardCost=0,weighted=0;const zoneRows=state.zones.map(z=>{const za=Math.max(0,accountsOf(z.preset)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const zcard=za*cardHourly*hours,zgross=zp*zm,zcbg=zgross*(1-fee)/3000*zq;accounts+=za;purchase+=zp;sales+=zp*(1+zm);grossProfit+=zgross;feeCoins+=zgross*fee;cbgNetCoins+=zgross*(1-fee);cbgRmb+=zcbg;cardCost+=zcard;weighted+=zp*zm*(1-fee)*zq/3000;return{name:z.name,net:zcbg-zcard}});const rmbPerWan=purchase>0?weighted/purchase:0,dailyNet=cbgRmb-cardCost,breakEven=rmbPerWan>0?cardCost/rmbPerWan:0,targetPurchase=rmbPerWan>0?(cardCost+Math.max(0,num(state.targetProfit)))/rmbPerWan:0,margin=purchase>0?grossProfit/purchase:0,cbgCostBasis=(margin>0&&sales>0)?purchase*margin/(1+margin):0;return{accounts,purchase,sales,grossProfit,feeCoins,cbgNetCoins,cbgRmb,cardCost,dailyNet,breakEven,targetPurchase,cbgCostBasis,zoneRows}}
+// 利润口径：净利润以「万游戏币」表示。
+//   净利(万) = 毛利(万) × (1-手续费) − 点卡(元) 折算成的游戏币(万)
+// 与旧的「藏宝阁到账(元) − 点卡(元)」在数学上完全等价，只是换成游戏币单位。
+function calc(){const fee=.05,cardHourly=.6,hours=24;let accounts=0,purchase=0,sales=0,grossProfit=0,feeCoins=0,cbgNetCoins=0,cbgRmb=0,cardCost=0,cardCoins=0,netCoins=0,weighted=0;const zoneRows=state.zones.map(z=>{const za=Math.max(0,accountsOf(z.preset)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const zcard=za*cardHourly*hours,zgross=zp*zm,zcbg=zgross*(1-fee)/3000*zq,zcardCoins=rmbToWan(zcard,zq),znetCoins=zgross*(1-fee)-zcardCoins;accounts+=za;purchase+=zp;sales+=zp*(1+zm);grossProfit+=zgross;feeCoins+=zgross*fee;cbgNetCoins+=zgross*(1-fee);cbgRmb+=zcbg;cardCost+=zcard;cardCoins+=zcardCoins;netCoins+=znetCoins;weighted+=zp*zm*(1-fee)*zq/3000;return{name:z.name,net:zcbg-zcard,netCoins:znetCoins}});const rmbPerWan=purchase>0?weighted/purchase:0,breakEven=rmbPerWan>0?cardCost/rmbPerWan:0,targetPurchase=rmbPerWan>0?(cardCost+Math.max(0,num(state.targetProfit)))/rmbPerWan:0,margin=purchase>0?grossProfit/purchase:0,cbgCostBasis=(margin>0&&sales>0)?purchase*margin/(1+margin):0;return{accounts,purchase,sales,grossProfit,feeCoins,cbgNetCoins,cbgRmb,cardCost,cardCoins,dailyNetCoins:netCoins,breakEven,targetPurchase,cbgCostBasis,zoneRows}}
 function activeZone(){return state.zones.find(z=>z.id===state.activeZoneId)||state.zones[0]}
 function compositionUnits(type,level){if(type==='normal')return 2**(level-1);if(type==='star')return 3**(level-1);const units=[0,1,2];for(let current=3;current<=level;current++)units[current]=2*units[current-1]+units[current-2];return units[level]}
 // 体力消耗：普通宝石 T(N)=2×T(N-1)+10×(N-1)（2合1，单次操作=原料级×10）；
@@ -546,13 +552,13 @@ function staminaPointsFor(type,level){let t=0;
 function staminaCostCoinsFor(type,level){return staminaPointsFor(type,level)/40*3000}
 function renderSynthesis(){const type=gemTypes[state.gemType];const basePrice=Math.max(0,num(state.synthesisPrices[state.gemType]));const averageSalePrice=Math.max(0,num(state.averageSalePrices[state.gemType],Math.round(basePrice*1.1)));const cbgRate=Math.max(0,num(state.cbgQuote));const averageMode=state.saleMode==='average';document.querySelectorAll('[data-gem-type]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.gemType===state.gemType);const bt=gemTypes[btn.dataset.gemType];btn.innerHTML=`<img src="${bt.icon}" alt="">${bt.name}`});document.querySelectorAll('[data-sale-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.saleMode===state.saleMode));$('saleModeBar').classList.toggle('average',averageMode);$('averageSaleField').classList.toggle('show',averageMode);$('ratioBtn').hidden=averageMode;if(document.activeElement!==$('averageSalePrice'))$('averageSalePrice').value=averageSalePrice;$('priceTableTitle').innerHTML=`<img src="${type.icon}" alt="">${type.name}价格表`;$('synthesisRule').textContent=averageMode?`${type.rule} 均价售卖：各级售价按1级售卖均价乘以所需1级数量计算。`:type.rule;const hasStamina=state.gemType==='normal'||state.gemType==='star'||state.gemType==='dust';const headRow=$('priceTableHeadRow');if(headRow)headRow.innerHTML=`<span>等级</span><span>${hasStamina?'成本':'收购价'}（万）</span><span>需1级宝石</span><span>摆摊售价（万）</span><span>藏宝阁售价（元）</span>`;$('gemPriceTable').classList.toggle('with-stamina',hasStamina);const rows=[];type.levels.forEach(level=>{const units=compositionUnits(state.gemType,level);const purchasePrice=basePrice*units;const ratio=state.priceRatios[state.gemType][level];const stallCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.stall));const cbgCoins=stallCoins;const stallPrice=Math.floor(Math.round(stallCoins/10000*1e6)/1e6);const coinTier=stallCoins>=10000000?'coin-tier-ten-million':stallCoins>=1000000?'coin-tier-million':stallCoins>=100000?'coin-tier-hundred-thousand':stallCoins>=10000?'coin-tier-wan':'';const cbgPrice=cbgCoins/30000000*cbgRate;const cbgAvailable=level>=type.cbgMinLevel;rows.push(`<div class="price-row"><span>${level}级</span>${hasStamina?(()=>{const pw=purchasePrice/10000,sw=staminaCostCoinsFor(state.gemType,level)/10000;return `<span class="cost-merge" title="收购价 ${fmt(pw,1)}万 + 体力成本 ${fmt(sw,1)}万（合成消耗${staminaPointsFor(state.gemType,level)}点体力，按40体力=3000游戏币折算）"><b>${fmt(pw+sw,1)}</b><small>${fmt(pw,1)} + ${fmt(sw,1)}</small></span>`})():`<span>${fmtWan(purchasePrice/10000)}</span>`}<span>${fmt(units,0)}</span><span class="${coinTier}">${fmt(stallPrice,0)}</span><span class="${cbgAvailable?'':'not-available'}">${cbgAvailable?fmt(cbgPrice,1):'—'}</span></div>`)});$('gemPriceRows').innerHTML=rows.join('')}
 function renderRatioRows(){const type=gemTypes[state.gemType];$('ratioModalTitle').textContent=`${type.name}售价比例调整`;const rows=[];type.levels.forEach(level=>{const ratio=state.priceRatios[state.gemType][level];const cbgNA=level<type.cbgMinLevel;rows.push(`<div class="ratio-row"><b>${level}级</b><input type="number" inputmode="decimal" min="0" step="0.01" value="${num(ratio.stall).toFixed(2)}" data-ratio-level="${level}" data-ratio-key="stall" aria-label="${level}级售价比例">${cbgNA?'<span class="ratio-na">藏宝阁不可上架</span>':'<span class="ratio-na">藏宝阁同比例</span>'}</div>`)});$('ratioRows').innerHTML=rows.join('');document.querySelectorAll('[data-ratio-level]').forEach(input=>input.addEventListener('input',()=>{const level=input.dataset.ratioLevel;const v=Math.max(0,num(input.value));const r=state.priceRatios[state.gemType][level];r.stall=v;r.cbg=v;save();renderSynthesis()}))}
-function renderHero(c){$('dailyNet').textContent=fmt(c.dailyNet);$('dailyProfitSummary').classList.toggle('loss',c.dailyNet<0);$('dailyProfitNote').textContent=c.dailyNet>=0?`${state.zones.length}个区服合计 · 已扣手续费和点卡`:'当前经营参数预计亏损'}
+function renderHero(c){$('dailyNet').textContent=fmtSmart(c.dailyNetCoins);$('dailyProfitSummary').classList.toggle('loss',c.dailyNetCoins<0);$('dailyProfitNote').textContent=c.dailyNetCoins>=0?`${state.zones.length}个区服合计 · 游戏币口径，已扣手续费和点卡`:'当前经营参数预计亏损'}
 function renderZoneSelect(){const sel=$('synthesisZoneSelect'),zs=state.zones;if(!sel)return;sel.innerHTML=zs.map(z=>`<option value="${z.id}"${z.id===state.cbgZoneId?' selected':''}>${escapeHtml(z.name)}（${fmt(z.cbgQuote,0)}元）</option>`).join('')}
 function renderZones(){
   const zl=$('zoneAdminList');if(!zl)return;
   zl.innerHTML=state.zones.map(z=>{
     const za=Math.max(0,accountsOf(z.preset)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));
-    const net=zp*zm*0.95/3000*zq-za*14.4;
+    const net=zp*zm*0.95-rmbToWan(za*14.4,zq);
     return `<div class="zone-admin-card" data-zone="${z.id}">
       <div class="zone-admin-head"><input data-zone-input="name" value="${escapeHtml(z.name)}" maxlength="12" placeholder="区服名称">
         <div class="zone-preset-mini"><button type="button" data-zf="preset" data-preset="1" class="${z.preset===1?'active':''}" title="1收 · 1个号 · 点卡14.4元/天">1收</button><button type="button" data-zf="preset" data-preset="2" class="${z.preset===2?'active':''}" title="2收 · 2个号 · 点卡28.8元/天">2收</button><button type="button" data-zf="preset" data-preset="3" class="${z.preset===3?'active':''}" title="3收 · 3个号 · 点卡43.2元/天">3收</button></div>
@@ -567,13 +573,13 @@ function renderZones(){
 }
 function render(){const c=refreshProfitNumbers();renderSynthesis();renderZones();renderSingle();renderZoneSelectSingle();renderZoneSelect();return c}
 function refreshProfitNumbers(skipZoneRows){const c=calc();renderHero(c);renderAdminStats();renderCompanyStats();
-  $('sales').innerHTML=`${fmtSmart(c.sales)}<small>万</small>`;$('grossProfit').innerHTML=`${fmtSmart(c.grossProfit)}<small>万</small>`;$('cbgRmb').innerHTML=`${fmt(c.cbgRmb)}<small>元</small>`;$('cardCost').innerHTML=`${fmt(c.cardCost,1)}<small>元</small>`;$('breakEven').innerHTML=`${fmtSmart(c.breakEven)}<small>万</small>`;const gap=c.purchase-c.breakEven;$('gap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;
+  $('sales').innerHTML=`${fmtSmart(c.sales)}<small>万</small>`;$('grossProfit').innerHTML=`${fmtSmart(c.grossProfit)}<small>万</small>`;$('cbgRmb').innerHTML=`${fmt(c.cbgRmb)}<small>元</small>`;$('cardCost').innerHTML=`${fmt(c.cardCost,1)}<small>元 ≈ ${fmtSmart(c.cardCoins)}万</small>`;$('breakEven').innerHTML=`${fmtSmart(c.breakEven)}<small>万</small>`;const gap=c.purchase-c.breakEven;$('gap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;
   if(!skipZoneRows)renderProfitZones(c);
-  const days=Math.max(1,Math.round(state.periodDays));$('periodPurchase').innerHTML=`${fmtSmart(c.purchase*days)}<small>万</small>`;$('periodSales').innerHTML=`${fmtSmart(c.sales*days)}<small>万</small>`;$('periodCbg').innerHTML=`${fmt(c.cbgRmb*days)}<small>元</small>`;$('periodCards').innerHTML=`${fmt(c.cardCost*days)}<small>元</small>`;$('periodNet').innerHTML=`${fmt(c.dailyNet*days)}<small>元</small>`;$('playerRevenue').innerHTML=`${fmtSmart(c.purchase)}<small>万/天</small>`;$('cbgListing').innerHTML=`${fmtSmart(c.grossProfit)}<small>万/天</small>`;$('cbgCostBasis').innerHTML=`${fmtSmart(c.cbgCostBasis)}<small>万/天</small>`;$('feeCoins').innerHTML=`${fmtSmart(c.feeCoins)}<small>万/天</small>`;
+  const days=Math.max(1,Math.round(state.periodDays));$('periodPurchase').innerHTML=`${fmtSmart(c.purchase*days)}<small>万</small>`;$('periodSales').innerHTML=`${fmtSmart(c.sales*days)}<small>万</small>`;$('periodCbg').innerHTML=`${fmt(c.cbgRmb*days)}<small>元</small>`;$('periodCards').innerHTML=`${fmt(c.cardCost*days)}<small>元</small>`;$('periodNet').innerHTML=`${fmtSmart(c.dailyNetCoins*days)}<small>万</small>`;$('playerRevenue').innerHTML=`${fmtSmart(c.purchase)}<small>万/天</small>`;$('cbgListing').innerHTML=`${fmtSmart(c.grossProfit)}<small>万/天</small>`;$('cbgCostBasis').innerHTML=`${fmtSmart(c.cbgCostBasis)}<small>万/天</small>`;$('feeCoins').innerHTML=`${fmtSmart(c.feeCoins)}<small>万/天</small>`;
   document.querySelectorAll('[data-days]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.days)===days));return c}
-function renderProfitZones(c){const nets={};state.zones.forEach((z,i)=>{const za=Math.max(0,accountsOf(z.preset)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));nets[z.id]=zp*zm*0.95/3000*zq-za*14.4});$('zoneBreakdown').innerHTML=state.zones.map(z=>{const net=nets[z.id];return `<div class="zone-breakdown-row zone-profit-row" data-zone="${z.id}"><b>${escapeHtml(z.name)}</b><input class="zp-input" data-zone-input="purchase" value="${num(z.purchase,9000)}" type="number" inputmode="decimal" min="0" step="100" placeholder="9000"><span class="zp-net ${net>=0?'win':'loss'}">${net>=0?'+':''}${fmt(net)} 元/天</span></div>`}).join('')}
-function renderAdminStats(){const at=$('adminTotal');if(at)at.textContent=`${state.zones.length}个区服 · 合计净利 ${fmt(calc().dailyNet)} 元/天`}
-function renderCompanyStats(){state.zones.forEach(z=>{const za=Math.max(0,accountsOf(z.preset)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95/3000*zq-za*14.4;const badge=document.querySelector(`[data-zone="${z.id}"] .zone-admin-net`);if(badge){badge.textContent=`${net>=0?'+':''}${fmt(net,1)}`;badge.classList.toggle('loss',net<0)}})}
+function renderProfitZones(c){const nets={};state.zones.forEach((z,i)=>{const za=Math.max(0,accountsOf(z.preset)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));nets[z.id]=zp*zm*0.95-rmbToWan(za*14.4,zq)});$('zoneBreakdown').innerHTML=state.zones.map(z=>{const net=nets[z.id];return `<div class="zone-breakdown-row zone-profit-row" data-zone="${z.id}"><b>${escapeHtml(z.name)}</b><input class="zp-input" data-zone-input="purchase" value="${num(z.purchase,9000)}" type="number" inputmode="decimal" min="0" step="100" placeholder="9000"><span class="zp-net ${net>=0?'win':'loss'}">${net>=0?'+':''}${fmtSmart(net)} 万/天</span></div>`}).join('')}
+function renderAdminStats(){const at=$('adminTotal');if(at)at.textContent=`${state.zones.length}个区服 · 合计净利 ${fmtSmart(calc().dailyNetCoins)} 万/天`}
+function renderCompanyStats(){state.zones.forEach(z=>{const za=Math.max(0,accountsOf(z.preset)),zp=Math.max(0,num(z.purchase,9000)),zm=Math.max(0,num(z.margin)/100),zq=Math.max(0,num(z.cbgQuote));const net=zp*zm*0.95-rmbToWan(za*14.4,zq);const badge=document.querySelector(`[data-zone="${z.id}"] .zone-admin-net`);if(badge){badge.textContent=`${net>=0?'+':''}${fmtSmart(net)}`;badge.classList.toggle('loss',net<0)}})}
 function renderSingle(){
   const s=state.single;
   const sel=$('singleZoneSelect');const zsel=state.zones.find(x=>x.id===s.zoneId)||state.zones[0];
@@ -581,23 +587,24 @@ function renderSingle(){
   if(zsel)s.quote=quote;
   const purchase=Math.max(0,num(s.purchase));const marginRate=Math.max(0,num(s.margin));const margin=marginRate/100;const preset=Math.max(0,accountsOf(s.preset));
   const cardHourly=.6;const hours=24;const netRate=.95;
-  const cardCost=preset*cardHourly*hours;
+  const cardCost=preset*cardHourly*hours;          // 点卡（元）
+  const cardCoins=rmbToWan(cardCost,quote);        // 点卡折算成游戏币（万）
   const sales=purchase*(1+margin);const gross=purchase*margin;
-  const cbg=gross*netRate/3000*quote;
-  const dailyNet=cbg-cardCost;
+  const cbg=gross*netRate/3000*quote;              // 藏宝阁到账（元），仅作中间展示
+  const dailyNet=gross*netRate-cardCoins;          // 净利（万游戏币）= 扣手续费后的毛利 − 点卡等值游戏币
   const rmbPerWan=margin*netRate/3000*quote;
   let breakEven=0,gap=0,targetPurchase=0;
   if(rmbPerWan>0){breakEven=cardCost/rmbPerWan;gap=purchase-breakEven;targetPurchase=(cardCost+Math.max(0,num(s.targetProfit)))/rmbPerWan}
   $('singlePurchase').value=purchase;$('singleMargin').value=marginRate;$('sTargetProfit').value=Math.max(0,num(s.targetProfit));
   document.querySelectorAll('[data-single-preset]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.singlePreset)===preset));
   document.querySelectorAll('[data-single-pq]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.singlePq)===purchase));
-  $('singleNet').textContent=fmt(dailyNet);
+  $('singleNet').textContent=fmtSmart(dailyNet);
   $('singleProfitSummary').classList.toggle('loss',dailyNet<0);
-  $('singleProfitNote').textContent=dailyNet>=0?`${zsel?zsel.name:''} · 已扣手续费和点卡`:'当前参数预计亏损';
+  $('singleProfitNote').textContent=dailyNet>=0?`${zsel?zsel.name:''} · 游戏币口径，已扣手续费和点卡`:'当前参数预计亏损';
   $('sSales').innerHTML=`${fmtSmart(sales)}<small>万</small>`;
   $('sGross').innerHTML=`${fmtSmart(gross)}<small>万</small>`;
   $('sCbg').innerHTML=`${fmt(cbg)}<small>元</small>`;
-  $('sCard').innerHTML=`${fmt(cardCost,1)}<small>元</small>`;
+  $('sCard').innerHTML=`${fmt(cardCost,1)}<small>元 ≈ ${fmtSmart(cardCoins)}万</small>`;
   $('sBreak').innerHTML=`${fmtSmart(breakEven)}<small>万</small>`;
   $('sGap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;
   $('sTargetPurchase').textContent=`${fmtSmart(targetPurchase)}万`;
