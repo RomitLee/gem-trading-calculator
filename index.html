@@ -29,13 +29,19 @@
 .sale-mode-tabs button.active::before{content:'✓';display:inline-grid;width:17px;height:17px;margin-right:5px;place-items:center;border-radius:50%;background:rgba(255,255,255,.2);font-size:10px;vertical-align:-1px}
 .sale-mode-tabs button:focus-visible{outline:3px solid rgba(102,88,235,.22);outline-offset:2px}
 .sale-mode-setting{position:relative;min-width:0;height:38px}
-.sale-mode-setting>.ratio-button,.sale-mode-setting>.average-sale-field{position:absolute;inset:0;width:100%;height:38px}
+.sale-mode-setting>.ratio-button,.sale-mode-setting>.average-fields{position:absolute;inset:0;width:100%;height:38px}
 .sale-mode-setting>.ratio-button{border-color:#7770e7;background:#fff;box-shadow:0 4px 12px rgba(102,88,235,.1)}
-.average-sale-field{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:7px;min-width:0;padding:0 9px;border-radius:10px;background:#fff;color:#6f788c;font-size:11px;font-weight:700;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .15s}
-.average-sale-field.show{visibility:visible;opacity:1;pointer-events:auto}
+/* 均价售卖：模式切换独占一行，下方「利润率 + 1级均价」两个字段并排铺满整行 */
+.sale-mode-bar.average .sale-mode-tabs{grid-column:1 / -1}
+.sale-mode-bar.average .sale-mode-setting{grid-column:1 / -1}
+.average-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:8px;min-width:0;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .15s}
+.average-fields.show{visibility:visible;opacity:1;pointer-events:auto}
+.average-sale-field{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:7px;min-width:0;padding:0 9px;border-radius:10px;background:#fff;color:#6f788c;font-size:11px;font-weight:700}
 .sale-mode-bar.average .average-sale-field{box-shadow:inset 0 0 0 1px rgba(102,88,235,.25),0 4px 12px rgba(102,88,235,.08)}
 .average-sale-field input{min-width:0;width:100%;height:38px;padding:0 8px;border:0;outline:0;background:transparent;color:var(--ink);font-size:14px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
-@media(max-width:380px){.average-sale-field{gap:4px;padding:0 7px}.average-sale-field input{padding:0 4px;font-size:13px}}
+.average-sale-field.average-sale-derived{background:#f7f6ff}
+.average-sale-derived b{min-width:0;font-size:14px;font-weight:800;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:380px){.average-sale-field{gap:4px;padding:0 7px}.average-sale-field input{padding:0 4px;font-size:13px}.average-fields{gap:6px}.average-sale-derived b{font-size:13px}}
 .main{margin-top:0;padding-top:calc(14px + env(safe-area-inset-top))}
 .top-tabs{top:calc(8px + env(safe-area-inset-top))}
 .global-cbg-setting{margin-bottom:14px}
@@ -47,7 +53,7 @@
 .daily-profit-value em{font-size:11px;font-style:normal;font-weight:700}
 .daily-profit-summary.loss{border-color:#f0c4c4;background:linear-gradient(135deg,#fff0f0,#fff8f8)}
 .daily-profit-summary.loss .daily-profit-copy span,.daily-profit-summary.loss .daily-profit-value{color:#c63838}
-.price-table.with-stamina .price-row{grid-template-columns:38px minmax(0,1.7fr) minmax(40px,.75fr) minmax(52px,1fr) minmax(58px,1fr)}
+
 .price-row:not(.head) span.cost-merge{display:flex;flex-direction:column;align-items:flex-end;line-height:1.25}
 .price-row:not(.head) span.cost-merge b{font-weight:750;font-variant-numeric:tabular-nums}
 .price-row:not(.head) span.cost-merge small{color:#9aa1b0;font-size:9px;font-weight:400;font-variant-numeric:tabular-nums}
@@ -105,6 +111,15 @@
 .admin-server-ts{font-size:11px;color:#8b93a4;margin:-6px 0 12px;padding-left:2px}
 .admin-revoke{margin-top:10px;width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;color:#98a1b2;font-size:12px;font-weight:650;padding:10px;cursor:pointer}.sync-chip.on{color:#087c68;border-color:#bfe8dc;background:var(--green-soft)}.sync-chip.on .sync-dot{background:#0f9f88}.sync-chip.busy .sync-dot{background:#b76e00}
 .app-version{margin-left:6px;font-size:10px;font-weight:700;color:#98a1b2;background:#f0f2f7;border:1px solid var(--line);border-radius:999px;padding:1px 7px;vertical-align:middle}
+.price-table .price-row{grid-template-columns:38px minmax(0,.85fr) minmax(0,1.2fr) minmax(0,1.45fr)}
+.sale-prices,.cost-prices{display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:0}
+.sale-prices b,.cost-prices b{font-size:inherit;font-weight:700}.sale-prices small,.cost-prices small{margin-left:3px;font-size:9px;font-weight:400;color:var(--muted)}
+.sale-prices>span,.cost-prices>span{font-size:11px;color:var(--muted)}
+.sale-prices .cbg-sale-line{display:flex;justify-content:flex-end;gap:6px;white-space:nowrap;font-size:10px;letter-spacing:-.2px}
+#adminTabs[hidden],#adminZonesPane[hidden],#adminBody[hidden]{display:none}.admin-tabs{margin-bottom:14px}.zone-sync-btn{width:100%;margin-top:10px;padding:11px;border:0;border-radius:12px;background:var(--navy);color:#fff;font-weight:700;cursor:pointer}#adminZonesPane .zone-admin-fields{grid-template-columns:1fr 1fr}#adminZonesPane .zone-admin-net{display:none}
+
+.top-tabs{grid-template-columns:repeat(4,1fr)}
+[data-panel="expenses"]{padding-bottom:100px}.expense-total{font-size:30px;font-weight:800;color:var(--navy);margin:8px 0 16px}.expense-categories{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.expense-category{padding:12px;border-radius:13px;background:#f5f6fb}.expense-category b{display:block;margin-top:6px;font-size:17px}.expense-record{padding:15px 0;border-bottom:1px solid var(--line)}.expense-record:last-child{border-bottom:0}.expense-line{display:flex;justify-content:space-between;gap:12px;align-items:center}.expense-meta{color:var(--muted);font-size:12px;line-height:1.8;margin-top:5px;overflow-wrap:anywhere}.expense-price{font-size:18px;white-space:nowrap;font-weight:750}.expense-footer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,760px);padding:12px 18px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--line);z-index:20}.expense-footer button{width:100%;height:46px;border:0;border-radius:13px;background:var(--navy);color:white;font-weight:700}.expense-form{display:grid;gap:14px}.expense-form label{display:grid;gap:7px;color:#626b7e;font-size:12px}.expense-form input,.expense-form select,.expense-form textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;background:#f8f9fc;color:var(--ink);font:inherit}.expense-form fieldset{border:1px solid var(--line);border-radius:11px;margin:0;padding:12px}.expense-zone-options{display:flex;gap:10px;flex-wrap:wrap}.expense-zone-options label{display:flex;align-items:center;gap:5px}.expense-zone-options input{width:auto}.expense-form [hidden]{display:none}.expense-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:8px}.expense-error{color:#c43d3d;min-height:18px}.expense-filter{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -112,14 +127,13 @@
   <main class="main">
     <header class="app-header">
       <img class="app-logo" src="icons/app-logo.png" alt="子霖宝石助手">
-      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v60</span></h1>
+      <h1 class="app-name">子霖宝石助手<span class="app-version" id="appVersion">v64</span></h1>
       <button type="button" class="sync-chip" id="syncChip"><span class="admin-gear">⚙</span><span class="sync-dot" id="chipDot"></span><span id="chipText">管理员</span></button>
     </header>
     <nav class="top-tabs" aria-label="计算器页面">
       <button type="button" class="active" data-tab="synthesis">宝石合成</button>
-      <button type="button" data-tab="profit">日利润</button>
       <button type="button" data-tab="period">周期</button>
-      <button type="button" data-tab="single">单服日利润</button>
+      <button type="button" data-tab="single">单服日利润</button><button type="button" data-tab="expenses">支出统计</button>
     </nav>
 
     <section class="tab-panel active" data-panel="synthesis">
@@ -143,55 +157,27 @@
           </div>
           <div class="sale-mode-setting">
             <button type="button" class="ratio-button" id="ratioBtn">售价比例</button>
-            <label class="average-sale-field" id="averageSaleField" for="averageSalePrice"><span>1级均价</span><input id="averageSalePrice" type="number" inputmode="numeric" min="0" step="1" value="110000"></label>
+            <div class="average-fields" id="averageFields">
+              <div class="average-sale-field average-sale-derived"><span>利润率</span><b id="averageProfitRate">27%</b></div>
+              <label class="average-sale-field" for="averageSalePrice"><span>1级均价</span><input id="averageSalePrice" type="number" inputmode="decimal" min="0" step="1" value="127000"></label>
+            </div>
           </div>
         </div>
         <div class="price-table-head"><strong id="priceTableTitle">普通宝石价格表</strong></div>
         <div class="price-table" id="gemPriceTable">
-          <div class="price-row head" id="priceTableHeadRow"><span>等级</span><span>收购价（万）</span><span>需1级宝石</span><span>摆摊售价（万）</span><span>藏宝阁售价（元）</span></div>
+          <div class="price-row head" id="priceTableHeadRow"><span>等级</span><span>需1级宝石</span><span>成本价</span><span>售价</span></div>
           <div id="gemPriceRows"></div>
         </div>
         <div class="table-note" id="synthesisRule">普通宝石：2个低一级宝石合成1个高一级宝石。藏宝阁最低上架8级；摆摊售价直接去掉万位后的小数，藏宝阁售价保留1位小数。</div>
       </div>
     </section>
 
-    <section class="tab-panel" data-panel="profit">
-      <div class="card">
-        <div class="card-title"><h2>日利润总览</h2><span id="accountHint">0个区服</span></div>
-        <div class="daily-profit-summary" id="dailyProfitSummary">
-          <div class="daily-profit-copy"><span>预计每天净利润</span><small id="dailyProfitNote">各区服合计，已扣除账号点卡</small></div>
-          <div class="daily-profit-value"><strong id="dailyNet">0.00</strong><em>万</em></div>
-        </div>
-        <div class="sync-bar" id="syncBar"><span class="sync-dot" id="syncDot"></span><span id="syncText">数据仅存本机</span><button type="button" class="sync-link" id="syncBtn">管理区服</button></div>
-        <div class="zone-label">各区服净利（输入每天收购金额）</div>
-        <div class="zone-breakdown" id="zoneBreakdown"></div>
-        <div class="formula">各区服净利（万游戏币）＝收购额 × 利润率 − 点卡折算的游戏币，合计即日利润。点卡按每号每小时0.6元、每天24小时＝每号14.4元/天，再按「3000万＝该区服汇率」换成游戏币后扣除，账号配置几收即几个号。保本线与目标反推按当前各区收购占比加权计算。</div>
-      </div>
-      <div class="card">
-        <div class="card-title"><h2>利润明细</h2><span id="accountHint2">0个账号</span></div>
-        <div class="results">
-          <div class="result"><div class="result-label">游戏内销售额</div><div class="result-value" id="sales">0<small>万</small></div></div>
-          <div class="result"><div class="result-label">交易毛利润</div><div class="result-value" id="grossProfit">0<small>万</small></div></div>
-          <div class="result"><div class="result-label">藏宝阁到账</div><div class="result-value" id="cbgRmb">0<small>元</small></div></div>
-          <div class="result"><div class="result-label">每天点卡</div><div class="result-value" id="cardCost">0<small>元</small></div></div>
-          <div class="result highlight"><div class="result-label">不亏本收购线</div><div class="result-value" id="breakEven">0<small>万</small></div></div>
-          <div class="result warning"><div class="result-label">距离保本线</div><div class="result-value" id="gap">0<small>万</small></div></div>
-        </div>
-      </div>
+    <div hidden><span id="accountHint"></span><span id="dailyProfitSummary"></span><span id="dailyProfitNote"></span><span id="dailyNet"></span><span id="syncBar"></span><span id="syncDot"></span><span id="syncText"></span><span id="syncBtn"></span><span id="zoneBreakdown"></span><span id="accountHint2"></span><span id="sales"></span><span id="grossProfit"></span><span id="cbgRmb"></span><span id="cardCost"></span><span id="breakEven"></span><span id="gap"></span></div>
+    <section class="tab-panel" data-panel="expenses">
+      <div class="card"><div class="card-title"><h2>支出统计</h2><span id="expenseCount"></span></div><div class="result-label">累计支出（元）</div><div class="expense-total" id="expenseTotal"></div><div class="expense-categories" id="expenseCategories"></div><div class="table-note" id="expensePermission"></div></div>
+      <div class="card"><div class="card-title"><h2>支出明细</h2><span>按时间倒序</span></div><select id="expenseFilter" class="expense-filter" aria-label="筛选支出类型"><option value="">全部类型</option><option value="hardware">硬件支出</option><option value="account">账号支出</option><option value="coins">购菜支出</option><option value="card">点卡支出</option></select><div id="expenseList"></div></div>
+      <div class="expense-footer"><button type="button" id="addExpenseBtn">新增支出项</button></div>
     </section>
-
-    <section class="tab-panel" data-panel="admin">
-      <div class="card">
-        <div class="card-title"><h2>区服管理</h2><span id="adminTotal">—</span></div>
-        <div class="sync-bar" id="adminSyncBar"><span class="sync-dot" id="adminSyncDot"></span><span id="adminSyncText">核对口令中…</span></div>
-        <div id="zoneAdminList"></div>
-        <button type="button" class="add-zone-btn" id="addZoneBtn">＋ 新增区服</button>
-      </div>
-      <div class="card">
-        <div class="setting-actions" style="justify-content:space-between;padding:0 4px"><button type="button" class="text-button" id="exitAdminBtn">← 返回日利润</button><button type="button" class="text-button danger" id="revokeBtn">清除本机口令授权</button></div>
-      </div>
-    </section>
-
     <section class="tab-panel" data-panel="period">
       <div class="card">        <div class="card-title"><h2>周期收益</h2><span>按当前每日数据</span></div>
         <div class="period-tabs"><button data-days="7">7天</button><button data-days="30" class="active">30天</button><button data-days="31">31天</button></div>
@@ -270,10 +256,21 @@
     <div class="modal-actions"><button type="button" class="primary" id="ratioSyncBtn" style="grid-column:1/-1">同步</button></div>
   </div>
 </div>
+<div class="modal" id="expenseModal" role="dialog" aria-modal="true" aria-labelledby="expenseModalTitle"><div class="modal-card"><div class="modal-title"><h2 id="expenseModalTitle">新增支出项</h2><button type="button" class="modal-close" id="expenseClose" aria-label="关闭">×</button></div>
+<form id="expenseForm" class="expense-form"><label>支出类型<select id="expenseType"><option value="hardware">硬件支出</option><option value="account">账号支出</option><option value="coins">购菜支出</option><option value="card">点卡支出</option></select></label><label>时间<input id="expenseDate" type="date" required></label><fieldset id="expenseZoneField"><legend id="expenseZoneLegend">区服（单选）</legend><div id="expenseZones" class="expense-zone-options"></div></fieldset><label id="expenseDescriptionField">描述<textarea id="expenseDescription" rows="2" maxlength="300"></textarea></label><label id="expenseCoinsField">游戏币（万）<input id="expenseCoins" type="number" min="0.01" step="0.01" value="3000"></label><label>价格（元）<input id="expensePrice" type="number" min="0.01" step="0.01" required inputmode="decimal"></label><div class="expense-error" id="expenseError" role="alert"></div><button type="submit" class="primary">保存支出</button></form></div></div>
 <div class="modal" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
   <div class="modal-card">
     <div class="modal-title"><h2 id="adminModalTitle">管理员</h2><button type="button" class="modal-close" id="adminClose" aria-label="关闭">×</button></div>
+    <div class="period-tabs admin-tabs" id="adminTabs" hidden role="tablist"><button type="button" id="adminHistoryTab" role="tab">历史同步记录</button><button type="button" id="adminZonesTab" role="tab">区服管理</button></div>
     <div id="adminBody"></div>
+    <div id="adminZonesPane" hidden>      <div class="card">
+        <div class="card-title"><h2>区服管理</h2><span id="adminTotal">—</span></div>
+        <div class="sync-bar" id="adminSyncBar"><span class="sync-dot" id="adminSyncDot"></span><span id="adminSyncText">核对口令中…</span></div>
+        <div id="zoneAdminList"></div>
+        <button type="button" class="add-zone-btn" id="addZoneBtn">＋ 新增区服</button><button type="button" class="primary zone-sync-btn" id="zoneSyncBtn">同步区服比例</button>
+      </div>
+</div>
+    <div hidden><button id="exitAdminBtn"></button><button id="revokeBtn"></button></div>
   </div>
 </div>
 <div class="modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
@@ -291,8 +288,8 @@
 <script>
 const defaultRatios={
   normal:{2:{stall:1.15,cbg:1.15},3:{stall:1.16,cbg:1.16},4:{stall:1.17,cbg:1.17},5:{stall:1.18,cbg:1.18},6:{stall:1.19,cbg:1.19},7:{stall:1.19,cbg:1.19},8:{stall:1.20,cbg:1.20},9:{stall:1.22,cbg:1.24},10:{stall:1.22,cbg:1.24},11:{stall:1.23,cbg:1.25},12:{stall:1.24,cbg:1.26}},
-  star:{2:{stall:1.10,cbg:1.10},3:{stall:1.10,cbg:1.10},4:{stall:1.10,cbg:1.10},5:{stall:1.12,cbg:1.12},6:{stall:1.14,cbg:1.14},7:{stall:1.16,cbg:1.16}},
-  dust:{2:{stall:1.10,cbg:1.10},3:{stall:1.10,cbg:1.10},4:{stall:1.10,cbg:1.10},5:{stall:1.12,cbg:1.12},6:{stall:1.14,cbg:1.14},7:{stall:1.16,cbg:1.16}}
+  star:{2:{stall:1.10,cbg:1.10},3:{stall:1.10,cbg:1.10},4:{stall:1.10,cbg:1.10},5:{stall:1.12,cbg:1.12},6:{stall:1.14,cbg:1.14},7:{stall:1.16,cbg:1.16},8:{stall:1.16,cbg:1.16}},
+  dust:{2:{stall:1.10,cbg:1.10},3:{stall:1.10,cbg:1.10},4:{stall:1.10,cbg:1.10},5:{stall:1.12,cbg:1.12},6:{stall:1.14,cbg:1.14},7:{stall:1.16,cbg:1.16},8:{stall:1.16,cbg:1.16}}
 };
 const ratioDefaultsVersion=2;
 const defaultSynthesisPrices={normal:100000,star:141111,dust:322222};
@@ -309,10 +306,16 @@ const savedRatios=saved.priceRatios||{};
 const mergedRatios=cloneRatios(defaultRatios);
 if(savedRatios.normal||savedRatios.star||savedRatios.dust){Object.keys(mergedRatios).forEach(type=>Object.keys(mergedRatios[type]).forEach(level=>{if(savedRatios[type]?.[level])mergedRatios[type][level]={...mergedRatios[type][level],...savedRatios[type][level]}}))}else{Object.keys(mergedRatios.normal).forEach(level=>{if(savedRatios[level])mergedRatios.normal[level]={...mergedRatios.normal[level],...savedRatios[level]}})}
 const savedPrices={...defaultSynthesisPrices,...(saved.synthesisPrices||{})};
+// 保留已有均价；首次使用时按历史利润率（默认27%）初始化均价。
+const DEFAULT_PROFIT_RATE=27;
+const savedProfitRates=saved.averageProfitRate||{};
+const averageProfitRate=Object.fromEntries(Object.keys(defaultSynthesisPrices).map(type=>{const value=Number(savedProfitRates[type]);return[type,Number.isFinite(value)?Math.max(0,value):DEFAULT_PROFIT_RATE]}));
 const savedAveragePrices=saved.averageSalePrices||{};
-const averageSalePrices=Object.fromEntries(Object.keys(defaultSynthesisPrices).map(type=>{const value=Number(savedAveragePrices[type]);return[type,Number.isFinite(value)?Math.max(0,value):Math.round(savedPrices[type]*1.1)]}));
-const averagePriceCustomized={normal:false,star:false,dust:false,...(saved.averagePriceCustomized||{})};
-const state={...defaults,...saved,synthesisPrices:savedPrices,priceRatios:mergedRatios,averageSalePrices,averagePriceCustomized,ratioDefaultsVersion};
+const averageSalePrices=Object.fromEntries(Object.keys(defaultSynthesisPrices).map(type=>{const value=Number(savedAveragePrices[type]);return[type,Number.isFinite(value)?Math.max(0,value):Math.round(savedPrices[type]*(1+averageProfitRate[type]/100))]}));
+const state={...defaults,...saved,synthesisPrices:savedPrices,priceRatios:mergedRatios,averageSalePrices,averageProfitRate,ratioDefaultsVersion};
+const expenseSeed=[{"id":"xlsx-20261022-hardware-2","type":"hardware","date":"2026-09-21","description":"G24Q显示器","price":588,"zones":[],"coins":null},{"id":"xlsx-20261022-account-2","type":"account","date":"2026-09-18","description":"秦淮风光144五庄","price":330,"zones":["秦淮风光"],"coins":null},{"id":"xlsx-20261022-coins-2","type":"coins","date":"2026-09-16","description":"秦淮风光","price":210,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-card-2","type":"card","date":"2026-09-16","description":"秦淮风光点卡充值","price":60,"zones":["秦淮风光"],"coins":null},{"id":"xlsx-20261022-hardware-3","type":"hardware","date":"2026-10-19","description":"5700X主机","price":1436,"zones":[],"coins":null},{"id":"xlsx-20261022-account-3","type":"account","date":"2026-10-09","description":"罗浮山144地府","price":470,"zones":["罗浮山"],"coins":null},{"id":"xlsx-20261022-coins-3","type":"coins","date":"2026-09-18","description":"秦淮风光","price":416,"zones":["秦淮风光"],"coins":6000},{"id":"xlsx-20261022-card-3","type":"card","date":"2026-09-18","description":"秦淮风光点卡充值50","price":50,"zones":["秦淮风光"],"coins":null},{"id":"xlsx-20261022-hardware-4","type":"hardware","date":"2026-10-19","description":"1050ti显卡","price":480,"zones":[],"coins":null},{"id":"xlsx-20261022-account-4","type":"account","date":"2026-10-11","description":"罗浮山144地府","price":460,"zones":["罗浮山"],"coins":null},{"id":"xlsx-20261022-coins-4","type":"coins","date":"2026-09-19","description":"秦淮风光","price":417,"zones":["秦淮风光"],"coins":6000},{"id":"xlsx-20261022-card-4","type":"card","date":"2026-09-18","description":"秦淮风光点卡充值50","price":50,"zones":["秦淮风光"],"coins":null},{"id":"xlsx-20261022-account-5","type":"account","date":"2026-10-15","description":"罗浮山144方寸","price":499,"zones":["罗浮山"],"coins":null},{"id":"xlsx-20261022-coins-5","type":"coins","date":"2026-09-20","description":"秦淮风光","price":208,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-card-5","type":"card","date":"2026-09-22","description":"秦淮风光点卡充值","price":20,"zones":["秦淮风光"],"coins":null},{"id":"xlsx-20261022-account-6","type":"account","date":"2026-10-20","description":"钓鱼岛143方寸","price":399,"zones":["钓鱼岛"],"coins":null},{"id":"xlsx-20261022-coins-6","type":"coins","date":"2026-09-21","description":"秦淮风光","price":420,"zones":["秦淮风光"],"coins":6000},{"id":"xlsx-20261022-card-6","type":"card","date":"2026-09-22","description":"秦淮风光点卡充值","price":120,"zones":["秦淮风光"],"coins":null},{"id":"xlsx-20261022-coins-7","type":"coins","date":"2026-09-26","description":"秦淮风光","price":211,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-card-7","type":"card","date":"2026-09-22","description":"秦淮风光点卡充值","price":400,"zones":["秦淮风光"],"coins":null},{"id":"xlsx-20261022-coins-8","type":"coins","date":"2026-09-27","description":"秦淮风光","price":213,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-card-8","type":"card","date":"2026-09-29","description":"秦淮风光点卡充值","price":400,"zones":["秦淮风光"],"coins":null},{"id":"xlsx-20261022-coins-9","type":"coins","date":"2026-09-28","description":"秦淮风光","price":211,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-card-9","type":"card","date":"2026-09-29","description":"罗浮山点卡充值","price":60,"zones":["罗浮山"],"coins":null},{"id":"xlsx-20261022-coins-10","type":"coins","date":"2026-10-01","description":"秦淮风光","price":418,"zones":["秦淮风光"],"coins":6000},{"id":"xlsx-20261022-card-10","type":"card","date":"2026-10-12","description":"秦淮风光罗浮山综合充值","price":720,"zones":["秦淮风光","罗浮山"],"coins":null},{"id":"xlsx-20261022-coins-11","type":"coins","date":"2026-10-08","description":"秦淮风光","price":208,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-card-11","type":"card","date":"2026-10-15","description":"罗浮山点卡充值","price":100,"zones":["罗浮山"],"coins":null},{"id":"xlsx-20261022-coins-12","type":"coins","date":"2026-10-08","description":"秦淮风光","price":207,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-card-12","type":"card","date":"2026-10-20","description":"钓鱼岛点卡充值","price":100,"zones":["钓鱼岛"],"coins":null},{"id":"xlsx-20261022-coins-13","type":"coins","date":"2026-10-09","description":"秦淮风光","price":207,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-card-13","type":"card","date":"2026-10-20","description":"秦淮风光罗浮山综合充值","price":270,"zones":["秦淮风光","罗浮山"],"coins":null},{"id":"xlsx-20261022-coins-14","type":"coins","date":"2026-10-09","description":"秦淮风光","price":207,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-coins-15","type":"coins","date":"2026-10-10","description":"秦淮风光","price":206,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-coins-16","type":"coins","date":"2026-10-17","description":"秦淮风光","price":216,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-coins-17","type":"coins","date":"2026-10-17","description":"秦淮风光","price":219,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-coins-18","type":"coins","date":"2026-10-18","description":"秦淮风光","price":219,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-coins-19","type":"coins","date":"2026-10-19","description":"秦淮风光","price":220,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-coins-20","type":"coins","date":"2026-10-20","description":"秦淮风光","price":220,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-coins-21","type":"coins","date":"2026-10-22","description":"秦淮风光 （清风给与）","price":220,"zones":["秦淮风光"],"coins":3000},{"id":"xlsx-20261022-coins-22","type":"coins","date":"2026-10-09","description":"罗浮山","price":212,"zones":["罗浮山"],"coins":3000},{"id":"xlsx-20261022-coins-23","type":"coins","date":"2026-10-10","description":"罗浮山","price":212,"zones":["罗浮山"],"coins":3000},{"id":"xlsx-20261022-coins-24","type":"coins","date":"2026-10-10","description":"罗浮山","price":212,"zones":["罗浮山"],"coins":3000},{"id":"xlsx-20261022-coins-25","type":"coins","date":"2026-10-11","description":"罗浮山","price":212,"zones":["罗浮山"],"coins":3000},{"id":"xlsx-20261022-coins-26","type":"coins","date":"2026-10-11","description":"罗浮山","price":212,"zones":["罗浮山"],"coins":3000},{"id":"xlsx-20261022-coins-27","type":"coins","date":"2026-10-11","description":"罗浮山","price":212,"zones":["罗浮山"],"coins":3000},{"id":"xlsx-20261022-coins-28","type":"coins","date":"2026-10-12","description":"罗浮山","price":211,"zones":["罗浮山"],"coins":3000},{"id":"xlsx-20261022-coins-29","type":"coins","date":"2026-10-14","description":"罗浮山","price":220,"zones":["罗浮山"],"coins":3000},{"id":"xlsx-20261022-coins-30","type":"coins","date":"2026-10-17","description":"罗浮山","price":221,"zones":["罗浮山"],"coins":3000},{"id":"xlsx-20261022-coins-31","type":"coins","date":"2026-10-19","description":"罗浮山","price":222,"zones":["罗浮山"],"coins":3000},{"id":"xlsx-20261022-coins-32","type":"coins","date":"2026-10-20","description":"罗浮山","price":222,"zones":["罗浮山"],"coins":3000},{"id":"xlsx-20261022-coins-33","type":"coins","date":"2026-10-20","description":"钓鱼岛","price":215,"zones":["钓鱼岛"],"coins":3000},{"id":"xlsx-20261022-coins-34","type":"coins","date":"2026-10-22","description":"钓鱼岛","price":215,"zones":["钓鱼岛"],"coins":3000}];
+if(!Array.isArray(state.expenses))state.expenses=structuredClone(expenseSeed);
+state.expenseSeedVersion=1;
 delete state.synthesisCbgRate;
 delete state.coinRate;
 delete state.fee;
@@ -320,6 +323,7 @@ delete state.baseGemPrice;
 delete state.minLevel10;
 delete state.cardHourly;
 delete state.hours;
+delete state.averagePriceCustomized;   // v61 起 1级均价改为推导值，「是否手改过」的标记作废
 if(!['normal','star','dust'].includes(state.gemType))state.gemType='normal';
 if(!['ratio','average'].includes(state.saleMode))state.saleMode='ratio';
 let activeTab='synthesis';
@@ -352,9 +356,18 @@ if(Number(state.presetVersion)!==2){state.zones.forEach(z=>{z.preset=migrateLega
 if(!state.zones.some(z=>z.id===state.single.zoneId)){const pref=state.zones.find(z=>z.name==='秦淮风光')||state.zones[0];state.single.zoneId=pref.id;}
 const gemTypes={
   normal:{name:'普通宝石',icon:'icons/gem-normal.png',levels:[2,3,4,5,6,7,8,9,10,11,12],cbgMinLevel:8,rule:'普通宝石：2个低一级宝石合成1个高一级宝石。藏宝阁最低上架8级；摆摊售价直接去掉万位后的小数，藏宝阁售价保留1位小数。'},
-  star:{name:'星辉石',icon:'icons/gem-star.png',levels:[2,3,4,5,6,7],cbgMinLevel:5,rule:'星辉石：3个低一级星辉石合成1个高一级星辉石，计算2—7级。藏宝阁最低上架5级。'},
-  dust:{name:'五色灵尘',icon:'icons/gem-dust.png',levels:[2,3,4,5,6,7],cbgMinLevel:5,rule:'五色灵尘：2个低一级灵尘加1个再低一级灵尘，合成1个高一级灵尘，计算2—7级。藏宝阁最低上架5级。'}
+  star:{name:'星辉石',icon:'icons/gem-star.png',levels:[2,3,4,5,6,7,8],cbgMinLevel:5,rule:'星辉石：3个低一级星辉石合成1个高一级星辉石，计算2—8级。藏宝阁最低上架5级。'},
+  dust:{name:'五色灵尘',icon:'icons/gem-dust.png',levels:[2,3,4,5,6,7,8],cbgMinLevel:5,rule:'五色灵尘：2个低一级灵尘加1个再低一级灵尘，合成1个高一级灵尘，计算2—8级。藏宝阁最低上架5级。'}
 };
+// 均价按宝石类型保存；利润率由输入的均价与收购价反推，收购价为零时不可计算。
+function syncAverageSalePrice(){
+  Object.keys(defaultSynthesisPrices).forEach(type=>{
+    const price=Math.max(0,num(state.synthesisPrices[type]));
+    const average=Math.max(0,num(state.averageSalePrices[type]));
+    state.averageProfitRate[type]=price>0?(average/price-1)*100:null;
+  });
+}
+syncAverageSalePrice();
 document.querySelectorAll('[data-key]').forEach(input=>{const key=input.dataset.key;input.value=state[key];input.addEventListener('input',()=>{state[key]=num(input.value,defaults[key]);if(key==='cbgQuote'){const sel=$('synthesisZoneSelect');if(sel)sel.value=state.cbgZoneId}save();render()})});
 $('synthesisBasePrice').value=state.synthesisPrices[state.gemType];
 $('averageSalePrice').value=state.averageSalePrices[state.gemType];
@@ -378,11 +391,20 @@ const SYNC_NS_KEY='gemSyncNamespace';
 // 云端数据行 key：旧版本已弃用，仅此一行，不再做任何新旧迁移
 const ROW_NS=TOKEN_HASH+':v50';
 let cloud=null,namespace=null,syncTimer=null,busyState=null;
+let expenseSession='';
+try{expenseSession=sessionStorage.getItem('gemExpenseSession')||''}catch(_){}
+async function authorizeExpenses(password){
+  const res=await fetch('/api/admin_session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})});
+  if(!res.ok)throw new Error('管理员授权失败，请确认数据服务已更新');
+  const data=await res.json();expenseSession=data.token;
+  try{sessionStorage.setItem('gemExpenseSession',expenseSession)}catch(_){}
+}
+
 async function sha256Hex(text){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return Array.from(new Uint8Array(buf),b=>b.toString(16).padStart(2,'0')).join('')}
-function setSyncUI(status,text,target){busyState=status;const chip=$('syncChip'),bar=$('syncBar');chip.classList.remove('on','busy');bar.classList.remove('on','busy');if(status==='on'||status==='busy'){chip.classList.add(status);bar.classList.add(status)}const label=namespace?(status==='on'?'已同步':status==='busy'?'同步中':'同步失败'):'只读';$('chipText').textContent=text||(namespace?'管理员':'只读');$('syncChip').title=label;const targetBar=target==='admin'?$('adminSyncText'):$('syncText');targetBar.textContent=namespace?(status==='on'?'已同步到云端':status==='busy'?'正在同步…':'同步失败，将自动重试'):(target==='admin'?'输入口令后可编辑并跨设备同步':'已读取服务器最新数据 · 输入口令后可修改');$('syncBtn').textContent=namespace?'管理区服':'口令登录';const adminBar=$('adminSyncBar');if(adminBar)adminBar.classList.remove('on','busy');if(target==='admin'&&(status==='on'||status==='busy'))adminBar.classList.add(status)}
+function setSyncUI(status,text,target){busyState=status;renderExpenses();const chip=$('syncChip'),bar=$('syncBar');chip.classList.remove('on','busy');bar.classList.remove('on','busy');if(status==='on'||status==='busy'){chip.classList.add(status);bar.classList.add(status)}const label=namespace?(status==='on'?'已同步':status==='busy'?'同步中':'同步失败'):'只读';$('chipText').textContent=text||(namespace?'管理员':'只读');$('syncChip').title=label;const targetBar=target==='admin'?$('adminSyncText'):$('syncText');targetBar.textContent=namespace?(status==='on'?'已同步到云端':status==='busy'?'正在同步…':'同步失败，将自动重试'):(target==='admin'?'输入口令后可编辑并跨设备同步':'已读取服务器最新数据 · 输入口令后可修改');$('syncBtn').textContent=namespace?'管理区服':'口令登录';const adminBar=$('adminSyncBar');if(adminBar)adminBar.classList.remove('on','busy');if(target==='admin'&&(status==='on'||status==='busy'))adminBar.classList.add(status)}
 function mergeSyncHistory(local,remote){const map=new Map();[...(Array.isArray(remote)?remote:[]),...(Array.isArray(local)?local:[])].forEach(h=>{const t=Number(h&&h.t)||0;if(!t)return;const k=Math.round(t/1000);const prev=map.get(k);if(!prev||(h.kind==='ratio'&&prev.kind!=='ratio'))map.set(k,{t,kind:h.kind||'auto'})});return Array.from(map.values()).sort((a,b)=>b.t-a.t).slice(0,30)}
 function applyRemote(p,opts){if(!p||typeof p!=='object')return;const force=!!(opts&&opts.force);const localRev=Number(state.rev)||0,syncedRev=Number(state.syncedRev)||0,remoteRev=Number(p.rev)||0;const localTs=Number(state.updatedAt)||0,remoteTs=Number(p.updatedAt)||0;const hasLocalPending=localRev>syncedRev;if(!force&&hasLocalPending&&remoteRev<=localRev&&remoteTs+2000<localTs){console.warn('本机有未推送的改动且更新，以本机为准并回推');setSyncUI('busy');scheduleCloudPush();return}
-['targetProfit','periodDays','cbgQuote','ratioDefaultsVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.updatedAt!==undefined){state.updatedAt=remoteTs;state.syncedAt=remoteTs}if(remoteRev>0){state.rev=remoteRev;state.syncedRev=remoteRev}adoptRemoteHistory(p.syncHistory);if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){const rmNew=Number(p.presetVersion)===2;state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:rmNew?accountsOf(z.preset):migrateLegacyPreset(z.preset)}));state.activeZoneId=state.zones.some(z=>z.id===state.activeZoneId)?state.activeZoneId:state.zones[0].id}lastFp=dataFingerprint();safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
+['targetProfit','periodDays','cbgQuote','ratioDefaultsVersion','expenses','expenseSeedVersion'].forEach(k=>{if(p[k]!==undefined)state[k]=p[k]});if(p.updatedAt!==undefined){state.updatedAt=remoteTs;state.syncedAt=remoteTs}if(remoteRev>0){state.rev=remoteRev;state.syncedRev=remoteRev}adoptRemoteHistory(p.syncHistory);if(p.synthesisPrices)state.synthesisPrices={...state.synthesisPrices,...p.synthesisPrices};if(p.averageSalePrices)state.averageSalePrices={...state.averageSalePrices,...p.averageSalePrices};if(p.averageProfitRate)state.averageProfitRate={...state.averageProfitRate,...p.averageProfitRate};syncAverageSalePrice();if(p.priceRatios)['normal','star','dust'].forEach(t=>{if(p.priceRatios[t])Object.keys(p.priceRatios[t]).forEach(l=>{if(state.priceRatios[t]&&state.priceRatios[t][l])state.priceRatios[t][l]={...state.priceRatios[t][l],...p.priceRatios[t][l]}})});if(Array.isArray(p.zones)&&p.zones.length){const rmNew=Number(p.presetVersion)===2;state.zones=p.zones.map(z=>({id:z.id||uid(),name:String(z.name||'未命名'),cbgQuote:num(z.cbgQuote,210),purchase:num(z.purchase,9000),margin:num(z.margin,17),preset:rmNew?accountsOf(z.preset):migrateLegacyPreset(z.preset)}));state.activeZoneId=state.zones.some(z=>z.id===state.activeZoneId)?state.activeZoneId:state.zones[0].id}lastFp=dataFingerprint();safeStorage.set('gemCalculatorSettings',JSON.stringify(state));render()}
 let retryTimer=null;
 function scheduleRetry(fn,ms){clearTimeout(retryTimer);retryTimer=setTimeout(fn,ms)}
 // 自建数据接口适配层：接口形状与原来的云 SDK 保持一致，上层同步逻辑无需改动
@@ -396,8 +418,8 @@ async function apiZoneGet(ns){
 }
 async function apiZoneUpsert(row){
   try{
-    const res=await fetch(CLOUD_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(row)});
-    if(!res.ok)return{error:{message:'HTTP '+res.status}};
+    const res=await fetch(CLOUD_API,{method:'POST',headers:{'Content-Type':'application/json','X-Gem-Admin-Session':expenseSession},body:JSON.stringify(expenseSession?row:{...row,payload:Object.fromEntries(Object.entries(row.payload).filter(([k])=>!['expenses','expenseSeedVersion'].includes(k)))})});
+    if(res.status===403){expenseSession='';try{sessionStorage.removeItem('gemExpenseSession')}catch(_){}toast('支出同步需要重新输入管理员口令')}if(!res.ok)return{error:{message:'HTTP '+res.status}};
     return{error:null};
   }catch(e){return{error:{message:String(e)}}}
 }
@@ -475,11 +497,15 @@ function openAuthModal(){$('authOut').hidden=!!namespace;$('authModal').classLis
 function closeAuthModal(){$('authModal').classList.remove('show');document.body.style.overflow=''}
 function authErr(el,msg){$(el).textContent=msg}
 $('syncChip').addEventListener('click',openAdminModal);$('syncBtn').addEventListener('click',handleSyncEntry);
-let panelLoading=false;
+let panelLoading=false,adminTab='history';
+function showAdminTab(tab){adminTab=tab;const authorized=!!namespace;$('adminTabs').hidden=!authorized;$('adminBody').hidden=authorized&&tab==='zones';$('adminZonesPane').hidden=!authorized||tab!=='zones';$('adminHistoryTab').classList.toggle('active',tab==='history');$('adminZonesTab').classList.toggle('active',tab==='zones');if(authorized&&tab==='zones'){renderZones();setSyncUI(busyState||'on',null,'admin')}}
+$('adminHistoryTab').addEventListener('click',()=>showAdminTab('history'));
+$('adminZonesTab').addEventListener('click',()=>showAdminTab('zones'));
+$('zoneSyncBtn').addEventListener('click',async()=>{if(!namespace||!cloud){toast('请先登录管理口令');return}save();clearTimeout(syncTimer);const btn=$('zoneSyncBtn');btn.disabled=true;btn.textContent='同步中…';try{const ok=await syncBoth('force');toast(ok?'区服比例已同步到云端':'同步失败，将自动重试');if(!ok)scheduleCloudPushRetry()}finally{btn.disabled=false;btn.textContent='同步区服比例'}});
 function openAdminModal(){panelLoading=!!(namespace&&cloud);renderAdmin();$('adminModal').classList.add('show');document.body.style.overflow='hidden';if(namespace&&cloud){refreshFromCloud().finally(()=>{panelLoading=false;renderAdminIfOpen()})}}
 function closeAdminModal(){$('adminModal').classList.remove('show');document.body.style.overflow=''}
 function renderAdmin(){
-  const body=$('adminBody');if(!body)return;
+  const body=$('adminBody');if(!body)return;showAdminTab(adminTab);
   if(!namespace){
     body.innerHTML=`<label class="auth-label">管理口令</label><div class="auth-row"><input id="adminToken" type="password" placeholder="请输入管理口令" autocomplete="off"><button type="button" class="auth-code-btn" id="adminTokenSubmit">进入</button></div><div class="auth-error" id="adminError"></div><div class="auth-hint">登录后区服与售价比例可在多设备间同步，并保留最近 30 条同步记录。</div>`;
     const inp=$('adminToken');if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')$('adminTokenSubmit').click()});
@@ -495,12 +521,8 @@ function renderAdmin(){
     ${serverTs?`<div class="admin-server-ts">云端记录时间 ${fmtSyncTime(serverTs)}（服务器时间，两台设备一致）</div>`:''}
     <div class="admin-section-title">历史同步记录（${hist.length}）<span class="admin-section-hint">仅在「售价比例」弹框点【同步】时记录</span></div>
     <div class="admin-history">${rows}</div>
-    <div class="modal-actions"><button type="button" class="primary" id="adminSyncNow">立即同步</button><button type="button" class="secondary" id="adminGotoZones">区服管理</button></div>
     <button type="button" class="admin-revoke" id="adminRevoke">清除本机授权</button>`;
-  // 这里只做「立刻把本机改动推上去并拉回最新」，不写同步历史
-  $('adminSyncNow').addEventListener('click',async()=>{if(!cloud){toast('云组件未就绪');return}setSyncUI('busy');renderAdmin();const ok=await syncBoth('force');renderAdmin();toast(ok?'已与云端双向同步':'同步失败，将自动重试');if(!ok)scheduleCloudPushRetry()});
-  $('adminGotoZones').addEventListener('click',()=>{closeAdminModal();activateTab('admin')});
-  $('adminRevoke').addEventListener('click',()=>{if(!confirm('清除本机口令授权？云端数据不会删除，清除后本机回到只读模式。'))return;namespace=null;safeStorage.set(SYNC_NS_KEY,'');clearTimeout(syncTimer);syncLog=[];pendingLog=[];setSyncUI('off');renderAdmin();toast('已清除本机授权')});
+  $('adminRevoke').addEventListener('click',()=>{if(!confirm('清除本机口令授权？云端数据不会删除，清除后本机回到只读模式。'))return;namespace=null;expenseSession='';try{sessionStorage.removeItem('gemExpenseSession')}catch(_){}safeStorage.set(SYNC_NS_KEY,'');clearTimeout(syncTimer);syncLog=[];pendingLog=[];setSyncUI('off');renderAdmin();toast('已清除本机授权')});
 }
 async function submitAdminToken(){
   const val=$('adminToken').value.trim();
@@ -509,9 +531,9 @@ async function submitAdminToken(){
   try{
     const hash=await sha256Hex(val);
     if(hash!==TOKEN_HASH){$('adminError').textContent='口令不正确';return}
-    namespace=ROW_NS;safeStorage.set(SYNC_NS_KEY,hash);$('adminError').textContent='';
+    await authorizeExpenses(val);namespace=ROW_NS;safeStorage.set(SYNC_NS_KEY,hash);$('adminError').textContent='';
     if(cloud){setSyncUI('busy');await cloudPull({force:true})}
-    renderAdmin();toast('口令验证成功');
+    await syncBoth('force');renderExpenses();renderAdmin();toast('口令验证成功');
   }catch(e){console.error(e);$('adminError').textContent='验证失败，请重试'}
 }
 $('adminClose').addEventListener('click',closeAdminModal);$('adminModal').addEventListener('click',e=>{if(e.target===$('adminModal'))closeAdminModal()});
@@ -529,11 +551,11 @@ async function syncRatios(){
 }
 $('ratioSyncBtn').addEventListener('click',syncRatios);
 $('authClose').addEventListener('click',closeAuthModal);$('authModal').addEventListener('click',e=>{if(e.target===$('authModal'))closeAuthModal()});
-$('tokenSubmitBtn').addEventListener('click',async()=>{const input=$('authToken').value.trim();if(!input)return authErr('authError','请输入口令');if(!(window.crypto&&window.crypto.subtle))return authErr('authError','当前环境不支持加密，请刷新重试');try{const hash=await sha256Hex(input);if(hash!==TOKEN_HASH)return authErr('authError','口令不正确');namespace=ROW_NS;safeStorage.set(SYNC_NS_KEY,hash);$('authToken').value='';authErr('authError','');if(cloud){setSyncUI('busy');await cloudPull()}closeAuthModal();render();activateTab('admin');toast('口令验证成功')}catch(e){console.error(e);authErr('authError','验证失败，请重试')}});
+$('tokenSubmitBtn').addEventListener('click',async()=>{const input=$('authToken').value.trim();if(!input)return authErr('authError','请输入口令');if(!(window.crypto&&window.crypto.subtle))return authErr('authError','当前环境不支持加密，请刷新重试');try{const hash=await sha256Hex(input);if(hash!==TOKEN_HASH)return authErr('authError','口令不正确');await authorizeExpenses(input);namespace=ROW_NS;safeStorage.set(SYNC_NS_KEY,hash);$('authToken').value='';authErr('authError','');if(cloud){setSyncUI('busy');await cloudPull()}await syncBoth('force');closeAuthModal();render();adminTab='zones';openAdminModal();toast('口令验证成功')}catch(e){console.error(e);authErr('authError','验证失败，请重试')}});
 $('authToken').addEventListener('keydown',e=>{if(e.key==='Enter')$('tokenSubmitBtn').click()});
 $('addZoneBtn').addEventListener('click',()=>{const z={id:uid(),name:'新区服',cbgQuote:210,purchase:9000,margin:17,preset:3};state.zones.push(z);save();render();setTimeout(()=>{const inp=document.querySelector(`[data-zone="${z.id}"] [data-zone-input="name"]`);if(inp){inp.focus();inp.select()}},60);});
 $('exitAdminBtn').addEventListener('click',()=>{activateTab('profit')});
-$('revokeBtn').addEventListener('click',()=>{if(!confirm('清除本机口令授权？云端数据不会删除，清除后本机将回到只读模式，下次需重新输入口令。'))return;namespace=null;safeStorage.set(SYNC_NS_KEY,'');clearTimeout(syncTimer);setSyncUI('off');render();activateTab('profit');toast('已清除本机授权')});
+$('revokeBtn').addEventListener('click',()=>{if(!confirm('清除本机口令授权？云端数据不会删除，清除后本机将回到只读模式，下次需重新输入口令。'))return;namespace=null;expenseSession='';try{sessionStorage.removeItem('gemExpenseSession')}catch(_){}safeStorage.set(SYNC_NS_KEY,'');clearTimeout(syncTimer);setSyncUI('off');render();activateTab('profit');toast('已清除本机授权')});
 // 利润口径：净利润以「万游戏币」表示。
 //   净利(万游戏币) = 毛利(万) − 点卡(元) 折算成的游戏币(万)
 // 与旧的「藏宝阁到账(元) − 点卡(元)」在数学上完全等价，只是换成游戏币单位。
@@ -543,13 +565,7 @@ function compositionUnits(type,level){if(type==='normal')return 2**(level-1);if(
 // 体力消耗：普通宝石 T(N)=2×T(N-1)+10×(N-1)（2合1，单次操作=原料级×10）；
 // 星辉石 S(N)=3×S(N-1)+30×N（3合1，单次操作=目标级×30）；
 // 五色灵尘 D(N)=2×D(N-1)+D(N-2)+30×N（2个低一级+1个再低一级，单次操作=目标级×30）；
-// 成本统一按40体力=3000游戏币折算
-function staminaPointsFor(type,level){let t=0;
-  if(type==='normal'){for(let l=2;l<=level;l++)t=2*t+10*(l-1);return t}
-  if(type==='star'){for(let l=2;l<=level;l++)t=3*t+30*l;return t}
-  const arr=[0,0];for(let l=2;l<=level;l++)arr[l]=2*arr[l-1]+arr[l-2]+30*l;return arr[level]||0}
-function staminaCostCoinsFor(type,level){return staminaPointsFor(type,level)/40*3000}
-function renderSynthesis(){const type=gemTypes[state.gemType];const basePrice=Math.max(0,num(state.synthesisPrices[state.gemType]));const averageSalePrice=Math.max(0,num(state.averageSalePrices[state.gemType],Math.round(basePrice*1.1)));const cbgRate=Math.max(0,num(state.cbgQuote));const averageMode=state.saleMode==='average';document.querySelectorAll('[data-gem-type]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.gemType===state.gemType);const bt=gemTypes[btn.dataset.gemType];btn.innerHTML=`<img src="${bt.icon}" alt="">${bt.name}`});document.querySelectorAll('[data-sale-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.saleMode===state.saleMode));$('saleModeBar').classList.toggle('average',averageMode);$('averageSaleField').classList.toggle('show',averageMode);$('ratioBtn').hidden=averageMode;if(document.activeElement!==$('averageSalePrice'))$('averageSalePrice').value=averageSalePrice;$('priceTableTitle').innerHTML=`<img src="${type.icon}" alt="">${type.name}价格表`;$('synthesisRule').textContent=averageMode?`${type.rule} 均价售卖：各级售价按1级售卖均价乘以所需1级数量计算。`:type.rule;const hasStamina=state.gemType==='normal'||state.gemType==='star'||state.gemType==='dust';const headRow=$('priceTableHeadRow');if(headRow)headRow.innerHTML=`<span>等级</span><span>${hasStamina?'成本':'收购价'}（万）</span><span>需1级宝石</span><span>摆摊售价（万）</span><span>藏宝阁售价（元）</span>`;$('gemPriceTable').classList.toggle('with-stamina',hasStamina);const rows=[];type.levels.forEach(level=>{const units=compositionUnits(state.gemType,level);const purchasePrice=basePrice*units;const ratio=state.priceRatios[state.gemType][level];const stallCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.stall));const cbgCoins=stallCoins;const stallPrice=Math.floor(Math.round(stallCoins/10000*1e6)/1e6);const coinTier=stallCoins>=10000000?'coin-tier-ten-million':stallCoins>=1000000?'coin-tier-million':stallCoins>=100000?'coin-tier-hundred-thousand':stallCoins>=10000?'coin-tier-wan':'';const cbgPrice=cbgCoins/30000000*cbgRate;const cbgAvailable=level>=type.cbgMinLevel;rows.push(`<div class="price-row"><span>${level}级</span>${hasStamina?(()=>{const pw=purchasePrice/10000,sw=staminaCostCoinsFor(state.gemType,level)/10000;return `<span class="cost-merge" title="收购价 ${fmt(pw,1)}万 + 体力成本 ${fmt(sw,1)}万（合成消耗${staminaPointsFor(state.gemType,level)}点体力，按40体力=3000游戏币折算）"><b>${fmt(pw+sw,1)}</b><small>${fmt(pw,1)} + ${fmt(sw,1)}</small></span>`})():`<span>${fmtWan(purchasePrice/10000)}</span>`}<span>${fmt(units,0)}</span><span class="${coinTier}">${fmt(stallPrice,0)}</span><span class="${cbgAvailable?'':'not-available'}">${cbgAvailable?fmt(cbgPrice,1):'—'}</span></div>`)});$('gemPriceRows').innerHTML=rows.join('')}
+function renderSynthesis(){const type=gemTypes[state.gemType];const basePrice=Math.max(0,num(state.synthesisPrices[state.gemType]));const profitRate=state.averageProfitRate[state.gemType];const averageSalePrice=Math.max(0,Math.round(num(state.averageSalePrices[state.gemType],basePrice*(1+profitRate/100))));const cbgRate=Math.max(0,num(state.cbgQuote));const averageMode=state.saleMode==='average';document.querySelectorAll('[data-gem-type]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.gemType===state.gemType);const bt=gemTypes[btn.dataset.gemType];btn.innerHTML=`<img src="${bt.icon}" alt="">${bt.name}`});document.querySelectorAll('[data-sale-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.saleMode===state.saleMode));$('saleModeBar').classList.toggle('average',averageMode);$('averageFields').classList.toggle('show',averageMode);$('ratioBtn').hidden=averageMode;$('averageProfitRate').textContent=profitRate===null?'—':num(profitRate).toLocaleString('zh-CN',{maximumFractionDigits:2})+'%';if(document.activeElement!==$('averageSalePrice'))$('averageSalePrice').value=averageSalePrice;$('priceTableTitle').innerHTML=`<img src="${type.icon}" alt="">${type.name}价格表`;$('synthesisRule').textContent=averageMode?`${type.rule} 均价售卖：各级售价 = 输入的1级均价 × 所需1级数量；利润率 =（1级均价 ÷ 宝石价格 − 1）× 100%。`:type.rule;const headRow=$('priceTableHeadRow');if(headRow)headRow.innerHTML='<span>等级</span><span>需1级宝石</span><span>成本价</span><span>售价</span>';const rows=[];type.levels.forEach(level=>{const units=compositionUnits(state.gemType,level);const purchasePrice=basePrice*units;const ratio=state.priceRatios[state.gemType][level];const stallCoins=averageMode?averageSalePrice*units:purchasePrice*Math.max(0,num(ratio.stall));const cbgCoins=stallCoins;const stallPrice=Math.floor(Math.round(stallCoins/10000*1e6)/1e6);const coinTier=stallCoins>=10000000?'coin-tier-ten-million':stallCoins>=1000000?'coin-tier-million':stallCoins>=100000?'coin-tier-hundred-thousand':stallCoins>=10000?'coin-tier-wan':'';const cbgPrice=cbgCoins/30000000*cbgRate;const cbgAvailable=level>=type.cbgMinLevel;rows.push(`<div class="price-row"><span>${level}级</span><span>${fmt(units,0)}</span><span class="cost-prices"><b>${fmtWan(purchasePrice/10000)}<small>万游戏币</small></b><span>${fmt(purchasePrice/30000000*cbgRate,1)} 元</span></span><span class="sale-prices"><b class="${coinTier}">${fmt(stallPrice,0)}<small>万游戏币</small></b><span class="cbg-sale-line ${cbgAvailable?'':'not-available'}">${cbgAvailable?`<span>藏宝阁 ${fmt(cbgPrice,1)}元</span><span>到手 ${fmt(cbgPrice*.95,1)}元</span>`:'藏宝阁不可上架'}</span></span></div>`)});$('gemPriceRows').innerHTML=rows.join('')}
 function renderRatioRows(){const type=gemTypes[state.gemType];$('ratioModalTitle').textContent=`${type.name}售价比例调整`;const rows=[];type.levels.forEach(level=>{const ratio=state.priceRatios[state.gemType][level];const cbgNA=level<type.cbgMinLevel;rows.push(`<div class="ratio-row"><b>${level}级</b><input type="number" inputmode="decimal" min="0" step="0.01" value="${num(ratio.stall).toFixed(2)}" data-ratio-level="${level}" data-ratio-key="stall" aria-label="${level}级售价比例">${cbgNA?'<span class="ratio-na">藏宝阁不可上架</span>':'<span class="ratio-na">藏宝阁同比例</span>'}</div>`)});$('ratioRows').innerHTML=rows.join('');document.querySelectorAll('[data-ratio-level]').forEach(input=>input.addEventListener('input',()=>{const level=input.dataset.ratioLevel;const v=Math.max(0,num(input.value));const r=state.priceRatios[state.gemType][level];r.stall=v;r.cbg=v;save();renderSynthesis()}))}
 function renderHero(c){$('dailyNet').textContent=fmtSmart(c.dailyNetCoins);$('dailyProfitSummary').classList.toggle('loss',c.dailyNetCoins<0);$('dailyProfitNote').textContent=c.dailyNetCoins>=0?`${state.zones.length}个区服合计 · 游戏币口径，已扣点卡`:'当前经营参数预计亏损'}
 function renderZoneSelect(){const sel=$('synthesisZoneSelect'),zs=state.zones;if(!sel)return;sel.innerHTML=zs.map(z=>`<option value="${z.id}"${z.id===state.cbgZoneId?' selected':''}>${escapeHtml(z.name)}（${fmt(z.cbgQuote,0)}元）</option>`).join('')}
@@ -560,7 +576,6 @@ function renderZones(){
     const net=zp*zm-rmbToWan(za*14.4,zq);
     return `<div class="zone-admin-card" data-zone="${z.id}">
       <div class="zone-admin-head"><input data-zone-input="name" value="${escapeHtml(z.name)}" maxlength="12" placeholder="区服名称">
-        <div class="zone-preset-mini"><button type="button" data-zf="preset" data-preset="1" class="${z.preset===1?'active':''}" title="1收 · 1个号 · 点卡14.4元/天">1收</button><button type="button" data-zf="preset" data-preset="2" class="${z.preset===2?'active':''}" title="2收 · 2个号 · 点卡28.8元/天">2收</button><button type="button" data-zf="preset" data-preset="3" class="${z.preset===3?'active':''}" title="3收 · 3个号 · 点卡43.2元/天">3收</button></div>
         <span class="zone-admin-net${net<0?' loss':''}">${net>=0?'+':''}${fmt(net,1)}</span>
         <button type="button" class="clear-button zone-del" data-zf="del">删</button></div>
       <div class="zone-admin-fields">
@@ -570,7 +585,7 @@ function renderZones(){
     </div>`;
     }).join('');
 }
-function render(){const c=refreshProfitNumbers();renderSynthesis();renderZones();renderSingle();renderZoneSelectSingle();renderZoneSelect();return c}
+function render(){const c=refreshProfitNumbers();renderSynthesis();renderZones();renderSingle();renderZoneSelectSingle();renderZoneSelect();renderExpenses();return c}
 function refreshProfitNumbers(skipZoneRows){const c=calc();renderHero(c);renderAdminStats();renderCompanyStats();
   $('sales').innerHTML=`${fmtSmart(c.sales)}<small>万</small>`;$('grossProfit').innerHTML=`${fmtSmart(c.grossProfit)}<small>万</small>`;$('cbgRmb').innerHTML=`${fmt(c.cbgRmb)}<small>元</small>`;$('cardCost').innerHTML=`${fmt(c.cardCost,1)}<small>元 ≈ ${fmtSmart(c.cardCoins)}万</small>`;$('breakEven').innerHTML=`${fmtSmart(c.breakEven)}<small>万</small>`;const gap=c.purchase-c.breakEven;$('gap').innerHTML=`${gap>=0?'+':''}${fmtSmart(gap)}<small>万</small>`;
   if(!skipZoneRows)renderProfitZones(c);
@@ -619,22 +634,61 @@ function renderZoneSelectSingle(){const sel=$('singleZoneSelect');if(!sel)return
   sel.innerHTML=state.zones.map(z=>`<option value="${z.id}"${z.id===state.single.zoneId?' selected':''}>${escapeHtml(z.name)}（${fmt(z.cbgQuote,0)}元）</option>`).join('');
   const z=state.zones.find(x=>x.id===state.single.zoneId);if(z)state.single.quote=num(z.cbgQuote,210);
 }
-function activateTab(tab,scroll=true){activeTab=tab;document.querySelectorAll('[data-tab]').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===tab));document.querySelectorAll('.tab-panel').forEach(panel=>panel.classList.toggle('active',panel.dataset.panel===tab));$('settings').classList.toggle('show',tab==='period');if(tab==='admin')setSyncUI(namespace?((busyState==='busy'||busyState==='on')?busyState:'on'):'off',null,'admin');renderHero(calc());if(scroll)window.scrollTo({top:0,behavior:'smooth'})}
-function handleSyncEntry(){if(namespace){activateTab('admin');if(cloud)refreshFromCloud()}else openAuthModal()}
+function activateTab(tab,scroll=true){if(tab==='profit')tab='synthesis';if(tab==='admin'){adminTab='zones';openAdminModal();return}activeTab=tab;document.querySelectorAll('[data-tab]').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===tab));document.querySelectorAll('.tab-panel').forEach(panel=>panel.classList.toggle('active',panel.dataset.panel===tab));$('settings').classList.toggle('show',tab==='period');if(tab==='admin')setSyncUI(namespace?((busyState==='busy'||busyState==='on')?busyState:'on'):'off',null,'admin');renderHero(calc());if(tab==='expenses')renderExpenses();if(scroll)window.scrollTo({top:0,behavior:'smooth'})}
+function handleSyncEntry(){adminTab='zones';openAdminModal()}
 function closeRatioModal(){$('ratioModal').classList.remove('show');document.body.style.overflow=''}
 document.querySelectorAll('[data-preset]').forEach(btn=>btn.addEventListener('click',()=>{activeZone().preset=Number(btn.dataset.preset);save();render()}));
 document.querySelectorAll('[data-days]').forEach(btn=>btn.addEventListener('click',()=>{state.periodDays=Number(btn.dataset.days);$('periodDays').value=state.periodDays;save();render()}));
 document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>activateTab(btn.dataset.tab)));
 document.querySelectorAll('[data-gem-type]').forEach(btn=>btn.addEventListener('click',()=>{state.gemType=btn.dataset.gemType;$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];save();render()}));
 document.querySelectorAll('[data-sale-mode]').forEach(btn=>btn.addEventListener('click',()=>{state.saleMode=btn.dataset.saleMode;save();renderSynthesis()}));
-$('averageSalePrice').addEventListener('input',()=>{state.averageSalePrices[state.gemType]=Math.max(0,num($('averageSalePrice').value));state.averagePriceCustomized[state.gemType]=true;save();renderSynthesis()});
-$('synthesisBasePrice').addEventListener('input',()=>{const price=Math.max(0,num($('synthesisBasePrice').value));state.synthesisPrices[state.gemType]=price;if(!state.averagePriceCustomized[state.gemType])state.averageSalePrices[state.gemType]=Math.round(price*1.1);save();renderSynthesis();renderHero(calc())});
-$('synthesisZoneSelect').addEventListener('change',()=>{const zid=$('synthesisZoneSelect').value;const z=state.zones.find(x=>x.id===zid);if(z){state.cbgZoneId=zid;state.cbgQuote=z.cbgQuote;save()}});
-document.querySelectorAll('[data-clear]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.clear;if(id==='synthesisBasePrice'){state.synthesisPrices[state.gemType]=0;if(!state.averagePriceCustomized[state.gemType])state.averageSalePrices[state.gemType]=0}else{state.cbgQuote=0}$(id).value='';save();render();$(id).focus()}));
+$('averageSalePrice').addEventListener('input',()=>{state.averageSalePrices[state.gemType]=Math.max(0,num($('averageSalePrice').value));syncAverageSalePrice();save();renderSynthesis()});
+$('synthesisBasePrice').addEventListener('input',()=>{const price=Math.max(0,num($('synthesisBasePrice').value));state.synthesisPrices[state.gemType]=price;syncAverageSalePrice();save();renderSynthesis();renderHero(calc())});
+$('synthesisZoneSelect').addEventListener('change',()=>{const zid=$('synthesisZoneSelect').value;const z=state.zones.find(x=>x.id===zid);if(z){state.cbgZoneId=zid;state.cbgQuote=z.cbgQuote;save();renderSynthesis()}});
+document.querySelectorAll('[data-clear]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.clear;if(id==='synthesisBasePrice'){state.synthesisPrices[state.gemType]=0;syncAverageSalePrice()}else{state.cbgQuote=0}$(id).value='';save();render();$(id).focus()}));
 function updateRatioSyncTime(loading){const el=$('ratioSyncTime');if(!el)return;if(loading){el.textContent='正在读取云端最新比例…';return}const last=syncLog[0];const latest=last?`当前为云端最新比例 · 最近同步 ${fmtSyncTime(last.t)}`:'当前为云端最新比例';el.textContent=namespace?latest:latest+'（只读）'}
 $('ratioBtn').addEventListener('click',async()=>{renderRatioRows();updateRatioSyncTime();$('ratioModal').classList.add('show');document.body.style.overflow='hidden';if(cloud){updateRatioSyncTime(true);await cloudPull({force:true});renderRatioRows();updateRatioSyncTime()}});
 $('ratioClose').addEventListener('click',closeRatioModal);$('ratioModal').addEventListener('click',event=>{if(event.target===$('ratioModal'))closeRatioModal()});
-$('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*1.1)])),averagePriceCustomized:{normal:false,star:false,dust:false},zones:[{id:uid(),name:'秦淮风光',cbgQuote:210,purchase:9000,margin:17,preset:3}]});state.activeZoneId=state.zones[0].id;state.cbgZoneId=state.zones[0].id;state.single.zoneId=state.zones[0].id;document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisZoneSelect').value=state.cbgZoneId;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
+$('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*(1+DEFAULT_PROFIT_RATE/100))])),averageProfitRate:Object.fromEntries(Object.keys(defaultSynthesisPrices).map(type=>[type,DEFAULT_PROFIT_RATE])),zones:[{id:uid(),name:'秦淮风光',cbgQuote:210,purchase:9000,margin:17,preset:3}]});state.activeZoneId=state.zones[0].id;state.cbgZoneId=state.zones[0].id;state.single.zoneId=state.zones[0].id;document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisZoneSelect').value=state.cbgZoneId;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
+
+const expenseTypes={hardware:'硬件支出',account:'账号支出',coins:'购菜支出',card:'点卡支出'};
+let editingExpenseId=null;
+function renderExpenses(){
+  if(!$('expenseList'))return;
+  const rows=state.expenses||[],total=rows.reduce((n,r)=>n+Math.round(num(r.price)*100),0)/100;
+  $('expenseTotal').textContent='¥ '+fmt(total);$('expenseCount').textContent=rows.length+' 笔';
+  $('expenseCategories').innerHTML=Object.entries(expenseTypes).map(([k,v])=>`<div class="expense-category">${v}<b>¥ ${fmt(rows.filter(r=>r.type===k).reduce((n,r)=>n+Math.round(num(r.price)*100),0)/100)}</b></div>`).join('');
+  $('expensePermission').textContent=namespace?'已获管理员授权 · 可新增、编辑和删除，自动同步云端':'当前为只读模式 · 请通过右上角管理员入口授权后操作';
+  const filter=$('expenseFilter').value;
+  $('expenseList').innerHTML=rows.filter(r=>!filter||r.type===filter).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)).map(r=>`<article class="expense-record"><div class="expense-line"><strong>${expenseTypes[r.type]||'支出'}</strong><span class="expense-price">¥ ${fmt(r.price)}</span></div><div class="expense-meta">${escapeHtml(r.date)}${r.zones?.length?' · '+r.zones.map(escapeHtml).join('、'):''}${r.type==='coins'?' · '+fmtWan(r.coins)+' 万游戏币':''}</div>${r.description?`<div class="expense-meta">${escapeHtml(r.description)}</div>`:''}${namespace?`<div class="expense-actions"><button class="text-button" data-expense-edit="${escapeHtml(r.id)}">编辑</button><button class="text-button" data-expense-delete="${escapeHtml(r.id)}">删除</button></div>`:''}</article>`).join('')||'<div class="admin-empty">暂无支出记录</div>';
+}
+function expenseFormFields(selected=[]){
+  const type=$('expenseType').value,multiple=type==='card';
+  $('expenseZoneField').hidden=type==='hardware';$('expenseCoinsField').hidden=type!=='coins';$('expenseDescriptionField').hidden=!['hardware','account'].includes(type);
+  $('expenseDescription').required=['hardware','account'].includes(type);$('expenseCoins').required=type==='coins';
+  $('expenseZoneLegend').textContent=multiple?'区服（可多选，价格为本笔总金额）':'区服（单选）';
+  const options=[...new Set([...state.zones.map(z=>z.name),...state.expenses.flatMap(r=>r.zones||[])])];
+  $('expenseZones').innerHTML=options.map(n=>`<label><input type="${multiple?'checkbox':'radio'}" name="expenseZone" value="${escapeHtml(n)}"${selected.includes(n)?' checked':''}>${escapeHtml(n)}</label>`).join('');
+}
+function openExpense(id){
+  if(!namespace||!expenseSession){toast('请重新输入管理员口令以操作支出');namespace=null;openAdminModal();return}
+  const r=state.expenses.find(r=>r.id===id);editingExpenseId=r?.id||null;
+  $('expenseForm').reset();$('expenseModalTitle').textContent=r?'编辑支出项':'新增支出项';$('expenseType').value=r?.type||'hardware';
+  $('expenseDate').value=r?.date||new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai'}).format(new Date());$('expenseDescription').value=r?.description||'';$('expenseCoins').value=r?.coins||3000;$('expensePrice').value=r?.price??'';$('expenseError').textContent='';expenseFormFields(r?.zones||[]);$('expenseModal').classList.add('show');document.body.style.overflow='hidden';
+}
+function closeExpense(){$('expenseModal').classList.remove('show');document.body.style.overflow=''}
+$('addExpenseBtn').addEventListener('click',()=>openExpense());$('expenseClose').addEventListener('click',closeExpense);$('expenseModal').addEventListener('click',e=>{if(e.target===$('expenseModal'))closeExpense()});
+$('expenseType').addEventListener('change',()=>expenseFormFields());$('expenseFilter').addEventListener('change',renderExpenses);
+$('expenseList').addEventListener('click',e=>{const edit=e.target.closest('[data-expense-edit]'),del=e.target.closest('[data-expense-delete]');if(!namespace||!expenseSession){openExpense();return}if(edit)openExpense(edit.dataset.expenseEdit);if(del&&confirm('确定删除这笔支出？')){state.expenses=state.expenses.filter(r=>r.id!==del.dataset.expenseDelete);save();renderExpenses()}});
+$('expenseForm').addEventListener('submit',e=>{
+  e.preventDefault();if(!namespace){closeExpense();toast('管理员授权已失效');return}
+  const type=$('expenseType').value,zones=type==='hardware'?[]:Array.from(document.querySelectorAll('#expenseZones input:checked'),i=>i.value),price=Number($('expensePrice').value),coins=Number($('expenseCoins').value),date=$('expenseDate').value,description=$('expenseDescription').value.trim();
+  if(!date||!Number.isFinite(price)||price<=0||price>1e10||(['hardware','account'].includes(type)&&!description)||(type!=='hardware'&&!zones.length)||(type!=='card'&&zones.length>1)||(type==='coins'&&(!Number.isFinite(coins)||coins<=0))){$('expenseError').textContent='请填写有效时间、价格及必填信息，并选择区服';return}
+  const old=state.expenses.find(r=>r.id===editingExpenseId),r={id:editingExpenseId||uid(),type,date,zones,price:Math.round(price*100)/100,coins:type==='coins'?coins:null,description:['hardware','account'].includes(type)?description:(old?.description||'')};
+  if(editingExpenseId)state.expenses=state.expenses.map(x=>x.id===editingExpenseId?r:x);else state.expenses.push(r);save();closeExpense();renderExpenses();toast('支出已保存，正在同步');
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('expenseModal').classList.contains('show'))closeExpense()});
+
 try{render();activateTab('synthesis',false);save(false);renderSingle();renderZoneSelectSingle()}catch(error){console.error('初始化失败',error)}initCloud();
 function flushSync(){clearTimeout(syncTimer);if(cloud&&namespace&&(Number(state.rev)||0)>(Number(state.syncedRev)||0))cloudPushNow()}
 window.addEventListener('pagehide',flushSync);window.addEventListener('beforeunload',flushSync);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushSync()});
