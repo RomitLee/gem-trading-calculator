@@ -120,6 +120,7 @@
 
 .top-tabs{grid-template-columns:repeat(4,1fr)}
 [data-panel="expenses"]{padding-bottom:100px}.expense-total{font-size:30px;font-weight:800;color:var(--navy);margin:8px 0 16px}.expense-categories{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.expense-category{padding:12px;border-radius:13px;background:#f5f6fb}.expense-category b{display:block;margin-top:6px;font-size:17px}.expense-record{padding:15px 0;border-bottom:1px solid var(--line)}.expense-record:last-child{border-bottom:0}.expense-line{display:flex;justify-content:space-between;gap:12px;align-items:center}.expense-meta{color:var(--muted);font-size:12px;line-height:1.8;margin-top:5px;overflow-wrap:anywhere}.expense-price{font-size:18px;white-space:nowrap;font-weight:750}.expense-footer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,760px);padding:12px 18px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--line);z-index:20}.expense-footer button{width:100%;height:46px;border:0;border-radius:13px;background:var(--navy);color:white;font-weight:700}.expense-form{display:grid;gap:14px}.expense-form label{display:grid;gap:7px;color:#626b7e;font-size:12px}.expense-form input,.expense-form select,.expense-form textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;background:#f8f9fc;color:var(--ink);font:inherit}.expense-form fieldset{border:1px solid var(--line);border-radius:11px;margin:0;padding:12px}.expense-zone-options{display:flex;gap:10px;flex-wrap:wrap}.expense-zone-options label{display:flex;align-items:center;gap:5px}.expense-zone-options input{width:auto}.expense-form [hidden]{display:none}.expense-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:8px}.expense-error{color:#c43d3d;min-height:18px}.expense-filter{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;margin-bottom:6px}
+.expense-record{position:relative;overflow:hidden;padding:0;touch-action:pan-y;isolation:isolate}.expense-content{position:relative;z-index:1;padding:15px 0;background:#fff;transition:transform .2s ease}.expense-record.swiped .expense-content{transform:translateX(80px)}.expense-delete{position:absolute;inset:0 auto 0 0;width:72px;border:0;border-radius:10px;background:#dc4545;color:#fff;font:700 14px inherit;visibility:hidden;pointer-events:none}.expense-record.swiped .expense-delete{visibility:visible;pointer-events:auto}.expense-record:focus-visible{outline:2px solid #8278ef;outline-offset:-2px}@media(prefers-reduced-motion:reduce){.expense-content{transition:none}}
 </style>
 </head>
 <body>
@@ -652,15 +653,14 @@ $('ratioClose').addEventListener('click',closeRatioModal);$('ratioModal').addEve
 $('resetBtn').addEventListener('click',()=>{Object.assign(state,defaults,{synthesisPrices:{...defaultSynthesisPrices},priceRatios:cloneRatios(defaultRatios),averageSalePrices:Object.fromEntries(Object.entries(defaultSynthesisPrices).map(([type,price])=>[type,Math.round(price*(1+DEFAULT_PROFIT_RATE/100))])),averageProfitRate:Object.fromEntries(Object.keys(defaultSynthesisPrices).map(type=>[type,DEFAULT_PROFIT_RATE])),zones:[{id:uid(),name:'秦淮风光',cbgQuote:210,purchase:9000,margin:17,preset:3}]});state.activeZoneId=state.zones[0].id;state.cbgZoneId=state.zones[0].id;state.single.zoneId=state.zones[0].id;document.querySelectorAll('[data-key]').forEach(input=>input.value=state[input.dataset.key]);$('synthesisBasePrice').value=state.synthesisPrices[state.gemType];$('synthesisZoneSelect').value=state.cbgZoneId;$('averageSalePrice').value=state.averageSalePrices[state.gemType];save();render()});
 
 const expenseTypes={hardware:'硬件支出',account:'账号支出',coins:'购菜支出',card:'点卡支出'};
-let editingExpenseId=null;
 function renderExpenses(){
   if(!$('expenseList'))return;
   const rows=state.expenses||[],total=rows.reduce((n,r)=>n+Math.round(num(r.price)*100),0)/100;
   $('expenseTotal').textContent='¥ '+fmt(total);$('expenseCount').textContent=rows.length+' 笔';
   $('expenseCategories').innerHTML=Object.entries(expenseTypes).map(([k,v])=>`<div class="expense-category">${v}<b>¥ ${fmt(rows.filter(r=>r.type===k).reduce((n,r)=>n+Math.round(num(r.price)*100),0)/100)}</b></div>`).join('');
-  $('expensePermission').textContent=namespace?'已获管理员授权 · 可新增、编辑和删除，自动同步云端':'当前为只读模式 · 请通过右上角管理员入口授权后操作';
+  $('expensePermission').textContent=namespace?'已获管理员授权 · 右滑记录可删除，自动同步云端':'当前为只读模式 · 请通过右上角管理员入口授权后操作';
   const filter=$('expenseFilter').value;
-  $('expenseList').innerHTML=rows.filter(r=>!filter||r.type===filter).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)).map(r=>`<article class="expense-record"><div class="expense-line"><strong>${expenseTypes[r.type]||'支出'}</strong><span class="expense-price">¥ ${fmt(r.price)}</span></div><div class="expense-meta">${escapeHtml(r.date)}${r.zones?.length?' · '+r.zones.map(escapeHtml).join('、'):''}${r.type==='coins'?' · '+fmtWan(r.coins)+' 万游戏币':''}</div>${r.description?`<div class="expense-meta">${escapeHtml(r.description)}</div>`:''}${namespace?`<div class="expense-actions"><button class="text-button" data-expense-edit="${escapeHtml(r.id)}">编辑</button><button class="text-button" data-expense-delete="${escapeHtml(r.id)}">删除</button></div>`:''}</article>`).join('')||'<div class="admin-empty">暂无支出记录</div>';
+  $('expenseList').innerHTML=rows.filter(r=>!filter||r.type===filter).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)).map(r=>`<article class="expense-record"${namespace?' tabindex="0" aria-label="右滑或按向右方向键显示删除"':''}>${namespace?`<button type="button" class="expense-delete" data-expense-delete="${escapeHtml(r.id)}" tabindex="-1" aria-hidden="true">删除</button>`:''}<div class="expense-content"><div class="expense-line"><strong>${expenseTypes[r.type]||'支出'}</strong><span class="expense-price">¥ ${fmt(r.price)}</span></div><div class="expense-meta">${escapeHtml(r.date)}${r.zones?.length?' · '+r.zones.map(escapeHtml).join('、'):''}${r.type==='coins'?' · '+fmtWan(r.coins)+' 万游戏币':''}</div>${r.description?`<div class="expense-meta">${escapeHtml(r.description)}</div>`:''}</div></article>`).join('')||'<div class="admin-empty">暂无支出记录</div>';
 }
 function expenseFormFields(selected=[]){
   const type=$('expenseType').value,multiple=type==='card';
@@ -670,22 +670,45 @@ function expenseFormFields(selected=[]){
   const options=[...new Set([...state.zones.map(z=>z.name),...state.expenses.flatMap(r=>r.zones||[])])];
   $('expenseZones').innerHTML=options.map(n=>`<label><input type="${multiple?'checkbox':'radio'}" name="expenseZone" value="${escapeHtml(n)}"${selected.includes(n)?' checked':''}>${escapeHtml(n)}</label>`).join('');
 }
-function openExpense(id){
+function openExpense(){
   if(!namespace||!expenseSession){toast('请重新输入管理员口令以操作支出');namespace=null;openAdminModal();return}
-  const r=state.expenses.find(r=>r.id===id);editingExpenseId=r?.id||null;
-  $('expenseForm').reset();$('expenseModalTitle').textContent=r?'编辑支出项':'新增支出项';$('expenseType').value=r?.type||'hardware';
-  $('expenseDate').value=r?.date||new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai'}).format(new Date());$('expenseDescription').value=r?.description||'';$('expenseCoins').value=r?.coins||3000;$('expensePrice').value=r?.price??'';$('expenseError').textContent='';expenseFormFields(r?.zones||[]);$('expenseModal').classList.add('show');document.body.style.overflow='hidden';
+  $('expenseForm').reset();$('expenseType').value='hardware';
+  $('expenseDate').value=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai'}).format(new Date());$('expenseCoins').value=3000;$('expenseError').textContent='';expenseFormFields();$('expenseModal').classList.add('show');document.body.style.overflow='hidden';
 }
 function closeExpense(){$('expenseModal').classList.remove('show');document.body.style.overflow=''}
 $('addExpenseBtn').addEventListener('click',()=>openExpense());$('expenseClose').addEventListener('click',closeExpense);$('expenseModal').addEventListener('click',e=>{if(e.target===$('expenseModal'))closeExpense()});
 $('expenseType').addEventListener('change',()=>expenseFormFields());$('expenseFilter').addEventListener('change',renderExpenses);
-$('expenseList').addEventListener('click',e=>{const edit=e.target.closest('[data-expense-edit]'),del=e.target.closest('[data-expense-delete]');if(!namespace||!expenseSession){openExpense();return}if(edit)openExpense(edit.dataset.expenseEdit);if(del&&confirm('确定删除这笔支出？')){state.expenses=state.expenses.filter(r=>r.id!==del.dataset.expenseDelete);save();renderExpenses()}});
+function setExpenseSwipe(row,open){
+  if(!row)return;
+  row.classList.toggle('swiped',open);row.querySelector('.expense-content').style.transform='';
+  const button=row.querySelector('.expense-delete');if(button){button.tabIndex=open?0:-1;button.setAttribute('aria-hidden',String(!open))}
+}
+function closeExpenseSwipes(except){document.querySelectorAll('.expense-record.swiped').forEach(row=>{if(row!==except)setExpenseSwipe(row,false)})}
+let expenseGesture=null;
+$('expenseList').addEventListener('dragstart',e=>e.preventDefault());
+$('expenseList').addEventListener('pointerdown',e=>{
+  if(!namespace||!e.isPrimary||e.button!==0||e.target.closest('button'))return;
+  const row=e.target.closest('.expense-record');if(!row)return;
+  closeExpenseSwipes(row);expenseGesture={row,id:e.pointerId,x:e.clientX,y:e.clientY,start:row.classList.contains('swiped')?80:0,dx:0,axis:null};
+});
+$('expenseList').addEventListener('pointermove',e=>{
+  const g=expenseGesture;if(!g||g.id!==e.pointerId)return;
+  const dx=e.clientX-g.x,dy=e.clientY-g.y;
+  if(!g.axis&&Math.max(Math.abs(dx),Math.abs(dy))>10){g.axis=Math.abs(dx)>Math.abs(dy)?'x':'y';if(g.axis==='x')g.row.setPointerCapture(e.pointerId)}
+  if(g.axis!=='x')return;
+  g.dx=dx;g.row.querySelector('.expense-content').style.transform=`translateX(${Math.max(0,Math.min(80,g.start+dx))}px)`;
+});
+function finishExpenseSwipe(e){const g=expenseGesture;if(!g||g.id!==e.pointerId)return;expenseGesture=null;setExpenseSwipe(g.row,e.type!=='pointercancel'&&g.axis==='x'?g.start+g.dx>=40:g.start>0);if(g.row.hasPointerCapture(e.pointerId))g.row.releasePointerCapture(e.pointerId)}
+$('expenseList').addEventListener('pointerup',finishExpenseSwipe);$('expenseList').addEventListener('pointercancel',finishExpenseSwipe);
+$('expenseList').addEventListener('keydown',e=>{const row=e.target.closest('.expense-record');if(!namespace||!row)return;if(e.key==='ArrowRight'){e.preventDefault();closeExpenseSwipes(row);setExpenseSwipe(row,true)}else if(e.key==='ArrowLeft'||e.key==='Escape'){setExpenseSwipe(row,false);row.focus()}});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.expense-record'))closeExpenseSwipes()});
+$('expenseList').addEventListener('click',e=>{const del=e.target.closest('[data-expense-delete]');if(!del||!del.closest('.swiped'))return;if(!namespace||!expenseSession){openExpense();return}if(confirm('确定删除这笔支出？')){state.expenses=state.expenses.filter(r=>r.id!==del.dataset.expenseDelete);save();renderExpenses();toast('支出已删除，正在同步')}});
 $('expenseForm').addEventListener('submit',e=>{
   e.preventDefault();if(!namespace){closeExpense();toast('管理员授权已失效');return}
   const type=$('expenseType').value,zones=type==='hardware'?[]:Array.from(document.querySelectorAll('#expenseZones input:checked'),i=>i.value),price=Number($('expensePrice').value),coins=Number($('expenseCoins').value),date=$('expenseDate').value,description=$('expenseDescription').value.trim();
   if(!date||!Number.isFinite(price)||price<=0||price>1e10||(['hardware','account'].includes(type)&&!description)||(type!=='hardware'&&!zones.length)||(type!=='card'&&zones.length>1)||(type==='coins'&&(!Number.isFinite(coins)||coins<=0))){$('expenseError').textContent='请填写有效时间、价格及必填信息，并选择区服';return}
-  const old=state.expenses.find(r=>r.id===editingExpenseId),r={id:editingExpenseId||uid(),type,date,zones,price:Math.round(price*100)/100,coins:type==='coins'?coins:null,description:['hardware','account'].includes(type)?description:(old?.description||'')};
-  if(editingExpenseId)state.expenses=state.expenses.map(x=>x.id===editingExpenseId?r:x);else state.expenses.push(r);save();closeExpense();renderExpenses();toast('支出已保存，正在同步');
+  const r={id:uid(),type,date,zones,price:Math.round(price*100)/100,coins:type==='coins'?coins:null,description:['hardware','account'].includes(type)?description:''};
+  state.expenses.push(r);save();closeExpense();renderExpenses();toast('支出已保存，正在同步');
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('expenseModal').classList.contains('show'))closeExpense()});
 
