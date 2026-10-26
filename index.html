@@ -359,9 +359,10 @@ delete state.purchase;delete state.margin;delete state.buyAccounts;delete state.
 if(state.syncedAt===undefined)state.syncedAt=Number(state.updatedAt)||0;
 if(!Number(state.rev))state.rev=1;if(!Number(state.syncedRev))state.syncedRev=0;
 if(!state.single||typeof state.single!=='object')state.single={};
-state.single={quote:num(state.single.quote,210),purchase:num(state.single.purchase,9000),margin:num(state.single.margin,17),preset:singleAccountsOf(state.single.preset),targetProfit:num(state.single.targetProfit,40),zoneId:state.single.zoneId||''};
+state.single={quote:num(state.single.quote,210),purchase:num(state.single.purchase,9000),margin:num(state.single.margin,17),preset:singleAccountsOf(state.single.preset),targetProfit:num(state.single.targetProfit,singleAccountsOf(state.single.preset)*10),targetDefaultsVersion:state.single.targetDefaultsVersion,zoneId:state.single.zoneId||''};
 // 一次性迁移：旧「几收几卖」总号数 → 新的「几收」（只执行一次）
 if(Number(state.presetVersion)!==2){state.zones.forEach(z=>{z.preset=migrateLegacyPreset(z.preset)});state.single.preset=migrateLegacyPreset(state.single.preset);state.presetVersion=2}
+if(state.single.targetDefaultsVersion!==1){state.single.targetProfit=singleAccountsOf(state.single.preset)*10;state.single.targetDefaultsVersion=1}
 if(!state.zones.some(z=>z.id===state.single.zoneId)){const pref=state.zones.find(z=>z.name==='秦淮风光')||state.zones[0];state.single.zoneId=pref.id;}
 const gemTypes={
   normal:{name:'普通宝石',icon:'icons/gem-normal.png',levels:[2,3,4,5,6,7,8,9,10,11,12],cbgMinLevel:8,rule:'普通宝石：2个低一级宝石合成1个高一级宝石。藏宝阁最低上架8级；摆摊售价直接去掉万位后的小数，藏宝阁售价保留1位小数。'},
@@ -635,7 +636,7 @@ function renderSingle(){
 $('singlePurchase').addEventListener('input',()=>{state.single.purchase=Math.max(0,num($('singlePurchase').value));save();renderSingle()});
 $('singleMargin').addEventListener('input',()=>{state.single.margin=Math.max(0,num($('singleMargin').value));save();renderSingle()});
 $('sTargetProfit').addEventListener('input',()=>{state.single.targetProfit=Math.max(0,num($('sTargetProfit').value));save();renderSingle()});
-document.querySelectorAll('[data-single-preset]').forEach(btn=>btn.addEventListener('click',()=>{state.single.preset=Number(btn.dataset.singlePreset);save();renderSingle()}));
+document.querySelectorAll('[data-single-preset]').forEach(btn=>btn.addEventListener('click',()=>{state.single.preset=Number(btn.dataset.singlePreset);state.single.targetProfit=singleAccountsOf(state.single.preset)*10;save();renderSingle()}));
 document.querySelectorAll('[data-single-pq]').forEach(btn=>btn.addEventListener('click',()=>{state.single.purchase=Number(btn.dataset.singlePq);save();renderSingle()}));
 $('singleZoneSelect').addEventListener('change',()=>{const z=state.zones.find(x=>x.id===$('singleZoneSelect').value);if(!z)return;state.single.zoneId=z.id;state.single.quote=num(z.cbgQuote,210);save();renderSingle();});
 function renderZoneSelectSingle(){const sel=$('singleZoneSelect');if(!sel)return;
